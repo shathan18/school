@@ -1,0 +1,1 @@
+"""ShadowArt geometry subpackage."""

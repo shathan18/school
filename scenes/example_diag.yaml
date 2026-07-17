@@ -1,0 +1,165 @@
+# ShadowArt example scene — a room corner with two floor lights and 8 woven panels.
+# All lengths in metres.  Tune these to your real installation.
+units: m
+
+walls:
+  A:                 # plane x = 0 ; image spans y (width) x z (height)
+    plane: x
+    offset: 0.0
+    width_axis: y
+    width: 1.80      # y in [0, 1.80]
+    height: 1.80     # z in [z0, z0+1.80]
+    z0: 0.30
+  B:                 # plane y = 0 ; image spans x (width) x z (height)
+    plane: y
+    offset: 0.0
+    width_axis: x
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+
+lights:
+  # Rescaled installation: smaller object, longer throw, bigger wall (magnification
+  # verified numerically at 2.00-2.50x across the panel depth spread below, matching
+  # the derived ~2.0-2.5x target; penumbra 1.50-2.25mm, matching the derived
+  # ~1.5-2.3mm target -- both checked directly against the projection/penumbra code,
+  # not assumed).
+  A: {pos: [3.00, 0.70, 0.06]}   # illuminates Wall A ; x must exceed all family-A panel x
+  B: {pos: [0.70, 3.00, 0.06]}   # illuminates Wall B ; y must exceed all family-B panel y
+  source_radius: 0.003           # effective source radius (metres) -> penumbra / focus blur
+
+material:
+  thickness: 0.003               # 3 mm perspex
+
+panels:
+  # A flat list -- every panel is independent (its own angle_deg + anchor), no
+  # grouping/family concept. `anchor` is the (x,y) floor-plan point at local u=0;
+  # `angle_deg` is measured from the +x axis. angle_deg=90 (anchor=(x,0), u along
+  # +y) reproduces what used to be called "family A" (parallel to Wall A);
+  # angle_deg=0 (anchor=(0,y), u along +x) reproduces "family B" -- just two
+  # particular angles now, nothing else in the code treats them specially.
+  # NB: panel positions must fall within the room bounds enforced by
+  # config/io.py::_sanity_check (strictly between each light and its wall) so the
+  # lattice actually interlocks and every panel stays usable for whichever wall(s)
+  # its geometry ends up projecting to.
+  #
+  # Rescaled object footprint: lateral (u_size) 0.70m, depth (anchor spread) 0.30m,
+  # anchors moved from close-to-wall (0.35-1.15) to close-to-light (1.50-1.80) --
+  # matches the plan's "smaller object, longer throw" target almost exactly. v_range
+  # shrunk from 1.45m to 1.15m and moved down near the floor: verified numerically
+  # (geometry/homography.project_uv_to_wall) that this still brackets the new wall's
+  # full height band with comfortable margin at every anchor depth, now that
+  # magnification is ~2x higher than before (a taller panel would overshoot the wall
+  # band by even more than the old design already did).
+  - {name: A0, angle_deg: 90, anchor: [1.50, 0.0], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: A1, angle_deg: 90, anchor: [1.60, 0.0], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: A2, angle_deg: 90, anchor: [1.70, 0.0], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: A3, angle_deg: 90, anchor: [1.80, 0.0], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: B0, angle_deg: 0, anchor: [0.0, 1.50], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: B1, angle_deg: 0, anchor: [0.0, 1.60], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: B2, angle_deg: 0, anchor: [0.0, 1.70], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: B3, angle_deg: 0, anchor: [0.0, 1.80], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  # --- diagonal planes (rotated about z): angle_deg is neither 90 (parallel to Wall A) nor
+  # 0 (parallel to Wall B), so these fan across the corner and cast on BOTH walls. At least
+  # two, split across the walls (D0 favours Wall A, D1 favours Wall B) so the weave stays
+  # balanced. Endpoints verified inside the room bounds (config/io.py::_sanity_check).
+  - {name: D0, angle_deg: 60, anchor: [1.05, 0.05], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+  - {name: D1, angle_deg: 30, anchor: [0.05, 1.05], u_range: [0.55, 1.25], v_range: [0.03, 1.18]}
+
+solve:
+  mode: partition                # "partition" = scattered "cryptic cloud" shards (recommended);
+                                 # "optimize" = old differentiable solve (readable planes)
+  diagonal_frac: 0.30            # force 30% of shards onto the diagonal planes (D0/D1 above),
+                                 # otherwise the greedy leaves them empty and the piece is
+                                 # trivial (each wall's image on one readable flat plane)
+  fragment_size: 0.135           # target shard size in wall/shadow space (m); bigger = chunkier
+                                 # (this is WALL-space, not object-space: at fixed wall_res, the
+                                 # metres-per-pixel scale tracks the WALL's own physical size, not
+                                 # the object's. First attempt at this rescale scaled fragment_size
+                                 # down with the shrinking object instead -- confirmed wrong
+                                 # empirically: combined with wall_res unchanged but wall now 1.5x
+                                 # bigger, that produced ~2600 shards per wall against a budget of
+                                 # 220 and took >4 minutes to fragment. Scaling UP by the wall's own
+                                 # 1.2m->1.80m growth (1.5x linear) instead keeps the same PIXEL-
+                                 # space granularity as before.)
+  fragment_max_area: 0.0315      # hard cap on a shard's shadow area (m^2) -> forces splits
+                                 # (0.014 * 1.5^2, area scales with the wall's area growth)
+  fragment_min_area: 0.0027      # shards smaller than this (shadow) are dropped (0.0012 * 1.5^2)
+  shard_gap: 0.0                 # optional extra erosion (m); 0 keeps full coverage. Shards are
+                                 # already separated (neighbours sit on other depth planes).
+  depth_bias: 0.0                # 0..~0.3: bias shard COUNT toward the near panels
+  wall_res: [450, 450]           # [rows over height (z), cols over width]. Raising this is a
+                                 # clean fidelity win at fixed shard count (measured: SSIM
+                                 # 0.71->0.77 going 300->450 on the apples/breakfast targets)
+                                 # -- unlike shard count, resolution doesn't add per-region
+                                 # quantisation noise. Costs render/vectorise time, not shards.
+  panel_res: [420, 420]
+  seed: 0
+  # --- multi-run search (only used by: run --color --color-mode overlap) ---
+  # All defaults below reproduce today's single-run behaviour exactly. Raising `restarts`
+  # runs the shard-placement greedy several times (seed, seed+1, ...) and keeps the layout
+  # with the best composite score (SSIM + edge-fidelity, minus a cross-talk penalty). CLI
+  # flags --restarts/--panel-restarts/--time-budget/--search-panels/--damage-weight override
+  # these.
+  restarts: 1            # shard-placement restarts; keep best. 1 = single run (today)
+  panel_restarts: 1      # candidate panel layouts to try (needs search_panels: true)
+  time_budget: 0.0       # seconds; 0 = off. Stops at whichever of restarts / this is first
+  search_panels: false   # true = greedy panel-geometry search instead of the panels: block above
+  damage_weight: 0.0     # >0 = choose each shard's host plane to minimise the stray shadow it
+                         # casts on the OTHER wall (cross-talk). Auto-set to 0.5 whenever any
+                         # search knob above is active, so multi-running actually optimises.
+  credit_weight: 0.0     # companion to damage_weight (rewards genuine double-duty); 0 = library default
+  score_ssim_weight: 1.0     # composite-score weights (solve/search.py::score_layout)
+  score_edge_weight: 0.5
+  score_crosstalk_weight: 0.25
+  # --- only used when mode: optimize ---
+  iters: 350
+  lr: 0.06
+  lambda_sparsity: 0.0020        # encourages "floating pieces" (less material)
+  lambda_tv: 0.0010              # smoothness -> fewer tiny slivers before halftone
+  lambda_crosstalk: 0.0          # recon on both walls already penalises cross-talk
+
+# CMYK colour mode (used only with `run --color`). The image is split into C/M/Y/K channels;
+# each shard is one process colour, tone comes from STACKING same-colour shards across the
+# depth planes, and mixing comes from different-colour shards overlapping on a ray.
+color:
+  # preset (optional): a named palette from targets/color.py::PALETTES -- overrides `palette`
+  # when set. cmyk (default look), muted (dusty low-chroma CMY+K), noir (tonal grey ramp,
+  # reads as black-and-white). CLI --palette {cmyk,muted,noir} overrides this.
+  # preset: cmyk
+  palette: [C, M, Y, K]            # process colours of transparent perspex (no R/G/B)
+  max_layers: 2                    # max stacked shards per channel -> tone levels (weave mode)
+  white_threshold: 0.90            # brighter than this -> clear (no shard)
+  # --- only used with `run --color --color-mode overlap` (Stochastic Shard Overlap) ---
+  max_stack: 3                     # max channels laminated at the same footprint (secondary=2, tertiary=3)
+  overlap_jitter: 0.0              # per-channel scatter intent, as a fraction of shard size.
+                                   # 0 = fidelity-first (measured to match `weave` mode's wall
+                                   # reconstruction accuracy -- see shadowart/metrics.py); the
+                                   # only difference from weave is same-plane channel lamination,
+                                   # not scatter. Raise (e.g. 0.1-0.35) to trade wall-reconstruction
+                                   # accuracy for a more scrambled, harder-to-read raw structure --
+                                   # `shadowart run --color --color-mode overlap ...` prints an
+                                   # RMSE/SSIM/edge-fidelity report each run so you can see the cost.
+  shard_budget: 220                # fabrication CEILING on TOTAL shard count per wall, not a
+                                   # target -- more shards measurably HURTS SSIM/edge-fidelity
+                                   # (each is another independent colour+host-panel draw, adding
+                                   # boundary noise faster than real detail), so the natural,
+                                   # detail-biased count is used as-is when under this; spacing
+                                   # only coarsens (fewer/bigger shards) if it would be exceeded.
+  detail_bias: 2.0                 # concentrate shards at edges/colour transitions instead of
+                                   # spreading evenly (0 = uniform, like weave mode) -- this is
+                                   # the fidelity lever; shard_budget is only a safety cap.
+  penumbra_min_feature_sigmas: 2.0 # raise the minimum shard feature size to this many multiples
+                                   # of the worst-case panel's physical penumbra radius in each
+                                   # family -- a real (non-ideal) light blurs away detail finer
+                                   # than that anyway, so sub-floor shards merge into their
+                                   # neighbour instead of fabricating illusory precision.
+                                   # 0 disables (old fragment_min_area-only floor).
+
+fabricate:
+  kerf: 0.0002                   # 0.2 mm
+  min_feature: 0.004             # 4 mm smallest cuttable island/gap
+  threshold: 0.5
+  sheet_size: [2.00, 1.60]       # stock perspex sheet for nesting (must exceed panel size)
+  formats: [dxf, svg]
+  joint_clearance: 0.0001

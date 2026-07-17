@@ -1,0 +1,20 @@
+newmtl C
+Kd 0.3500 0.9000 0.9600
+d 0.55
+illum 1
+
+newmtl M
+Kd 0.9200 0.3500 0.8600
+d 0.55
+illum 1
+
+newmtl Y
+Kd 0.9700 0.9200 0.3200
+d 0.55
+illum 1
+
+newmtl K
+Kd 0.3000 0.3000 0.3200
+d 0.55
+illum 1
+

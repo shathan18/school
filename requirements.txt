@@ -1,0 +1,18 @@
+# ShadowArt — core dependencies (all have Python 3.14 / cp314 wheels)
+numpy>=2.0
+scipy>=1.13
+Pillow>=10.0
+shapely>=2.0
+pyclipper>=1.3        # robust polygon offsetting (kerf)
+ezdxf>=1.3           # DXF export
+svgwrite>=1.4        # SVG export
+pyyaml>=6.0          # scene config
+matplotlib>=3.8      # previews / heatmaps (contourpy comes with it, used for contours)
+torch>=2.4           # differentiable forward renderer + optimizer (CPU is fine)
+plotly>=5.20         # interactive 3D preview (writes a self-contained HTML)
+
+# Optional (not required to run the pipeline):
+#   kaleido      # export the interactive 3D scene to a static PNG
+#   vedo         # native-window 3D preview (VTK) instead of browser
+#   rhino3dm     # read/write Rhino .3dm for interop
+#   pytest       # test runner

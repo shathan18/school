@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m shadowart.cli run --scene scenes/example.yaml --color --color-mode overlap --target-a examples/apples.jpg --target-b examples/breakfast.jpg --out out_apples_breakfast)"
+    ]
+  }
+}

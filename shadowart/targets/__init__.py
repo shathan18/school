@@ -1,0 +1,1 @@
+"""ShadowArt targets subpackage."""

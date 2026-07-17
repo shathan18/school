@@ -1,0 +1,38 @@
+{
+  "mode": "partition",
+  "shard_mode": "voronoi",
+  "seed": 0,
+  "n_panels": 10,
+  "n_diagonals": 2,
+  "wall": {
+    "A": {
+      "rmse": 0.20377781138542425,
+      "psnr": 13.816862129603422,
+      "ssim": 0.8158070165532573,
+      "edge_fidelity": 0.37382948306094105,
+      "iou": 0.7851994721348087
+    },
+    "B": {
+      "rmse": 0.17410313854754295,
+      "psnr": 15.183867996195229,
+      "ssim": 0.8375081923426085,
+      "edge_fidelity": 0.5555545344372521,
+      "iou": 0.9028005588967863
+    }
+  },
+  "intersection": {
+    "fraction": 0.6283842041731333,
+    "jointA_px": 14132.0,
+    "jointB_px": 18664.0,
+    "totalDarkA_px": 19609.0,
+    "totalDarkB_px": 32582.0
+  },
+  "shards": {
+    "familyA": 4,
+    "familyB": 4,
+    "diagonal": 2,
+    "total": 122
+  },
+  "collisions_resolved": 1,
+  "scene": "scenes/diagonal.yaml"
+}

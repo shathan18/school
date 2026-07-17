@@ -1,0 +1,85 @@
+# ShadowArt example scene — a room corner with two floor lights and 8 woven panels.
+# All lengths in metres.  Tune these to your real installation.
+units: m
+
+walls:
+  A:                 # plane x = 0 ; image spans y (width) x z (height)
+    plane: x
+    offset: 0.0
+    width_axis: y
+    width: 1.20      # y in [0, 1.20]
+    height: 1.20     # z in [z0, z0+1.20]
+    z0: 0.30
+  B:                 # plane y = 0 ; image spans x (width) x z (height)
+    plane: y
+    offset: 0.0
+    width_axis: x
+    width: 1.20
+    height: 1.20
+    z0: 0.30
+
+lights:
+  A: {pos: [2.40, 0.70, 0.06]}   # illuminates Wall A ; x must exceed all family-A panel x
+  B: {pos: [0.70, 2.40, 0.06]}   # illuminates Wall B ; y must exceed all family-B panel y
+  source_radius: 0.003           # effective source radius (metres) -> penumbra / focus blur
+
+material:
+  thickness: 0.003               # 3 mm perspex
+
+panels:
+  # NB: each family's panel coords must fall within the OTHER family's u_range so the
+  # lattice actually interlocks (family-A x-coords must lie inside family-B's x-extent).
+  # v_range runs below the wall image (z0=0.30) so low-angle rays still find material.
+  familyA:                       # planes x = const (parallel to Wall A) -> build image A
+    x: [0.35, 0.65, 0.95, 1.15]
+    u_range: [0.0, 1.20]         # y extent of each panel
+    v_range: [0.10, 1.55]        # z extent of each panel
+  familyB:                       # planes y = const (parallel to Wall B) -> build image B
+    y: [0.35, 0.65, 0.95, 1.15]
+    u_range: [0.0, 1.20]         # x extent of each panel
+    v_range: [0.10, 1.55]        # z extent
+  diagonals:                     # NEW: vertical planes rotated about z, cast on BOTH walls
+    count: 2
+    placement: deliberate        # random | deliberate | deliberate_search
+    angle_range_deg: [30, 60]    # fan diagonals across this band (spread, not all parallel)
+    min_angle_sep_deg: 12        # (random mode) enforce this much angle between diagonals
+    seed: 0                      # (random mode) reproducible placement; defaults to solve.seed
+    u_range: [0.0, 0.60]         # narrower than full-wall panels (near-corner magnification)
+    v_range: [0.10, 1.55]
+    # explicit alternative (overrides count/placement):
+    # panels: [{angle_deg: 45, x0: 0.6, y0: 0.6}, {angle_deg: 45, x0: 0.9, y0: 0.9}]
+
+solve:
+  mode: partition                # "partition" = scattered "cryptic cloud" shards (recommended);
+                                 # "optimize" = old differentiable solve (readable planes)
+  fragment_size: 0.09            # target shard size in wall/shadow space (m); bigger = chunkier
+  fragment_max_area: 0.014       # hard cap on a shard's shadow area (m^2) -> forces splits
+  fragment_min_area: 0.0012      # shards smaller than this (shadow) are dropped
+  shard_gap: 0.0                 # optional extra erosion (m); 0 keeps full coverage. Shards are
+                                 # already separated (neighbours sit on other depth planes).
+  depth_bias: 0.0                # 0..~0.3: bias shard COUNT toward the near panels
+  wall_res: [300, 300]           # [rows over height (z), cols over width]
+  panel_res: [280, 280]
+  seed: 0
+  # --- only used when mode: optimize ---
+  iters: 350
+  lr: 0.06
+  lambda_sparsity: 0.0020        # encourages "floating pieces" (less material)
+  lambda_tv: 0.0010              # smoothness -> fewer tiny slivers before halftone
+  lambda_crosstalk: 0.0          # recon on both walls already penalises cross-talk
+
+# CMYK colour mode (used only with `run --color`). The image is split into C/M/Y/K channels;
+# each shard is one process colour, tone comes from STACKING same-colour shards across the
+# depth planes, and mixing comes from different-colour shards overlapping on a ray.
+color:
+  palette: [C, M, Y, K]            # process colours of transparent perspex (no R/G/B)
+  max_layers: 2                    # max stacked shards per channel -> tone levels
+  white_threshold: 0.90            # brighter than this -> clear (no shard)
+
+fabricate:
+  kerf: 0.0002                   # 0.2 mm
+  min_feature: 0.004             # 4 mm smallest cuttable island/gap
+  threshold: 0.5
+  sheet_size: [2.00, 1.60]       # stock perspex sheet for nesting (must exceed panel size)
+  formats: [dxf, svg]
+  joint_clearance: 0.0001

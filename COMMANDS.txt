@@ -1,0 +1,164 @@
+===============================================================================
+ ShadowArt — command reference
+===============================================================================
+Run everything with the `py` launcher on this machine (plain `python` is not on PATH).
+All commands are run from the project root:  c:\Ofek-Doodle\school
+
+Pipeline in one line:
+  images + scene  ->  geometry  ->  forward renderer  ->  solve (2 walls at once)
+                  ->  raster->vector  ->  fabricate (slots, DXF/SVG)  ->  3D preview
+
+
+-------------------------------------------------------------------------------
+ 0. SETUP  (only once)
+-------------------------------------------------------------------------------
+On the Intel network pip must go through the proxy:
+
+  export HTTPS_PROXY="http://proxy-dmz.intel.com:912"
+  py -m pip install --proxy "$HTTPS_PROXY" -r requirements.txt
+
+Off-network just:  py -m pip install -r requirements.txt
+
+
+-------------------------------------------------------------------------------
+ 1. demo        — write the two built-in demo target images (heart + star)
+-------------------------------------------------------------------------------
+  py -m shadowart.cli demo --out examples/targets
+
+  Creates examples/targets/a_heart.png and b_star.png. Handy for a quick test
+  when you don't have your own images yet.
+
+
+-------------------------------------------------------------------------------
+ 2. normalize   — make several images the SAME square size + scale
+-------------------------------------------------------------------------------
+  py -m shadowart.cli normalize --in examples/Chess1.png examples/Chess2.png \
+      --out-dir examples --size 800
+
+  For each input writes <name>_norm.png: composited on white, cropped to the
+  silhouette, scaled so the piece is the same height, centred, standing on a
+  common baseline. Use this so two differently-sized inputs match.
+  Options:
+    --size N       output canvas is N x N pixels        (default 800)
+    --content F    piece height as fraction of canvas   (default 0.9)
+    --align A      bottom | center | top                (default bottom)
+
+
+-------------------------------------------------------------------------------
+ 3. info         — inspect the scene geometry (no solving)
+-------------------------------------------------------------------------------
+  py -m shadowart.cli info --scene scenes/example.yaml --out out
+
+  Prints, per panel and per wall: whether it is a primary or cross-talk
+  contributor, its magnification (shadow size / piece size), and its penumbra
+  blur in mm. Also writes out/scene_3d.png (static 3D snapshot). Use it to sanity
+  check light/panel positions before a long solve.
+
+
+-------------------------------------------------------------------------------
+ 4. run          — the full pipeline (solve + preview + export)
+-------------------------------------------------------------------------------
+  py -m shadowart.cli run --scene scenes/example.yaml \
+      --target-a IMAGE_FOR_WALL_A.png \
+      --target-b IMAGE_FOR_WALL_B.png \
+      --out OUTPUT_DIR
+
+  If you omit --target-a/--target-b it uses the demo heart + star.
+  Add --color for CMYK coloured-perspex mode (see section 7).
+  Writes into OUTPUT_DIR:
+    scene_interactive.html   interactive 3D (see `view`)
+    preview_final.png        target vs predicted vs error vs cross-talk, both walls
+    preview_init.png         same, from the greedy initial guess (before optimising)
+    scene_3d.png             static 3D snapshot
+    opacity.npy              the solved per-panel opacity fields
+    cut/mono/panel_*.dxf     one DXF cut file per panel (layers OUTLINE/SLOT/PIECE)
+    cut/mono/panel_*.svg     the same as SVG
+  Tune the solve/lights/panels/fabrication settings in the --scene YAML file.
+
+
+-------------------------------------------------------------------------------
+ 5. view         — open the interactive 3D window (after a run)
+-------------------------------------------------------------------------------
+  py -m shadowart.cli view --scene scenes/example.yaml --out out
+
+  Opens OUTPUT_DIR/scene_interactive.html in your browser: drag to orbit, scroll
+  to zoom. Shows the glass shards floating in the corner volume, both walls textured
+  with the predicted images, the two floor lights, and (optionally) light rays.
+  Reads the opacity.npy produced by `run`.
+  Options:
+    --opacity PATH   use a specific opacity.npy       (default <out>/opacity.npy)
+    --rays N         number of light rays to draw, 0 = none   (default 40)
+    --thickness M    visual shard thickness in metres (default 0.02, exaggerated)
+    --show-panels    also draw the faint clear-panel planes (off by default)
+    --no-open        write the HTML but don't launch a browser
+
+
+-------------------------------------------------------------------------------
+ DECOMPOSITION MODE (scene YAML -> solve.mode)
+-------------------------------------------------------------------------------
+  partition (default) : shatter each image into many small ORGANIC shards scattered
+                        across the depth planes -> a "cryptic cloud"; no single plane is
+                        readable, only the shadow resolves the image. Knobs:
+                          solve.fragment_size       target shard size in metres (wall/shadow
+                                                    space); bigger = chunkier, fewer pieces
+                          solve.fragment_max_area   hard cap on a shard's area (m^2)
+                          solve.fragment_min_area   drop shards smaller than this (m^2)
+                          solve.shard_gap           extra erosion for separation (m); 0 keeps
+                                                    full coverage (shards already separate
+                                                    because neighbours sit on other depths)
+                          solve.depth_bias          0..~0.3, bias shard COUNT toward near panels
+  optimize            : old differentiable solve (sharpest images, but each panel looks
+                        like a faded copy of the whole picture -> flat planes).
+
+  `run` prints a fragment-size breakdown + per-wall reconstruction IoU (shards-only) +
+  collisions resolved. Genuine collisions where family-A/B panels cross are auto-trimmed.
+  Trade-off: partition looks like real hanging shards but the wall images are softer and a
+  few opposite-wall ghost fragments appear (see the cross-talk preview column).
+
+
+-------------------------------------------------------------------------------
+ 7. run --color   — CMYK coloured-perspex mode
+-------------------------------------------------------------------------------
+  py -m shadowart.cli run --color --scene scenes/example.yaml \
+      --target-a examples/apples.jpg --target-b examples/breakfast.jpg --out out_cmyk
+
+  True CMYK: the picture is split into C/M/Y/K channels and each shard is one process
+  colour of transparent perspex. Colour is projected SUBTRACTIVELY (white light through
+  the shards), so overlapping shards MIX (cyan+magenta on a ray -> blue, magenta+yellow
+  -> red). TONE (dim/bright) comes from STACKING more/fewer same-colour shards across the
+  depth planes. Shards are scattered across planes so no single plane reveals the picture.
+  Scene YAML `color:` block: palette (default C,M,Y,K), max_layers (stack levels/tone,
+  default 2), white_threshold.
+  Writes into OUTPUT_DIR (e.g. out_cmyk/):
+    cut/<colour>.svg|dxf     shards grouped per perspex colour -> cut each from that sheet
+    cut/structure/panel_*    the clear carrier panels (outline + weave slots)
+    shards.ply               per-vertex-coloured 3D mesh (open in Blender/MeshLab)
+    scene_interactive.html   coloured shards + colour projection on the walls
+    preview_final.png        source vs predicted colour projection, both walls
+    cmyk_channels/           C/M/Y/K separation previews of each source image
+    opacity.npy, colorid.npy the shard masks + per-shard palette ids
+  Finer colour detail: lower solve.fragment_size. Note: single-colour shards
+  reproduce PALETTE colours; blended hues snap to the nearest.
+
+
+-------------------------------------------------------------------------------
+ 8. tests         — verify the geometry + renderer still work
+-------------------------------------------------------------------------------
+  py -m pytest tests/ -q
+
+
+===============================================================================
+ THE CHESS EXAMPLE (bishop on Wall A, knight on Wall B)
+===============================================================================
+  # 1) make the two chess pieces the same size + scale
+  py -m shadowart.cli normalize --in examples/Chess1.png examples/Chess2.png \
+      --out-dir examples --size 800
+
+  # 2) run the whole pipeline into out_chess/
+  py -m shadowart.cli run --scene scenes/example.yaml \
+      --target-a examples/Chess1_norm.png \
+      --target-b examples/Chess2_norm.png \
+      --out out_chess
+
+  # 3) look around the result
+  py -m shadowart.cli view --scene scenes/example.yaml --out out_chess
