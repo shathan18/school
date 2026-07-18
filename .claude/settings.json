@@ -3,5 +3,23 @@
     "allow": [
       "Bash(python -m shadowart.cli run --scene scenes/example.yaml --color --color-mode overlap --target-a examples/apples.jpg --target-b examples/breakfast.jpg --out out_apples_breakfast)"
     ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "powershell.exe -Command \"[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('Claude needs your input', 'Claude Code')\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "powershell.exe -Command \"[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('Task complete', 'Claude Code')\"" }
+        ]
+      }
+    ]
   }
 }

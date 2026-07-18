@@ -23,6 +23,8 @@ from __future__ import annotations
 import dataclasses
 import time
 
+import numpy as np
+
 from ..targets import color as C
 from .. import metrics as _metrics
 from . import decompose
@@ -32,21 +34,68 @@ from . import panel_search
 # Higher score = better. `joint_thresh` selects which threshold of
 # `joint_intersection_pct` to penalise (0.3 = the strictest "genuine double duty" band,
 # so cross-talk that is merely incidental overlap is not over-penalised).
-DEFAULT_WEIGHTS = {"ssim": 1.0, "edge": 0.5, "crosstalk": 0.25, "joint_thresh": 0.3}
+# `duty`/`bleed` drive the COLOUR-AWARE path (see score_layout).
+DEFAULT_WEIGHTS = {"ssim": 1.0, "edge": 0.5, "crosstalk": 0.25, "joint_thresh": 0.3,
+                   "duty": 0.5, "bleed": 0.5}
 
 
-def score_layout(accuracy, joint_pct, weights=None):
+def colour_agreeing_duty(renderer, panel_T, panels, targets, white_thr, prim=None,
+                         match_tol=0.30, dark_thr=0.05):
+    """Split cross-wall bleed into the GOOD and BAD halves, per wall, as % of that wall's subject.
+
+    Renders only the panels whose primary wall is the OTHER one -- i.e. pure cross-talk -- then
+    of the subject pixels it darkens:
+      good = it arrived in a colour that wall actually wants (||pred - target|| < match_tol)
+      bad  = it arrived in the wrong colour (visible contamination)
+
+    This is the corrected measure of `corrections_note.md` 3: the geometric
+    `panel_search.joint_intersection_pct` counts "landed on content" regardless of colour, which
+    is exactly the number that read 27-31% and collapsed to ~3% once colour was required."""
+    from ..geometry.projection import primary_wall_of          # local: avoids a circular import
+    if prim is None:
+        prim = {}
+    good, bad = {}, {}
+    for wall in ("A", "B"):
+        q = panel_T.copy()
+        for gi, p in enumerate(panels):
+            if prim.get(p.name) == wall:
+                q[gi] = 1.0                                     # drop the panels that BUILD it
+        xr = renderer.render_color_np(q)[wall]
+        subj = C.subject_mask(targets[wall], white_thr)
+        denom = max(int(subj.sum()), 1)
+        onsub = ((1.0 - xr.mean(-1)) > dark_thr) & subj
+        if onsub.any():
+            d = np.sqrt(((xr[onsub] - targets[wall][onsub]) ** 2).sum(1))
+            good[wall] = 100.0 * float((d < match_tol).sum()) / denom
+            bad[wall] = 100.0 * float((d >= match_tol).sum()) / denom
+        else:
+            good[wall] = bad[wall] = 0.0
+    return good, bad
+
+
+def score_layout(accuracy, joint_pct, weights=None, duty=None, bleed=None):
     """Composite scalar (higher is better) ranking a whole layout across restarts.
 
     `accuracy`  : `metrics.evaluate_wall_accuracy` output -- {'A': {...ssim,
                   edge_fidelity...}, 'B': {...}}.
     `joint_pct` : `panel_search.joint_intersection_pct` output -- {0.1: pct, 0.2: pct,
-                  0.3: pct} -- or None (then the cross-talk term is dropped).
+                  0.3: pct} -- or None.
+    `duty`/`bleed`: `colour_agreeing_duty` output ({'A': pct, 'B': pct} each) or None.
     `weights`   : override any of DEFAULT_WEIGHTS.
 
-        score = w_ssim*(ssimA+ssimB) + w_edge*(edgeA+edgeB) - w_crosstalk*(joint_pct[thr]/100)
+    COLOUR-AWARE path (when `duty` is given) -- preferred:
 
-    Reused by both greedies' restart loops so the two searches optimise the same quantity.
+        score = w_ssim*(ssimA+ssimB) + w_edge*(edgeA+edgeB)
+                + w_duty*mean(duty)/100 - w_bleed*mean(bleed)/100
+
+    Genuine, colour-agreeing double duty is a BONUS; only wrong-colour bleed is penalised. The
+    legacy path below instead subtracted the colour-BLIND `joint_intersection_pct`, which
+    penalised real double duty -- i.e. it fought the per-shard signed credit in
+    `decompose._shard_damage`, which rewards exactly that. Both levels now optimise the same
+    quantity. Units are consistent here: duty and bleed are both % of the wall's subject.
+
+    LEGACY path (duty=None) reproduces the previous behaviour exactly, so callers that cannot
+    afford the extra cross-talk-only render (e.g. panel_search) are unchanged.
     """
     w = dict(DEFAULT_WEIGHTS)
     if weights:
@@ -54,7 +103,11 @@ def score_layout(accuracy, joint_pct, weights=None):
     a, b = accuracy["A"], accuracy["B"]
     s = w["ssim"] * (a["ssim"] + b["ssim"])
     s += w["edge"] * (a["edge_fidelity"] + b["edge_fidelity"])
-    if joint_pct:
+    if duty is not None:
+        s += w["duty"] * (duty.get("A", 0.0) + duty.get("B", 0.0)) / 2.0 / 100.0
+        if bleed is not None:
+            s -= w["bleed"] * (bleed.get("A", 0.0) + bleed.get("B", 0.0)) / 2.0 / 100.0
+    elif joint_pct:
         s -= w["crosstalk"] * (joint_pct.get(w["joint_thresh"], 0.0) / 100.0)
     return float(s)
 
@@ -90,12 +143,19 @@ def _run_once_shards(scene, table, targets, names, renderer, seed,
     pred_rgb = renderer.render_color_np(panel_T)
     accuracy = _metrics.evaluate_wall_accuracy(targets, pred_rgb)
     joint_pct = panel_search.joint_intersection_pct(fragments, table, scene.panels)
+    # colour-aware cross-talk terms: reward the bleed that arrives in a wanted colour, penalise
+    # only the rest. Costs one extra cross-talk-only render per run (see colour_agreeing_duty).
+    from ..geometry.projection import primary_wall_of
+    prim = {p.name: primary_wall_of(scene, table, p) for p in scene.panels}
+    duty, bleed = colour_agreeing_duty(renderer, panel_T, scene.panels, targets,
+                                       scene.white_threshold, prim=prim, match_tol=match_tol)
     return {
         "stack_colorid": stack_colorid, "opacity": opacity, "fragments": fragments,
         "resolved": resolved, "stack_depths": stack_depths, "budget_stats": budget_stats,
         "stack_intensity": stack_intensity, "pred_rgb": pred_rgb,
-        "accuracy": accuracy, "joint_pct": joint_pct,
-        "score": score_layout(accuracy, joint_pct, weights), "seed": seed,
+        "accuracy": accuracy, "joint_pct": joint_pct, "duty": duty, "bleed": bleed,
+        "score": score_layout(accuracy, joint_pct, weights, duty=duty, bleed=bleed),
+        "seed": seed,
     }
 
 
@@ -143,7 +203,12 @@ def multi_run_panels(scene, targets, names, *,
     for _, pseed in _restart_iter(panel_restarts, panel_time_budget, base_seed):
         n_layouts += 1
         panels, _scores = panel_search.build_panels_greedy(
-            scene, panel_count, mode="deliberate", K=greedy_K, targets=targets, seed=pseed)
+            scene, panel_count, mode="deliberate", K=greedy_K, targets=targets, seed=pseed,
+            anchor_range=scene.solve.search_anchor_range,
+            standoff=scene.solve.search_standoff,
+            mag_cap=scene.solve.search_mag_cap,
+            u_size_range=scene.solve.search_u_size_range,
+            v_range=scene.solve.search_v_range)
         if not panels:                            # degenerate seed produced no valid layout
             continue
         layout_scene = dataclasses.replace(scene, panels=panels)

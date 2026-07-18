@@ -5,7 +5,7 @@ colour-agreement credit (match_tol=0.30). Multi-seed -> pick best RMSE -> render
 HTML + all metrics incl. corrected colour-agreeing B_good (naive "lands on subject" retired).
 """
 import sys, dataclasses, os, json
-sys.path.insert(0, r"c:\Users\User1\Downloads\matterOfPerspective\school")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np, matplotlib
 matplotlib.use("Agg"); import matplotlib.pyplot as plt
 from PIL import Image

@@ -167,6 +167,37 @@ def _lights_floor(scene):
     return traces
 
 
+def _box_mesh(x0, x1, y0, y1, z0, z1, color, name, opacity=0.9):
+    """Axis-aligned solid box as a single Mesh3d (8 vertices, 12 triangles)."""
+    xs = [x0, x1, x1, x0, x0, x1, x1, x0]
+    ys = [y0, y0, y1, y1, y0, y0, y1, y1]
+    zs = [z0, z0, z0, z0, z1, z1, z1, z1]
+    i = [0, 0, 4, 4, 0, 0, 2, 2, 0, 0, 1, 1]
+    j = [1, 2, 5, 6, 1, 5, 3, 7, 3, 7, 2, 6]
+    k = [2, 3, 6, 7, 5, 4, 7, 6, 7, 4, 6, 5]
+    return go.Mesh3d(x=xs, y=ys, z=zs, i=i, j=j, k=k, color=color, opacity=opacity,
+                     flatshading=True, name=name, hoverinfo="skip", showlegend=False)
+
+
+def _table_traces(table):
+    """The display table under the shard body (scene.table, visualisation only):
+    a top slab plus optional legs down to the floor."""
+    cx, cy = table.center
+    sx, sy = table.size
+    x0, x1 = cx - sx / 2, cx + sx / 2
+    y0, y1 = cy - sy / 2, cy + sy / 2
+    wood = "rgb(150,110,75)"
+    traces = [_box_mesh(x0, x1, y0, y1, table.top_z - table.thickness, table.top_z,
+                        wood, "table")]
+    if table.legs:
+        leg, inset = 0.05, 0.06
+        for lx, ly in ((x0 + inset, y0 + inset), (x1 - inset - leg, y0 + inset),
+                       (x0 + inset, y1 - inset - leg), (x1 - inset - leg, y1 - inset - leg)):
+            traces.append(_box_mesh(lx, lx + leg, ly, ly + leg, 0.0,
+                                    table.top_z - table.thickness, wood, "table leg"))
+    return traces
+
+
 def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=True,
                       show_panels=False, shard_thickness=0.02,
                       panel_colorid=None, names=None, wall_rgb=None, pieces=None,
@@ -190,6 +221,8 @@ def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=
         if rr is not None:
             traces.append(rr)
     traces += _lights_floor(scene)
+    if getattr(scene, "table", None) is not None:
+        traces += _table_traces(scene.table)
 
     fig = go.Figure(data=traces)
     fig.update_layout(

@@ -1,0 +1,134 @@
+# ShadowArt TABLETOP scene -- a SMALL (~30 cm cube) shard body standing on a table far
+# from the corner, casting FULL-SIZE 1.8 m images on both walls, projector-style.
+# All lengths in metres.
+#
+# Geometry (verified numerically via geometry/homography.project_uv_to_wall):
+#   magnification m = 3.0 / (3.0 - x_panel):
+#     A0 x=2.325 -> 4.44x    A1 x=2.425 -> 5.22x
+#     A2 x=2.525 -> 6.32x    A3 x=2.625 -> 8.00x
+#   and EXACTLY 6.00x at the body-centre depth x=2.50, where the 0.30 m body edges
+#   (y 2.25..2.55, z 0.78..1.08) map exactly onto the wall band (y 0..1.80, z 0.30..2.10).
+#   Light lateral/height (Ly=2.70, Lz=0.876) are the exact solutions of that mapping.
+#   Penumbra sigma = 0.5 * source_radius * (m - 1) = 2.6..5.3 mm at r=0.0015.
+#
+# EXPECTATIONS vs example_diag.yaml (2.0-2.5x):
+#   * Penumbra is ~2x coarser, and fab.min_feature 4 mm (PANEL space) becomes 24-32 mm in
+#     WALL space at this magnification -- that fabrication floor, not the penumbra, is the
+#     dominant resolution limit here. Bold / flat / posterised imagery only; expect lower
+#     SSIM than the room-scale scene.
+#   * The near plane (m=4.44) cannot reach the image band's outer edges (it covers only
+#     y 0.70..2.03, z_rel 0.15..1.48) -- the edges are served by the DEEP (blurrier) planes
+#     and the diagonals; the union of all planes covers the full band.
+units: m
+
+walls:
+  A:                 # plane x = 0 ; image spans y (width) x z (height) -- unchanged
+    plane: x
+    offset: 0.0
+    width_axis: y
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+  B:                 # plane y = 0 ; image spans x (width) x z (height) -- unchanged
+    plane: y
+    offset: 0.0
+    width_axis: x
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+
+lights:
+  # Desk-lamp style: both lights stand ON the table (top z=0.75, ~13 cm stems),
+  # diagonally behind the body so each projects it onto its own wall.
+  A: {pos: [3.00, 2.70, 0.876]}  # x must exceed every panel x (sanity check)
+  B: {pos: [2.70, 3.00, 0.876]}  # y must exceed every panel y
+  source_radius: 0.0015          # small LED die; 0.003 would double the 3.8-5.3 mm penumbra
+
+material:
+  thickness: 0.003               # 3 mm perspex
+
+table:                           # VISUALISATION ONLY (drawn by both 3D previews)
+  top_z: 0.75
+  center: [2.65, 2.65]           # top spans 2.175..3.125 on x and y -> holds the shard
+  size: [0.95, 0.95]             # body AND both lamps
+  thickness: 0.04
+  legs: true
+
+panels:
+  # The whole body is one 30 cm cube on the table: footprint x,y in 2.25..2.625,
+  # height z in 0.78..1.08 (v_range; the panels stand on the 0.75 m table top).
+  # Unlike the room-scale scenes, BOTH orientations share this one cube, so the
+  # egg-crate weave crossings / collision trimming are active again.
+  - {name: A0, angle_deg: 90, anchor: [2.325, 0.0], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: A1, angle_deg: 90, anchor: [2.425, 0.0], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: A2, angle_deg: 90, anchor: [2.525, 0.0], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: A3, angle_deg: 90, anchor: [2.625, 0.0], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: B0, angle_deg: 0, anchor: [0.0, 2.325], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: B1, angle_deg: 0, anchor: [0.0, 2.425], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: B2, angle_deg: 0, anchor: [0.0, 2.525], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  - {name: B3, angle_deg: 0, anchor: [0.0, 2.625], u_range: [2.25, 2.55], v_range: [0.78, 1.08]}
+  # Diagonals thread the SAME cube, centre-anchored with symmetric u (negative u is fine;
+  # the panel search uses centred u_ranges too). magA = magB = 5.33 for both.
+  - {name: D0, angle_deg: 60, anchor: [2.4375, 2.4375], u_range: [-0.15, 0.15], v_range: [0.78, 1.08]}
+  - {name: D1, angle_deg: 30, anchor: [2.4375, 2.4375], u_range: [-0.15, 0.15], v_range: [0.78, 1.08]}
+
+solve:
+  mode: partition
+  diagonal_frac: 0.30            # force 30% of shards onto D0/D1 (greedy otherwise leaves
+                                 # them empty and each wall's image sits on readable planes)
+  # fragment_* are WALL/shadow-space (keyed to the wall's size, which is unchanged), so the
+  # smaller body needs NO change here -- same values as example_diag.yaml.
+  fragment_size: 0.135
+  fragment_max_area: 0.0315
+  fragment_min_area: 0.0027
+  shard_gap: 0.0
+  depth_bias: 0.0
+  wall_res: [450, 450]
+  panel_res: [420, 420]          # 420 px over the 0.30 m panel = 0.71 mm/px in panel space
+  seed: 0
+  # --- multi-run search (run --color --color-mode overlap) ---
+  restarts: 1
+  panel_restarts: 1
+  time_budget: 0.0
+  search_panels: false
+  damage_weight: 0.0             # auto-set to 0.5 when multi-running (see cli)
+  credit_weight: 0.0
+  score_ssim_weight: 1.0
+  score_edge_weight: 0.5
+  score_crosstalk_weight: 0.25
+  # --- tabletop panel-search geometry (used by --search-panels and girl_tabletop.py).
+  # The library defaults reproduce the old room-scale search box and mag_cap 3.0, which
+  # rejects EVERY candidate this deep -- these overrides confine the search to the table
+  # cube and admit its 4.3-7.5x magnifications.
+  search_anchor_range: [2.30, 2.60]   # candidate panel CENTRES (search u_ranges are centred)
+  search_standoff: 0.5                # trivially satisfied 2+ m from both walls
+  search_mag_cap: 9.0
+  search_u_size_range: [0.10, 0.30]
+  search_v_range: [0.78, 1.08]
+  # --- only used when mode: optimize ---
+  iters: 350
+  lr: 0.06
+  lambda_sparsity: 0.0020
+  lambda_tv: 0.0010
+  lambda_crosstalk: 0.0
+
+color:
+  palette: [C, M, Y, K]
+  max_layers: 2
+  white_threshold: 0.90
+  max_stack: 3
+  overlap_jitter: 0.0
+  shard_budget: 220
+  detail_bias: 2.0
+  penumbra_min_feature_sigmas: 2.0
+
+fabricate:
+  kerf: 0.0002
+  min_feature: 0.004             # PANEL-space; at 6-8x this is 24-32 mm ON THE WALL -- the
+                                 # real resolution floor of the tabletop design (penumbra
+                                 # 2-sigma is only 8-10.5 mm). Drop to 0.003 if the cutter
+                                 # can hold it.
+  threshold: 0.5
+  sheet_size: [2.00, 1.60]
+  formats: [dxf, svg]
+  joint_clearance: 0.0001

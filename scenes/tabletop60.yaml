@@ -1,0 +1,117 @@
+# ShadowArt TABLETOP-60 scene -- like scenes/tabletop.yaml but with a 60 cm cube body
+# instead of 30 cm: half the magnification (3x at body centre), so gentler optics.
+# All lengths in metres.
+#
+# Geometry (same construction as tabletop.yaml, re-solved for the 0.60 m body):
+#   magnification m = 3.0 / (3.0 - x_panel):
+#     A0 x=1.70 -> 2.31x    A1 x=1.90 -> 2.73x
+#     A2 x=2.10 -> 3.33x    A3 x=2.30 -> 4.29x
+#   and EXACTLY 3.00x at the body-centre depth x=2.00, where the 0.60 m body edges
+#   (y 1.70..2.30, z 0.78..1.38) map exactly onto the wall band (y 0..1.80, z 0.30..2.10).
+#   Light lateral/height (Ly=2.55, Lz=1.02) are the exact solutions of that mapping.
+#   Penumbra sigma = 0.5 * source_radius * (m - 1) = 1.0..2.5 mm at r=0.0015 -- roughly
+#   HALF the tabletop.yaml blur; fab.min_feature 4 mm is 9-17 mm in wall space (vs 24-32).
+#   Expect fidelity between the room-scale scene and the 30 cm tabletop.
+units: m
+
+walls:
+  A:                 # plane x = 0 ; image spans y (width) x z (height) -- unchanged
+    plane: x
+    offset: 0.0
+    width_axis: y
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+  B:                 # plane y = 0 ; image spans x (width) x z (height) -- unchanged
+    plane: y
+    offset: 0.0
+    width_axis: x
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+
+lights:
+  # On the table behind the body (top z=0.75, ~27 cm stems), diagonally offset so each
+  # projects the body onto its own wall.
+  A: {pos: [3.00, 2.55, 1.02]}   # x must exceed every panel x (sanity check)
+  B: {pos: [2.55, 3.00, 1.02]}   # y must exceed every panel y
+  source_radius: 0.0015          # small LED die
+
+material:
+  thickness: 0.003               # 3 mm perspex
+
+table:                           # VISUALISATION ONLY (drawn by both 3D previews)
+  top_z: 0.75
+  center: [2.35, 2.35]           # top spans 1.60..3.10 on x and y -> holds the 60 cm
+  size: [1.50, 1.50]             # body AND both lamps
+  thickness: 0.04
+  legs: true
+
+panels:
+  # The whole body is one 60 cm cube on the table: footprint x,y in 1.70..2.30,
+  # height z in 0.78..1.38 (v_range; the panels stand on the 0.75 m table top).
+  # Both orientations share the cube -> egg-crate weave crossings are active.
+  - {name: A0, angle_deg: 90, anchor: [1.70, 0.0], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: A1, angle_deg: 90, anchor: [1.90, 0.0], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: A2, angle_deg: 90, anchor: [2.10, 0.0], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: A3, angle_deg: 90, anchor: [2.30, 0.0], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: B0, angle_deg: 0, anchor: [0.0, 1.70], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: B1, angle_deg: 0, anchor: [0.0, 1.90], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: B2, angle_deg: 0, anchor: [0.0, 2.10], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  - {name: B3, angle_deg: 0, anchor: [0.0, 2.30], u_range: [1.70, 2.30], v_range: [0.78, 1.38]}
+  # Diagonals thread the SAME cube, centre-anchored with symmetric u.
+  - {name: D0, angle_deg: 60, anchor: [2.00, 2.00], u_range: [-0.30, 0.30], v_range: [0.78, 1.38]}
+  - {name: D1, angle_deg: 30, anchor: [2.00, 2.00], u_range: [-0.30, 0.30], v_range: [0.78, 1.38]}
+
+solve:
+  mode: partition
+  diagonal_frac: 0.30
+  # fragment_* are WALL/shadow-space (wall unchanged) -- same values as example_diag.yaml.
+  fragment_size: 0.135
+  fragment_max_area: 0.0315
+  fragment_min_area: 0.0027
+  shard_gap: 0.0
+  depth_bias: 0.0
+  wall_res: [450, 450]
+  panel_res: [420, 420]          # 420 px over the 0.60 m panel = 1.4 mm/px in panel space
+  seed: 0
+  # --- multi-run search (run --color --color-mode overlap) ---
+  restarts: 1
+  panel_restarts: 1
+  time_budget: 0.0
+  search_panels: false
+  damage_weight: 0.0             # auto-set to 0.5 when multi-running (see cli)
+  credit_weight: 0.0
+  score_ssim_weight: 1.0
+  score_edge_weight: 0.5
+  score_crosstalk_weight: 0.25
+  # --- tabletop panel-search geometry (used by --search-panels and girl_tabletop.py).
+  search_anchor_range: [1.75, 2.25]   # candidate panel CENTRES (search u_ranges are centred)
+  search_standoff: 0.5
+  search_mag_cap: 6.0                 # max m at x=2.25+0.30 is 5.0; library default 3.0 rejects the deep half
+  search_u_size_range: [0.20, 0.60]
+  search_v_range: [0.78, 1.38]
+  # --- only used when mode: optimize ---
+  iters: 350
+  lr: 0.06
+  lambda_sparsity: 0.0020
+  lambda_tv: 0.0010
+  lambda_crosstalk: 0.0
+
+color:
+  palette: [C, M, Y, K]
+  max_layers: 2
+  white_threshold: 0.90
+  max_stack: 3
+  overlap_jitter: 0.0
+  shard_budget: 220
+  detail_bias: 2.0
+  penumbra_min_feature_sigmas: 2.0
+
+fabricate:
+  kerf: 0.0002
+  min_feature: 0.004             # PANEL-space; 9-17 mm on the wall at 2.3-4.3x
+  threshold: 0.5
+  sheet_size: [2.00, 1.60]
+  formats: [dxf, svg]
+  joint_clearance: 0.0001

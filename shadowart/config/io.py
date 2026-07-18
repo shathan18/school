@@ -7,7 +7,7 @@ from typing import Union
 
 import yaml
 
-from .scene import FabParams, Light, Panel, Scene, SolveParams, Wall
+from .scene import FabParams, Light, Panel, Scene, SolveParams, TableSpec, Wall
 
 
 def _require(d: dict, key: str, ctx: str):
@@ -111,6 +111,11 @@ def load_scene(path: Union[str, Path]) -> Scene:
         score_edge_weight=float(s.get("score_edge_weight", 0.5)),
         score_crosstalk_weight=float(s.get("score_crosstalk_weight", 0.25)),
         diagonal_frac=float(s.get("diagonal_frac", 0.0)),
+        search_anchor_range=tuple(map(float, s.get("search_anchor_range", (0.5, 2.4)))),
+        search_standoff=float(s.get("search_standoff", 0.5)),
+        search_mag_cap=float(s.get("search_mag_cap", 3.0)),
+        search_u_size_range=tuple(map(float, s.get("search_u_size_range", (0.25, 0.75)))),
+        search_v_range=tuple(map(float, s.get("search_v_range", (0.03, 1.18)))),
     )
     f = raw.get("fabricate", {})
     fab = FabParams(
@@ -122,11 +127,22 @@ def load_scene(path: Union[str, Path]) -> Scene:
         joint_clearance=float(f.get("joint_clearance", 0.0001)),
     )
 
+    t = raw.get("table")
+    table = None
+    if t is not None:
+        table = TableSpec(
+            top_z=float(_require(t, "top_z", "table")),
+            center=tuple(map(float, _require(t, "center", "table"))),
+            size=tuple(map(float, _require(t, "size", "table"))),
+            thickness=float(t.get("thickness", 0.04)),
+            legs=bool(t.get("legs", True)),
+        )
+
     col = raw.get("color", {})
     palette = _resolve_palette(col)
     scene = Scene(walls=walls, lights=lights, panels=panels,
                   source_radius=source_radius, material_thickness=thickness,
-                  solve=solve, fab=fab,
+                  solve=solve, fab=fab, table=table,
                   color_palette=palette,
                   white_threshold=float(col.get("white_threshold", 0.90)),
                   color_max_layers=int(col.get("max_layers", 2)),
@@ -165,3 +181,17 @@ def _sanity_check(scene: Scene):
                 raise ValueError(
                     f"panel {p.name}: endpoint y={y:.3f} must satisfy "
                     f"0 <= y < light B y ({lb[1]}) so it sits between Light B and Wall B.")
+    if scene.table is not None:
+        # A panel standing over the table must not dip below its top -- the shard body
+        # would physically intersect the furniture. Judged at the footprint midpoint so a
+        # panel merely brushing the table's edge isn't rejected on a technicality.
+        t = scene.table
+        x0, x1 = t.center[0] - t.size[0] / 2, t.center[0] + t.size[0] / 2
+        y0, y1 = t.center[1] - t.size[1] / 2, t.center[1] + t.size[1] / 2
+        for p in scene.panels:
+            (ax, ay), (bx, by) = p.floor_segment_xy()
+            mx, my = (ax + bx) / 2, (ay + by) / 2
+            if x0 <= mx <= x1 and y0 <= my <= y1 and p.v_range[0] < t.top_z:
+                raise ValueError(
+                    f"panel {p.name}: bottom v={p.v_range[0]:.3f} is below the table top "
+                    f"z={t.top_z:.3f} it stands over -- the body would intersect the table.")

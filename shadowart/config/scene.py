@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -189,6 +189,16 @@ class SolveParams:
     diagonal_frac: float = 0.0                  # overlap mode: force this SHARE of shards onto
                                                # diagonal planes (the greedy otherwise leaves
                                                # them empty and the piece is trivial). 0 = off.
+    # --- panel-search geometry (panel_search.build_panels_greedy candidate box) ---
+    # Defaults reproduce the values that used to be hardcoded in that function's signature,
+    # so existing scenes behave identically. A scene whose sculpture lives elsewhere (e.g.
+    # the tabletop scene: a small body near the lights at ~5-8x magnification) MUST override
+    # these -- in particular search_mag_cap, which otherwise rejects every high-mag candidate.
+    search_anchor_range: Tuple[float, float] = (0.5, 2.4)   # (x,y) box for candidate panel CENTRES
+    search_standoff: float = 0.5               # min floor-plan distance from BOTH walls
+    search_mag_cap: float = 3.0                # reject candidates with magnification above this
+    search_u_size_range: Tuple[float, float] = (0.25, 0.75) # candidate lateral size (metres)
+    search_v_range: Tuple[float, float] = (0.03, 1.18)      # candidate vertical extent (metres)
 
 
 @dataclass
@@ -202,6 +212,19 @@ class FabParams:
 
 
 @dataclass
+class TableSpec:
+    """A table/pedestal the shard body stands on. VISUALISATION ONLY -- drawn by the 3D
+    previews (interactive3d, render3d) so the piece reads as a small object on furniture;
+    it has zero effect on projection, solving, or fabrication. The loader only checks that
+    no panel standing over the table dips below its top (the body would intersect it)."""
+    top_z: float                                # height of the table top surface (metres)
+    center: Tuple[float, float]                 # (x,y) centre of the top
+    size: Tuple[float, float]                   # (x extent, y extent) of the top
+    thickness: float = 0.04                     # top slab thickness
+    legs: bool = True                           # draw 4 legs down to the floor
+
+
+@dataclass
 class Scene:
     walls: dict                                 # {'A': Wall, 'B': Wall}
     lights: dict                                # {'A': Light, 'B': Light}
@@ -210,6 +233,7 @@ class Scene:
     material_thickness: float
     solve: SolveParams = field(default_factory=SolveParams)
     fab: FabParams = field(default_factory=FabParams)
+    table: Optional[TableSpec] = None           # optional display table under the shard body
     color_palette: List[str] = field(default_factory=lambda: ["C", "M", "Y", "K"])
     white_threshold: float = 0.90               # pixels brighter than this -> clear (no shard)
     color_max_layers: int = 2                   # max stacked shards per channel (tone levels)

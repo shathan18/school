@@ -113,6 +113,37 @@ def _fragments_dual(subject, face, spacing_bg, spacing_face, min_px, max_px, rng
     return frags
 
 
+def _fragments_regions(subject, labels, spacing_px, min_px, max_px, rng,
+                       importance=None, detail_bias=0.0, region_scale=None):
+    """Fragment each labelled REGION of `subject` on its OWN Voronoi, then concatenate, so no
+    shard ever crosses a region boundary -- the region outlines (e.g. the lemons vs the dish)
+    stay crisp instead of being blurred by a straddling shard that can only be one colour.
+
+    `labels` is an int array aligned to `subject`: 0 = unlabelled (fragmented together as a
+    remainder), 1..K = regions each tiled independently. Same tiling contract as `_fragments`
+    (union of the returned masks == `subject`), just partitioned by region.
+
+    `region_scale` (optional {label: multiplier}) sets each region's own shard spacing:
+    <1 packs SMALLER shards into that region, so a face can carry finer detail than a coat
+    while both still respect their outlines. The area floor scales with it (a denser region is
+    allowed correspondingly smaller pieces); `max_px` stays global so nothing gets huge.
+    """
+    labels = np.asarray(labels)
+    frags = []
+    covered = np.zeros_like(subject)
+    for v in (int(u) for u in np.unique(labels) if u != 0):
+        reg = subject & (labels == v)
+        if reg.any():
+            sc = float(region_scale.get(v, 1.0)) if region_scale else 1.0
+            frags += _fragments(reg, spacing_px * sc, max(4.0, min_px * sc * sc), max_px,
+                                rng, importance, detail_bias)
+            covered |= reg
+    remainder = subject & (~covered)                  # subject pixels outside every region
+    if remainder.any():
+        frags += _fragments(remainder, spacing_px, min_px, max_px, rng, importance, detail_bias)
+    return frags
+
+
 def _fragments(mask, spacing_px, min_px, max_px, rng, importance=None, detail_bias=0.0):
     """Return a list of boolean fragment masks that FULLY tile `mask`.
 
@@ -175,6 +206,42 @@ def _importance_map(rgb, semantic=None, semantic_weight=0.0):
         blended = (1.0 - semantic_weight) * grad + semantic_weight * sem
         return blended * 0.85 + 0.15
     return grad * 0.85 + 0.15
+
+
+def _autotune_regions(mask, labels, base_spacing, min_px, max_px, rng, importance, detail_bias,
+                      budget, region_scale=None, tol=0.15, max_iter=6):
+    """`_autotune_spacing` for the REGION-CONSTRAINED path: same coarsen-until-under-budget
+    bisection, but scaling every region's spacing by a common factor so the region partition is
+    preserved while the total shard count still respects the fabrication ceiling.
+
+    Without this, region runs silently carry more shards than uniform ones (each region costs at
+    least one shard plus border slivers), which by this module's own measurement *lowers*
+    SSIM/edge-fidelity -- so a region-vs-uniform comparison would be measuring shard inflation
+    rather than the segmentation. Returns (fragments, multiplier, count)."""
+    def build(mult):
+        scaled = None if region_scale is None else {k: v * mult for k, v in region_scale.items()}
+        return _fragments_regions(mask, labels, base_spacing * mult, min_px, max_px, rng,
+                                  importance, detail_bias, region_scale=scaled)
+
+    frags = build(1.0)
+    n = len(frags)
+    if not budget or budget <= 0 or n <= budget:
+        return frags, 1.0, n
+    lo, hi = 1.0, 4.0
+    best = (frags, 1.0, n)
+    for _ in range(max_iter):
+        mid = (lo * hi) ** 0.5
+        frags = build(mid)
+        n = len(frags)
+        if abs(n - budget) < abs(best[2] - budget):
+            best = (frags, mid, n)
+        if n <= budget:
+            hi = mid
+            if n >= budget * (1 - tol):
+                break
+        else:
+            lo = mid
+    return best
 
 
 def _autotune_spacing(mask, base_spacing, min_px, max_px, rng, importance, detail_bias,
@@ -407,6 +474,52 @@ def _active_channels(cvals, max_stack, thresh=0.15):
     return active or ranked[:1]
 
 
+def _compromise_channels(dom_P, dom_S, w, names, max_stack):
+    """A shard colour that serves BOTH walls: blend the shard's own dominant colour `dom_P`
+    toward what the other wall wants at its landing (`dom_S`) by fraction `w`, then push the
+    wish through the SAME realisable path the pipeline always uses (CMYK split -> strongest
+    <=max_stack channels -> laminated transmittance). Returns (active, cvals, T).
+
+    `w=0` returns exactly `_shard_channels`' result, so the feature is off by default.
+    Measured headroom (out_thickness_test/headroom.py): on the secondary wall this roughly
+    DOUBLES the reachable colour-agreeing double duty (e.g. 11.0% -> 21.8%) for a primary-wall
+    colour cost of ~0.01, because today's colour is chosen without ever consulting wall B."""
+    wish = (1.0 - w) * np.asarray(dom_P, float) + w * np.asarray(dom_S, float)
+    palette = [n for n in names if n != "clear"]
+    if _color.has_cmyk_channels(names):
+        cvals = _color.rgb_to_cmyk(wish)
+        active = _active_channels(cvals, max_stack)
+    else:
+        idx = int(_color.quantize_ids(wish[None, :], palette)[0])
+        active, cvals = [palette[idx]], {palette[idx]: 1.0}
+    return active, cvals, _shard_transmit(cvals, active)
+
+
+def _secondary_dominant(ys, xs, G, wallP, wallS, target_S, res_P, res_S,
+                        rng, max_samples=200):
+    """What the OTHER wall wants where this shard would land if hosted on the panel whose
+    wall->wall homography is `G`: the median wanted colour over the landing footprint, or None
+    if the shard lands off that wall entirely. Same projection as `_shard_damage` (which already
+    reads these pixels to SCORE a colour); here we read them to CHOOSE one."""
+    n = len(ys)
+    if n == 0:
+        return None
+    if n > max_samples:
+        sel = rng.choice(n, size=max_samples, replace=False)
+        ys, xs = ys[sel], xs[sel]
+    HnP, WnP = res_P
+    HnS, WnS = res_S
+    a = (xs + 0.5) / WnP * wallP.width
+    b = (ys + 0.5) / HnP * wallP.height
+    q = H.apply_homography(G, np.stack([a, b], axis=-1))
+    ci = np.rint(q[:, 0] / max(wallS.width, 1e-9) * WnS - 0.5).astype(int)
+    ri = np.rint(q[:, 1] / max(wallS.height, 1e-9) * HnS - 0.5).astype(int)
+    on = (ci >= 0) & (ci < WnS) & (ri >= 0) & (ri < HnS)
+    if not on.any():
+        return None
+    return np.median(target_S[ri[on], ci[on]], axis=0)
+
+
 def _shard_channels(region_rgb, names, max_stack):
     """Per-shard (active channel list, cvals dict) for the overlap loop, palette-aware.
 
@@ -591,7 +704,9 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                             credit_weight=None, agree_min=None, match_tol=0.30,
                             match_metric="rgb", diagonal_frac=0.0,
                             semantic_masks=None, semantic_weight=0.0,
-                            face_masks=None, face_density=1.0, bg_coarsen=1.0):
+                            face_masks=None, face_density=1.0, bg_coarsen=1.0,
+                            region_masks=None, region_scales=None,
+                            colour_blend=0.0, colour_primary_tol=0.10):
     """'Stochastic Shard Overlap': interleave C/M/Y/K shards onto the SAME set of depth
     planes (typically 1-2 per family) instead of separating each channel onto its own plane.
 
@@ -688,7 +803,22 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
         importance = _importance_map(rgb, semantic=sem, semantic_weight=semantic_weight)
         subj_mask = _color.subject_mask(rgb, white_thr)
         face = None if face_masks is None else (np.asarray(face_masks.get(family)) > 0.5)
-        if face is not None and face_density > 1.0:
+        region = None if region_masks is None else region_masks.get(family)
+        if region is not None:
+            # REGION-CONSTRAINED: fragment each labelled region (e.g. the lemons, the dish)
+            # on its own Voronoi so no shard crosses a region boundary -- keeps the outlines
+            # accurate.
+            #
+            # The budget MUST still be honoured here. Tiling each region independently inflates
+            # the shard count (every region costs at least one shard, plus slivers along its
+            # border), and `_autotune_spacing`'s docstring records that more shard regions
+            # measure as *lower* SSIM/edge-fidelity. Leaving this unbudgeted made region runs
+            # look worse than uniform ones for a reason that had nothing to do with the
+            # segmentation -- they were simply carrying ~15% more shards.
+            frags, mult, n_frags = _autotune_regions(
+                subj_mask, region, spacing, min_px_eff, max_px, rng, importance, detail_bias,
+                shard_budget, region_scale=(region_scales or {}).get(family))
+        elif face is not None and face_density > 1.0:
             # DUAL-DENSITY: dense Voronoi on the face, coarse on the rest. Strong
             # concentration -- unlike the (null) semantic mask, the face gets its own
             # dense seeding so a fixed budget can be pushed hard onto the face.
@@ -763,6 +893,37 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                 cv = cover[viable]
                 p = cv / cv.sum() if cv.sum() > 0 else None
                 local_k = int(rng.choice(viable, p=p))
+            elif colour_blend > 0.0:
+                # JOINT (depth + colour): today's colour is fixed from THIS wall before the host
+                # is picked, so a shard can only help the other wall by luck. Here the colour is
+                # a FUNCTION of the candidate host -- for each panel we look at what the other
+                # wall wants where the shard would land and blend toward it -- and the
+                # (panel, colour) pair is chosen together. Voronoi (the shard's SHAPE) is
+                # untouched; measured straddle ~0.95 says shape is not the limiter.
+                dom_P = _color.dominant_rgb(rgb[m])
+                err_a = float(np.sqrt(((_shard_transmit(cvals, active) - dom_P) ** 2).sum()))
+                best_obj, best_k, best_col = -np.inf, int(viable[0]), (active, cvals)
+                for k in viable:
+                    G = Gs[fam[k][0]]
+                    dom_S = _secondary_dominant(ys, xs, G, wall, wallS, target_S,
+                                                (Hn, Wn), res_S, rng)
+                    act_k, cv_k = active, cvals                 # fall back to own-wall colour
+                    if dom_S is not None:
+                        a2, c2, T2 = _compromise_channels(dom_P, dom_S, colour_blend, names, S)
+                        # only accept a compromise that stays close enough to what THIS wall
+                        # wants -- the primary wall is what a viewer mostly reads.
+                        if float(np.sqrt(((T2 - dom_P) ** 2).sum())) - err_a <= colour_primary_tol:
+                            act_k, cv_k = a2, c2
+                    T_k = _shard_transmit(cv_k, act_k)
+                    d_k = _shard_damage(ys, xs, G, wall, wallS, target_S, 1.0 - T_k,
+                                        (Hn, Wn), res_S, rng, transmit=T_k,
+                                        credit_weight=credit_weight, agree_min=agree_min,
+                                        match_tol=match_tol, match_metric=match_metric)
+                    o_k = cover[k] - damage_weight * d_k
+                    if o_k > best_obj:
+                        best_obj, best_k, best_col = o_k, int(k), (act_k, cv_k)
+                local_k = best_k
+                active, cvals = best_col
             else:
                 T_shard = _shard_transmit(cvals, active)
                 absorb = 1.0 - T_shard
