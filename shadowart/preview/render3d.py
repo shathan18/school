@@ -62,7 +62,11 @@ def _draw_table(ax, table):
     return np.concatenate(pts)
 
 
-def save_scene_3d(scene, out_path):
+def save_scene_3d(scene, out_path, elev=22, azim=-60, title=None):
+    """`elev`/`azim` set the matplotlib 3D camera (degrees). The default (elev=22, azim=-60) is
+    the front view a viewer standing in the room sees; azim rotated by 180 (e.g. azim=120) looks
+    at the installation FROM BEHIND -- the back of the woven shard body, facing away from the two
+    image walls. `title` overrides the caption."""
     fig = plt.figure(figsize=(7, 7))
     ax = fig.add_subplot(111, projection="3d")
 
@@ -102,8 +106,8 @@ def save_scene_3d(scene, out_path):
     for setlim, m in ((ax.set_xlim, mid[0]), (ax.set_ylim, mid[1]), (ax.set_zlim, mid[2])):
         setlim(m - span / 2, m + span / 2)
     ax.set_xlabel("x"); ax.set_ylabel("y"); ax.set_zlabel("z")
-    ax.set_title("ShadowArt scene (panel colour = floor-plan orientation)")
-    ax.view_init(elev=22, azim=-60)
+    ax.set_title(title or "ShadowArt scene (panel colour = floor-plan orientation)")
+    ax.view_init(elev=elev, azim=azim)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=120)
     plt.close(fig)

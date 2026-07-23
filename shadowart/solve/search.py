@@ -40,7 +40,7 @@ DEFAULT_WEIGHTS = {"ssim": 1.0, "edge": 0.5, "crosstalk": 0.25, "joint_thresh": 
 
 
 def colour_agreeing_duty(renderer, panel_T, panels, targets, white_thr, prim=None,
-                         match_tol=0.30, dark_thr=0.05):
+                         match_tol=0.30, dark_thr=0.05, match_metric="rgb"):
     """Split cross-wall bleed into the GOOD and BAD halves, per wall, as % of that wall's subject.
 
     Renders only the panels whose primary wall is the OTHER one -- i.e. pure cross-talk -- then
@@ -65,7 +65,10 @@ def colour_agreeing_duty(renderer, panel_T, panels, targets, white_thr, prim=Non
         denom = max(int(subj.sum()), 1)
         onsub = ((1.0 - xr.mean(-1)) > dark_thr) & subj
         if onsub.any():
-            d = np.sqrt(((xr[onsub] - targets[wall][onsub]) ** 2).sum(1))
+            if match_metric == "lab":                          # perceptual dE, matches the optimiser gate
+                d = C.delta_e(xr[onsub], targets[wall][onsub])
+            else:
+                d = np.sqrt(((xr[onsub] - targets[wall][onsub]) ** 2).sum(1))
             good[wall] = 100.0 * float((d < match_tol).sum()) / denom
             bad[wall] = 100.0 * float((d >= match_tol).sum()) / denom
         else:

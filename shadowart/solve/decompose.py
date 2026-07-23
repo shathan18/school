@@ -208,6 +208,45 @@ def _importance_map(rgb, semantic=None, semantic_weight=0.0):
     return grad * 0.85 + 0.15
 
 
+def outline_map(rgb, mask, edge_pct=90.0, boundary_px=2, guard_px=3):
+    """Per-pixel outline weight in [0,1] -- high on the image's DEFINING contour, tapering off.
+
+    The Scream (and any silhouette-driven image) reads by its outline: the outer silhouette plus
+    the strong internal contour (the dark wavy skull-face, the mouth, the hands). Two uses, both
+    fed from this one map:
+      * as a `semantic` mask for `_importance_map` (concentrate finer shards ON the outline so its
+        own shards trace the contour instead of straddling it), and
+      * as a `protect` map for `_shard_damage` (make the OTHER wall's stray shadows expensive here,
+        so cross-talk is steered off the contour instead of piling onto it -- the damage scorer is
+        otherwise edge-blind and treats the dark contour as free space).
+
+    Construction (all inside `mask`, 0 outside):
+      1. internal contour band: luma-gradient pixels above the `edge_pct`th percentile,
+      2. silhouette boundary band: `mask XOR erosion(mask)`, `boundary_px` wide,
+      3. union, dilate `guard_px` into a guard band, and taper by a normalised distance transform
+         so weight is strongest on the line and fades outward across the band.
+    """
+    mask = np.asarray(mask, bool)
+    if not mask.any():
+        return np.zeros(mask.shape, np.float32)
+    luma = rgb[..., 0] * 0.2989 + rgb[..., 1] * 0.5870 + rgb[..., 2] * 0.1140
+    g = np.hypot(ndimage.sobel(luma, axis=0), ndimage.sobel(luma, axis=1))
+    thr = np.percentile(g[mask], edge_pct) if mask.any() else 0.0
+    contour = mask & (g >= thr)                                    # strong internal edges
+    boundary = mask & ~ndimage.binary_erosion(mask, iterations=max(1, boundary_px))
+    band = contour | boundary
+    if guard_px > 0:
+        band = mask & ndimage.binary_dilation(band, iterations=guard_px)
+    if not band.any():
+        return np.zeros(mask.shape, np.float32)
+    # taper: 1 on the seed line, fading to 0 at the edge of the guard band
+    dist = ndimage.distance_transform_edt(band)
+    w = np.zeros(mask.shape, np.float32)
+    d = float(dist.max()) or 1.0
+    w[band] = (dist[band] / d).astype(np.float32)
+    return w
+
+
 def _autotune_regions(mask, labels, base_spacing, min_px, max_px, rng, importance, detail_bias,
                       budget, region_scale=None, tol=0.15, max_iter=6):
     """`_autotune_spacing` for the REGION-CONSTRAINED path: same coarsen-until-under-budget
@@ -558,7 +597,7 @@ _LUMA_W = np.array([0.2989, 0.5870, 0.1140])          # Rec.601, matches metrics
 
 def _shard_damage(ys, xs, G, wallP, wallS, target_S, absorb, res_P, res_S,
                   rng, max_samples=200, transmit=None, credit_weight=None, agree_min=None,
-                  match_tol=0.30, match_metric="rgb"):
+                  match_tol=0.30, match_metric="rgb", protect=None, protect_weight=0.0):
     """Visual error this shard would inflict on the SECONDARY wall if hosted on the panel
     whose wall->wall homography is `G`. Lower is better; 0 = harmless.
 
@@ -597,9 +636,21 @@ def _shard_damage(ys, xs, G, wallP, wallS, target_S, absorb, res_P, res_S,
         return 0.0
     tgt = target_S[ri[on], ci[on]]                        # [k,3] secondary target there
 
+    # OUTLINE PROTECTION (`protect`, a [Hn_S,Wn_S] weight in [0,1] high on the secondary wall's
+    # defining contour): the harm terms below are edge-blind -- a stray shadow on a DARK contour
+    # steals ~no light so it reads as harmless (and the signed credit can even reward it), which
+    # is exactly what lets cross-talk pile onto the very outline that carries the image. `w` is
+    # that contour weight at each landing pixel; where it is high we make landing expensive
+    # (amplify harm, suppress credit) so the host greedy steers the stray shadow off the outline.
+    pw = protect_weight if (protect is not None and protect_weight) else 0.0
+    w = protect[ri[on], ci[on]] if pw else None
+
     if credit_weight is None:                             # UNSIGNED (harm-only, >= 0)
         stolen = tgt * absorb[None, :]                    # light removed that was wanted
-        return float((stolen ** 2).sum()) / len(ci)       # off-wall pixels count as 0
+        per_px = (stolen ** 2).sum(axis=1)                # off-wall pixels count as 0
+        if w is not None:                                 # landing on the outline costs more
+            per_px = per_px * (1.0 + pw * w)
+        return float(per_px.sum()) / len(ci)
 
     # SIGNED: damage = error_with - error_without, allowed to go NEGATIVE (a credit).
     # Without the shard the secondary pixel is unblocked white (1,1,1); with it, the light
@@ -640,7 +691,13 @@ def _shard_damage(ys, xs, G, wallP, wallS, target_S, absorb, res_P, res_S,
     # wrong colour earns nothing (neither credit nor extra harm); genuine harm (signed>0) is
     # left untouched. `match_tol=None` restores the legacy hue-gate for comparison only.
     if match_tol is not None:
-        if match_metric == "luma":
+        if match_metric == "lab":
+            # perceptual gate in CIELAB (CIE76 dE): "right colour" is judged the way the eye sees
+            # colour difference rather than by raw-RGB Euclidean distance, so near-neutral and dark
+            # targets (where RGB distance is misleading) are handled correctly and fewer wrong-
+            # colour specks earn the credit. `match_tol` is then a dE (~15-25), not an RGB distance.
+            dist = _color.delta_e(transmit[None, :], tgt)
+        elif match_metric == "luma":
             # perceptual gate: weight the per-channel error by Rec.601 luma before measuring
             # "right colour", so a mismatch the eye barely notices (e.g. in blue) is not
             # counted as harshly as one it does (green). Off by default (match_metric="rgb").
@@ -659,6 +716,9 @@ def _shard_damage(ys, xs, G, wallP, wallS, target_S, absorb, res_P, res_S,
         signed = np.where(signed < 0.0, credit_weight * gate * signed, signed)
     else:
         signed = np.where(signed < 0.0, credit_weight * signed, signed)
+    if w is not None:                                      # outline guard: amplify harm on the
+        signed = np.where(signed > 0.0, signed * (1.0 + pw * w),         # contour, and never let
+                          signed * (1.0 - np.clip(w, 0.0, 1.0)))         # it earn a dark-on-dark credit
     return float(signed.sum()) / len(ci)                   # off-wall pixels count as 0 (neutral)
 
 
@@ -706,7 +766,9 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                             semantic_masks=None, semantic_weight=0.0,
                             face_masks=None, face_density=1.0, bg_coarsen=1.0,
                             region_masks=None, region_scales=None,
-                            colour_blend=0.0, colour_primary_tol=0.10):
+                            colour_blend=0.0, colour_primary_tol=0.10,
+                            outline_masks=None, outline_protect_weight=0.0,
+                            intensity_gain=1.0):
     """'Stochastic Shard Overlap': interleave C/M/Y/K shards onto the SAME set of depth
     planes (typically 1-2 per family) instead of separating each channel onto its own plane.
 
@@ -747,6 +809,20 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
     finer than what a real, non-ideal (non-point) light could ever resolve gets merged into
     its neighbour by the existing gap-fill path instead of being fabricated as illusory
     precision. 0 disables it (restores the previous `fragment_min_area`-only floor exactly).
+
+    `outline_masks` ({family: [Hn,Wn] weight in [0,1], high on that wall's defining contour --
+    build with `outline_map`) + `outline_protect_weight` make the host greedy AVOID landing a
+    family's stray cross-talk on the OTHER wall's outline: `_shard_damage` is edge-blind (a
+    shadow on a dark contour steals ~no light, so it scores harmless and can even earn a credit),
+    which is exactly what lets cross-talk pile onto the line that carries the image. The weight
+    amplifies harm and suppresses credit there. Pair with `semantic_masks=outline_masks`,
+    `semantic_weight>0` to also concentrate finer shards ON the outline so its own shards trace
+    it instead of straddling. `outline_protect_weight=0`/`outline_masks=None` -> old behaviour.
+
+    `intensity_gain` (>1, opt-in, default 1.0 = off) lifts every placed channel's recorded intensity
+    (clipped at 1.0) so deep colours render as dark/saturated as the physical full sheet actually
+    casts, instead of the intensity-weighted render washing Prussian blue to mid-blue -- see the
+    inline note at the stacking loop. Hue is preserved (weak channels stay proportionally weakest).
 
     Returns (stack_colorid [S,P,Hp,Wp] int16, opacity [P,Hp,Wp] float32, fragments:list[dict],
     collisions_resolved:int, stack_depths:list[int], budget_stats:dict[family -> {target,
@@ -851,6 +927,10 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
         wallS = scene.walls[secondary]
         target_S = targets[secondary]
         res_S = target_S.shape[:2]
+        # outline of the SECONDARY wall (where a stray shadow from this family would land): the
+        # damage calls below make landing on it expensive, so this family's cross-talk is steered
+        # off the other image's defining contour. None/0 weight -> identical to the old scorer.
+        protect_S = None if outline_masks is None else outline_masks.get(secondary)
         Gs = {gi: _wall_to_wall_H(table, p, family, secondary) for gi, p in fam}
 
         panel_wall_stack = {gi: np.zeros((S, Hn, Wn), np.int16) for gi, _ in fam}
@@ -918,7 +998,8 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                     d_k = _shard_damage(ys, xs, G, wall, wallS, target_S, 1.0 - T_k,
                                         (Hn, Wn), res_S, rng, transmit=T_k,
                                         credit_weight=credit_weight, agree_min=agree_min,
-                                        match_tol=match_tol, match_metric=match_metric)
+                                        match_tol=match_tol, match_metric=match_metric,
+                                        protect=protect_S, protect_weight=outline_protect_weight)
                     o_k = cover[k] - damage_weight * d_k
                     if o_k > best_obj:
                         best_obj, best_k, best_col = o_k, int(k), (act_k, cv_k)
@@ -931,7 +1012,8 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                                               absorb, (Hn, Wn), res_S, rng,
                                               transmit=T_shard, credit_weight=credit_weight,
                                               agree_min=agree_min, match_tol=match_tol,
-                                              match_metric=match_metric)
+                                              match_metric=match_metric,
+                                              protect=protect_S, protect_weight=outline_protect_weight)
                                 for k in viable])
                 # maximise primary-wall coverage, minimise secondary-wall damage. Restricting
                 # to `viable` (cover>0) is what keeps this safe: a panel that cannot host the
@@ -959,6 +1041,17 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
             sigma_m = table[(panel.name, family)].penumbra_sigma_m
             sigma_px = sigma_m / max(px_m, 1e-9)
             softening_sigmas = jitter_px / max(sigma_px, 1e-9)
+
+            # DARKNESS/SATURATION LIFT (`intensity_gain`>1, opt-in, default 1.0 = off): the render's
+            # intensity-weighted lamination (color.stack_transmit_lut) applies each sheet at only
+            # `cvals[ch]` strength, so a deep colour whose channels sit at 0.5-0.8 renders lighter
+            # and less saturated than the PHYSICAL full sheet actually casts -- Prussian blue washes
+            # to mid-blue. Scaling the recorded per-channel intensities up (clipped at 1.0) deepens
+            # those channels toward the full-sheet reality while a genuinely weak channel (e.g. the
+            # 0.28 M of a golden-orange, kept low by the hue fix) stays proportionally weakest, so
+            # hue is preserved. 1.0 leaves stack_intensity byte-identical to before.
+            if intensity_gain != 1.0:
+                cvals = {ch: min(1.0, float(v) * intensity_gain) for ch, v in cvals.items()}
 
             stack_depths.append(len(active))
             shadow_mm2 = float(m.sum()) * px_area_mm2

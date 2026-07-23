@@ -1,0 +1,15 @@
+running Hokusai pair (Great Wave x examples/enoshima.jpg) ...
+running ARBITRARY floor (apples x breakfast) ...
+
+HOKUSAI  Great Wave x Red Fuji  (compatible?)  (252 shards)
+  B_good (colour-agreeing double duty): A 15.2%  B 17.2%  | mean 16.2%
+  bleed (wrong-colour cross-talk):      A 15.4%  B 11.1%  | mean 13.3%
+  wall SSIM: A 0.739  B 0.633
+
+ARBITRARY  apples x breakfast  (167 shards)
+  B_good (colour-agreeing double duty): A 0.0%  B 1.0%  | mean 0.5%
+  bleed (wrong-colour cross-talk):      A 15.2%  B 32.5%  | mean 23.9%
+  wall SSIM: A 0.811  B 0.792
+
+==> Hokusai mean B_good 16.2%  vs  arbitrary floor 0.5%   (target compatibility band ~15-25%)
+saved out_wavefuji_enoshima/walls.png

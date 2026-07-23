@@ -1,0 +1,1 @@
+seed=3 crossings=40 comp=2.177 ssimA=0.771 ssimB=0.826 Bgood=14.7

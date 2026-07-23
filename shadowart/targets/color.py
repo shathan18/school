@@ -43,6 +43,16 @@ PERSPEX = OrderedDict([
     ("C_MUTE", ((0.35, 0.60, 0.66), (0.60, 0.84, 0.88))),   # dusty cyan
     ("M_MUTE", ((0.66, 0.40, 0.55), (0.86, 0.60, 0.82))),   # dusty magenta/rose
     ("Y_MUTE", ((0.72, 0.68, 0.42), (0.90, 0.86, 0.60))),   # dusty ochre/yellow
+    # --- FINE NOIR: a denser neutral grey ramp (6 grey stocks + K + white = 8 tones) so a
+    # greyscale reconstruction quantises to more distinct regions -> finer tonal gradation and
+    # (because fewer adjacent shards share a tone and merge) more cut pieces per shard budget.
+    # display == transmittance for a neutral sheet; each is still ONE cut piece (no lamination).
+    ("GRY1", ((0.90, 0.90, 0.90), (0.90, 0.90, 0.90))),
+    ("GRY2", ((0.80, 0.80, 0.80), (0.80, 0.80, 0.80))),
+    ("GRY3", ((0.70, 0.70, 0.70), (0.70, 0.70, 0.70))),
+    ("GRY4", ((0.60, 0.60, 0.60), (0.60, 0.60, 0.60))),
+    ("GRY5", ((0.50, 0.50, 0.50), (0.50, 0.50, 0.50))),
+    ("GRY6", ((0.40, 0.40, 0.40), (0.40, 0.40, 0.40))),
 ])
 CUT_COLORS = [n for n in PERSPEX if n != "clear"]        # colours that become physical shards
 CMYK = ["C", "M", "Y", "K"]                              # process channels used by colour mode
@@ -55,6 +65,7 @@ PALETTES = {
     "cmyk":  ["C", "M", "Y", "K"],
     "muted": ["C_MUTE", "M_MUTE", "Y_MUTE", "K"],
     "noir":  ["GRAY_L", "GRAY_M", "GRAY_D", "K"],
+    "noir_fine": ["GRY1", "GRY2", "GRY3", "GRY4", "GRY5", "GRY6", "K"],   # 8-tone grey ramp
 }
 
 
@@ -160,9 +171,18 @@ def majority_color(px, names):
 # ---------------------------------------------------------------------------
 # colour target loading (fit source image to the wall, colour-preserving)
 # ---------------------------------------------------------------------------
-def load_color_target(path, wall_res, content_frac=0.92, white_thr=0.90):
+def load_color_target(path, wall_res, content_frac=0.92, white_thr=0.90,
+                      posterize_k=None, denoise_sigma=0.0, boost_sat=1.15, boost_contrast=1.08):
     """Load an RGB image, crop to its non-white subject, fit centred on a white square wall
-    canvas, and return an RGB float map [Hn, Wn, 3] oriented so image-top -> wall-top."""
+    canvas, and return an RGB float map [Hn, Wn, 3] oriented so image-top -> wall-top.
+
+    `posterize_k` (opt-in, default None = OFF -> byte-identical to the legacy behaviour): flatten
+    the fitted subject to that many bold, hue-preserving flat colours via
+    `preprocess.preprocess_source` (k-means in RGB after a gentle boost + optional Gaussian
+    de-texture of sigma `denoise_sigma`). Applied AFTER the LANCZOS fit, so it also re-flattens the
+    resize's edge ringing. Only the subject is quantised (the white margin is left pure white). This
+    removes the brushstroke/JPEG texture that otherwise makes the shard decomposition blotchy -- see
+    preprocess.py. `boost_sat`/`boost_contrast` tune that flatten's mild pre-boost."""
     Hn, Wn = wall_res
     img = Image.open(path).convert("RGB")
     arr = np.asarray(img, dtype=np.float32) / 255.0
@@ -180,6 +200,11 @@ def load_color_target(path, wall_res, content_frac=0.92, white_thr=0.90):
     canvas = Image.new("RGB", (Wn, Hn), (255, 255, 255))
     canvas.paste(img, ((Wn - nw) // 2, (Hn - nh) // 2))
     out = np.asarray(canvas, dtype=np.float32) / 255.0
+    if posterize_k:                                       # opt-in source flatten (see docstring)
+        from .preprocess import preprocess_source
+        subj = subject_mask(out, white_thr)
+        out = preprocess_source(out, k=posterize_k, smooth=denoise_sigma,
+                                sat=boost_sat, contrast=boost_contrast, mask=subj)
     return np.flipud(out).copy()                          # image-top -> wall-top (z up)
 
 
@@ -192,6 +217,42 @@ def subject_mask(rgb, white_thr=0.90, sat_thr=0.12):
     rgb = np.asarray(rgb, dtype=np.float32)
     mx = rgb.max(axis=-1); mn = rgb.min(axis=-1)
     return ((mx - mn) >= sat_thr) | (mx <= white_thr)
+
+
+# ---------------------------------------------------------------------------
+# perceptual colour distance (CIELAB / CIE76 dE) -- dependency-free
+# ---------------------------------------------------------------------------
+# Raw-RGB Euclidean distance does NOT match perceived colour difference, so the shard channel
+# picks, the "right-colour" credit gate in decompose._shard_damage, and the B_good metric in
+# search.colour_agreeing_duty are all perceptually off in RGB. CIELAB is roughly perceptually
+# uniform, so dE there tracks what the eye sees. Implemented in numpy (no skimage/cv2 dependency).
+_XYZ_M = np.array([[0.4124, 0.3576, 0.1805],
+                   [0.2126, 0.7152, 0.0722],
+                   [0.0193, 0.1192, 0.9505]], dtype=np.float32)
+_D65 = np.array([0.95047, 1.0, 1.08883], dtype=np.float32)
+
+
+def _srgb_to_linear(c):
+    c = np.asarray(c, np.float32)
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4).astype(np.float32)
+
+
+def rgb_to_lab(rgb):
+    """sRGB in [0,1] -> CIELAB (D65 white). Works on any [...,3] array. L~[0,100], a/b~[-128,127]."""
+    lin = _srgb_to_linear(np.asarray(rgb, np.float32))
+    xyz = (lin @ _XYZ_M.T) / _D65
+    d = 6.0 / 29.0
+    f = np.where(xyz > d ** 3, np.cbrt(np.clip(xyz, 0, None)), xyz / (3 * d * d) + 4.0 / 29.0)
+    L = 116.0 * f[..., 1] - 16.0
+    a = 500.0 * (f[..., 0] - f[..., 1])
+    b = 200.0 * (f[..., 1] - f[..., 2])
+    return np.stack([L, a, b], axis=-1).astype(np.float32)
+
+
+def delta_e(rgb1, rgb2):
+    """CIE76 perceptual colour distance (ΔE) between two RGB arrays, broadcast over [...,3].
+    Rule of thumb: ~2.3 = just-noticeable, ~10 clearly different, ~25 a different colour."""
+    return np.sqrt(((rgb_to_lab(rgb1) - rgb_to_lab(rgb2)) ** 2).sum(-1))
 
 
 # ---------------------------------------------------------------------------

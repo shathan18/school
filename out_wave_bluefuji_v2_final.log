@@ -1,0 +1,25 @@
+colour targets: A=examples/wave_src.jpg  B=examples/blue_fuji_v2.png  (stochastic shard overlap)
+perspex palette: ['C', 'M', 'Y', 'K']   max stack: 3
+fabrication: kerf 0.20 mm (applied to every shard polygon in panel_stack_pieces -- shared by the cut files and shards.obj/.ply)
+interleaving C/M/Y/K shards onto shared depth planes (stochastic overlap) ...
+shard search: kept seed=1 of 6 runs (composite score 1.9905)
+
+=== wall reconstruction accuracy ===
+Wall A: RMSE 0.1674  |  PSNR 15.5 dB  |  SSIM 0.770  |  edge-fidelity 0.467
+Wall B: RMSE 0.2115  |  PSNR 13.5 dB  |  SSIM 0.673  |  edge-fidelity 0.630
+  (RMSE/PSNR = colour accuracy; SSIM/edge-fidelity = structural/detail accuracy -- low SSIM or edge-fidelity with a fine RMSE means the image is washing out into colour blobs even though the average colour is close)
+
+=== shard regions vs. fabrication ceiling ===
+Wall A: 115 shard regions (ceiling 220 (natural, detail-biased count))  |  penumbra-aware min feature: 4.50 mm
+Wall B: 135 shard regions (ceiling 220 (natural, detail-biased count))  |  penumbra-aware min feature: 4.50 mm
+
+=== overlap shard counts (per channel, across all stack slots) ===
+Wall A: 179 laminated layers  C:34, K:83, M:21, Y:41
+Wall B: 354 laminated layers  C:113, K:135, M:106
+stack depth per shard region (secondary/tertiary mixing): 1-stack:94, 2-stack:29, 3-stack:127
+scatter: jitter_px min 0 | median 0 | max 0
+  softening vs. physical penumbra: 0.0x sigma (median), 0.0x sigma (max) -- >1x means the cast shadow is being deliberately softened by this much to buy extra scrambling
+collisions: 0 resolved, 0 remaining
+vectorising stack slots + exporting per-colour cut files + dense .obj ...
+  146 laminated shards; per-colour cut files: C:53, K:61, M:24, Y:8
+wrote out_wave_bluefuji_v2_final\shards.obj (shards + wall/panel/light rig groups for orientation), shards.ply, out_wave_bluefuji_v2_final\cut (per-slot per-colour + structure), scene_interactive.html, preview_final.png, cmyk_channels/

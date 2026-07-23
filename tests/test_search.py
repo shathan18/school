@@ -55,7 +55,7 @@ def test_restart_iter_single_when_no_condition():
 # palette presets
 # ---------------------------------------------------------------------------
 def test_palette_presets_registered():
-    assert set(C.PALETTES) == {"cmyk", "muted", "noir"}
+    assert set(C.PALETTES) == {"cmyk", "muted", "noir", "noir_fine"}
     for name, cols in C.PALETTES.items():
         for c in cols:
             assert c in C.PERSPEX, f"{name} references unknown perspex {c}"

@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import plotly.graph_objects as go
+import matplotlib
 import matplotlib.cm as cm
 
 from ..geometry import homography as H
@@ -39,7 +40,8 @@ def _depth_color_of(scene, table):
     (farther panels magnify more), grouped by `primary_wall_of` since there's no family
     to group panels by directly. Replaces the old family-list-index gradient position."""
     from ..geometry.projection import primary_wall_of
-    turbo = cm.get_cmap("turbo")
+    # matplotlib >= 3.9 removed cm.get_cmap; the colormaps registry is the modern, version-safe path.
+    turbo = matplotlib.colormaps["turbo"] if hasattr(matplotlib, "colormaps") else cm.get_cmap("turbo")
     groups = {}
     for panel in scene.panels:
         groups.setdefault(primary_wall_of(scene, table, panel), []).append(panel)
