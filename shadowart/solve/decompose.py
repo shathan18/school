@@ -363,7 +363,7 @@ def fragment_shards(scene, table, targets, seed=None):
     op = np.zeros((len(scene.panels), Hp, Wp), dtype=np.float32)
     fragments = []
 
-    for fi, family in enumerate(("A", "B")):
+    for fi, family in enumerate(scene.walls.keys()):
         wall = scene.walls[family]
         target = targets[family]
         Hn, Wn = target.shape
@@ -448,7 +448,7 @@ def fragment_shards_cmyk(scene, table, targets, names=None, white_thr=0.90,
     colorid = np.zeros((len(scene.panels), Hp, Wp), dtype=np.int16)
     fragments, stack_depths = [], []
 
-    for fi, family in enumerate(("A", "B")):
+    for fi, family in enumerate(scene.walls.keys()):
         wall = scene.walls[family]
         rgb = targets[family]
         Hn, Wn = rgb.shape[:2]
@@ -847,7 +847,7 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
     fragments, stack_depths = [], []
     budget_stats = {}
 
-    for fi, family in enumerate(("A", "B")):
+    for fi, family in enumerate(scene.walls.keys()):
         wall = scene.walls[family]
         rgb = targets[family]
         Hn, Wn = rgb.shape[:2]
@@ -923,15 +923,30 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
         # coin flip (`rng.choice`) -- which is why bad cross-talk swung 14-37% purely with
         # the seed. Here it is chosen to minimise the damage that stray shadow does to the
         # OTHER wall's image, using `_shard_damage` (no re-render; see `_wall_to_wall_H`).
-        secondary = "B" if family == "A" else "A"
-        wallS = scene.walls[secondary]
-        target_S = targets[secondary]
-        res_S = target_S.shape[:2]
-        # outline of the SECONDARY wall (where a stray shadow from this family would land): the
-        # damage calls below make landing on it expensive, so this family's cross-talk is steered
-        # off the other image's defining contour. None/0 weight -> identical to the old scorer.
-        protect_S = None if outline_masks is None else outline_masks.get(secondary)
-        Gs = {gi: _wall_to_wall_H(table, p, family, secondary) for gi, p in fam}
+        wall_names = list(scene.walls.keys())
+        # ALL other walls this family's stray shadow can fall on. A panel casts a shadow on EVERY
+        # wall it isn't parallel to, so with 3+ walls each host does cross-talk damage to more than
+        # one image at once. Scoring only ONE cyclic-neighbour "secondary" (as before) left every
+        # third-wall setup half-blind -- e.g. with [A,B,C], family B's stray shadows landing on A
+        # were never counted, so A's image could be wrecked by B with the solver unaware. Summing
+        # `_shard_damage` over all others fixes that. For 2 walls `others` is the single other wall,
+        # so the sum has one term and this is byte-identical to the previous behaviour.
+        others = [w for w in wall_names if w != family]
+        wallS_by = {o: scene.walls[o] for o in others}
+        targetS_by = {o: targets[o] for o in others}
+        resS_by = {o: targets[o].shape[:2] for o in others}
+        # outline of each OTHER wall (where a stray shadow from this family would land): the damage
+        # calls below make landing on it expensive, so this family's cross-talk is steered off the
+        # other images' defining contours. None/0 weight -> identical to the old scorer.
+        protectS_by = {o: (None if outline_masks is None else outline_masks.get(o)) for o in others}
+        Gs_by = {o: {gi: _wall_to_wall_H(table, p, family, o) for gi, p in fam} for o in others}
+        # single-secondary aliases for the colour-blend branch below (a 2-wall colour feature; with
+        # one other wall these ARE that wall). colour_blend is NOT generalised to N walls -- it
+        # compromises a shard's colour toward one other image, which has no unambiguous 3-wall
+        # meaning; no current caller uses colour_blend with a third wall.
+        secondary = others[0]
+        wallS, target_S, res_S = wallS_by[secondary], targetS_by[secondary], resS_by[secondary]
+        protect_S, Gs = protectS_by[secondary], Gs_by[secondary]
 
         panel_wall_stack = {gi: np.zeros((S, Hn, Wn), np.int16) for gi, _ in fam}
         panel_wall_intensity = {gi: np.zeros((S, Hn, Wn), np.float32) for gi, _ in fam}
@@ -1008,13 +1023,18 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
             else:
                 T_shard = _shard_transmit(cvals, active)
                 absorb = 1.0 - T_shard
-                dmg = np.array([_shard_damage(ys, xs, Gs[fam[k][0]], wall, wallS, target_S,
-                                              absorb, (Hn, Wn), res_S, rng,
-                                              transmit=T_shard, credit_weight=credit_weight,
-                                              agree_min=agree_min, match_tol=match_tol,
-                                              match_metric=match_metric,
-                                              protect=protect_S, protect_weight=outline_protect_weight)
-                                for k in viable])
+                # sum the harm this shard would do across ALL other walls (each _shard_damage
+                # returns 0 where the shadow lands off that wall, so this naturally accounts for
+                # whichever walls a given host actually casts onto). 2 walls -> one term -> as before.
+                dmg = np.array([
+                    sum(_shard_damage(ys, xs, Gs_by[o][fam[k][0]], wall, wallS_by[o], targetS_by[o],
+                                      absorb, (Hn, Wn), resS_by[o], rng,
+                                      transmit=T_shard, credit_weight=credit_weight,
+                                      agree_min=agree_min, match_tol=match_tol,
+                                      match_metric=match_metric,
+                                      protect=protectS_by[o], protect_weight=outline_protect_weight)
+                        for o in others)
+                    for k in viable])
                 # maximise primary-wall coverage, minimise secondary-wall damage. Restricting
                 # to `viable` (cover>0) is what keeps this safe: a panel that cannot host the
                 # shard is EXCLUDED, never rewarded -- so the "aim at nothing scores best"

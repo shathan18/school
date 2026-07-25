@@ -35,29 +35,49 @@ import numpy as np
 
 @dataclass
 class Wall:
-    """A rectangular image region on one of the two walls."""
+    """A rectangular image region on a wall. `plane` is 'x' (Wall A), 'y' (Wall B), or
+    'n' -- a THIRD vertical wall at an arbitrary horizontal normal angle (`normal_deg`,
+    degrees from +x), for 3-wall setups. 'n' walls are centred on their own in-plane axis
+    (rather than starting at 0) since there's no natural origin for an arbitrary angle."""
     name: str
-    plane: str          # 'x' -> plane x=offset (Wall A);  'y' -> plane y=offset (Wall B)
+    plane: str          # 'x' -> plane x=offset (Wall A); 'y' -> plane y=offset (Wall B);
+                        # 'n' -> plane (normal_deg) at signed distance `offset` from origin
     offset: float       # usually 0.0
-    width_axis: str     # 'y' for Wall A, 'x' for Wall B
+    width_axis: str     # 'y' for Wall A, 'x' for Wall B; unused for plane='n'
     width: float        # extent along width_axis (metres)
     height: float       # extent along z (metres)
     z0: float           # bottom of the image region (metres above floor)
+    normal_deg: float = 0.0   # only used when plane == 'n': horizontal normal angle (degrees)
+    lateral_offset: float = 0.0   # only used when plane == 'n': shifts the centred width span
+                                  # along axis_u, so the rectangle can be centred on wherever the
+                                  # body actually projects instead of always on the origin normal
 
     @property
     def normal(self) -> np.ndarray:
-        return np.array([1.0, 0.0, 0.0]) if self.plane == "x" else np.array([0.0, 1.0, 0.0])
+        if self.plane == "x":
+            return np.array([1.0, 0.0, 0.0])
+        if self.plane == "y":
+            return np.array([0.0, 1.0, 0.0])
+        t = math.radians(self.normal_deg)
+        return np.array([math.cos(t), math.sin(t), 0.0])
 
     @property
     def origin(self) -> np.ndarray:
         """3D point at (width=0, height=0) corner of the image region."""
         if self.plane == "x":              # Wall A: vary y (width) and z (height)
             return np.array([self.offset, 0.0, self.z0])
-        return np.array([0.0, self.offset, self.z0])   # Wall B: vary x (width) and z
+        if self.plane == "y":
+            return np.array([0.0, self.offset, self.z0])   # Wall B: vary x (width) and z
+        n = self.normal
+        centre = n * self.offset
+        return centre + self.axis_u * (self.lateral_offset - self.width / 2.0) + np.array([0.0, 0.0, self.z0])
 
     @property
     def axis_u(self) -> np.ndarray:
         """In-plane unit axis for image width."""
+        if self.plane == "n":
+            t = math.radians(self.normal_deg)
+            return np.array([-math.sin(t), math.cos(t), 0.0])   # perpendicular to normal, horizontal
         return np.array([0.0, 1.0, 0.0]) if self.width_axis == "y" else np.array([1.0, 0.0, 0.0])
 
     @property
