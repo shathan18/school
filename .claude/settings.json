@@ -96,7 +96,12 @@
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\preview_fuji.py\")",
       "Bash(sed -i 's|for fs,mm,bud in \\\\[.*\\\\]:|for fs,mm,bud in [\\(0.13,6.0,99999\\),\\(0.13,10.0,99999\\),\\(0.14,16.0,99999\\),\\(0.16,16.0,99999\\)]:|' \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\probe_kana.py\")",
       "Bash(sed -i 's|for fs,bud in \\\\[.*\\\\]:|for fs,bud in [\\(0.06,99999\\)]:|' \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\probe_kana.py\")",
-      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\probe_kana.py\")"
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\probe_kana.py\")",
+      "Bash(awk '{print $5\"  \"$9, $10, $11, $12}')",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\preview_companions.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\compare_pairs.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\sam_region_test.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\region_compare.py\")"
     ]
   },
   "hooks": {
