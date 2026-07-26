@@ -38,7 +38,8 @@
       "Bash(git config *)",
       "Bash(git branch *)",
       "Bash(git checkout *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\show_k4_k8.py\")"
     ]
   }
 }
