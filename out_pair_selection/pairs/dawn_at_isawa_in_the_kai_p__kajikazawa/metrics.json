@@ -1,0 +1,21 @@
+{
+  "label": "dawn_at_isawa_in_the_kai_p__kajikazawa",
+  "target_a": "examples/series/dawn_at_isawa_in_the_kai_province.jpg",
+  "target_b": "examples/kajikazawa.jpg",
+  "n_shards": 291,
+  "elapsed_s": 3.5,
+  "ssim_A": 0.6209822312200285,
+  "ssim_B": 0.5870689009868437,
+  "edge_A": 0.19651752142194942,
+  "edge_B": 0.23669680362481368,
+  "good_A": 11.97438577690328,
+  "good_B": 11.114269723808931,
+  "bad_A": 13.661797387630333,
+  "bad_B": 16.685174162942957,
+  "good_mean": 11.544327750356105,
+  "bad_mean": 15.173485775286645,
+  "good_bad_ratio": 0.7608223925156723,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.66533972182263
+}

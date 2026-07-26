@@ -1,0 +1,21 @@
+{
+  "label": "dawn_at_isawa_in_the_kai_p__goten_yama_hill_shinagawa_",
+  "target_a": "examples/series/dawn_at_isawa_in_the_kai_province.jpg",
+  "target_b": "examples/series/katsushika_hokusai_goten_yama_hill_shinagawa_on_.jpg",
+  "n_shards": 290,
+  "elapsed_s": 4.0,
+  "ssim_A": 0.6024374890848149,
+  "ssim_B": 0.5653855049944013,
+  "edge_A": 0.16843171008762933,
+  "edge_B": 0.30879157023606063,
+  "good_A": 14.935481320766318,
+  "good_B": 8.067361249902243,
+  "bad_A": 13.663554193055349,
+  "bad_B": 19.403724333295678,
+  "good_mean": 11.501421285334281,
+  "bad_mean": 16.533639263175512,
+  "good_bad_ratio": 0.695637609013932,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.20829209529623
+}

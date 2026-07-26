@@ -1,0 +1,21 @@
+{
+  "label": "dawn_at_isawa_in_the_kai_p__fuji_a",
+  "target_a": "examples/series/dawn_at_isawa_in_the_kai_province.jpg",
+  "target_b": "examples/fuji_a.jpg",
+  "n_shards": 265,
+  "elapsed_s": 3.4,
+  "ssim_A": 0.6067382608083419,
+  "ssim_B": 0.735353560913904,
+  "edge_A": 0.2063139655901975,
+  "edge_B": 0.5172940710842878,
+  "good_A": 9.732702054583944,
+  "good_B": 12.237628800407073,
+  "bad_A": 11.89093751921506,
+  "bad_B": 18.905760312705993,
+  "good_mean": 10.98516542749551,
+  "bad_mean": 15.398348915960526,
+  "good_bad_ratio": 0.713398916172713,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.9151372795437
+}
