@@ -116,7 +116,13 @@
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_push2.py\")",
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_push3.py\")",
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_final.py\")",
-      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\tradeoff_plot.py\")"
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\tradeoff_plot.py\")",
+      "Bash(sed -e 's/MINF=0.002/MINF=0.02/' -e 's#Nmax=int\\(\\(B/MINF\\)\\\\*\\\\*2\\).*#Nmax=int\\(\\(B/0.02\\)**2\\) # 2cm shards that tile the 1.8m wall = \\(B/2cm\\)^2#' -e 's#Nmax@2mm#Nmax@2cm#' -e 's#floor is 2.0 mm#floor is 20 mm \\(2 cm\\)#' \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\size_sweep2.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\size_sweep3.py\")",
+      "Bash(sed -e 's/MINF=0.002/MINF=0.02/' -e 's/Nmax@2mm/Nmax@2cm/' -e 's/2 mm min shard/2 cm min shard/' -e 's/floor is 2.0 mm/floor is 20 mm/' \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\size_sweep2.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\finalize_redfuji60.py\")",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\User1\\CLionProjects\\OS\\school\\shadowart\\solve"
