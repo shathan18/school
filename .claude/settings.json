@@ -101,7 +101,25 @@
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\preview_companions.py\")",
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\compare_pairs.py\")",
       "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\sam_region_test.py\")",
-      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\region_compare.py\")"
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\region_compare.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\plane_sweep.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\sim_redfuji10.py\")",
+      "Bash(python -c \"import plotly; print\\('plotly', plotly.__version__\\)\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\live_sim.py\")",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(cd \"c:\\\\Users\\\\User1\\\\CLionProjects\\\\OS\\\\school\" && echo \"=== fragment_shards_overlap signature ===\" && sed -n '/def fragment_shards_overlap/,/\\):/p' shadowart/solve/decompose.py | head -20 && echo \"\" && echo \"=== colour_blend / credit / agree defaults & usage ===\" && grep -n \"colour_blend\\\\|colour_primary_tol\\\\|credit_weight\\\\|agree_min\\\\|_compromise_channels\\\\|_secondary_dominant\" shadowart/solve/decompose.py | head -30)",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_C.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_AB1.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_B2.py\")",
+      "Bash(python -c \"from scipy.optimize import linear_sum_assignment; print\\('linear_sum_assignment OK'\\)\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_push.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_push2.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_push3.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\run_final.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\tradeoff_plot.py\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\User1\\CLionProjects\\OS\\school\\shadowart\\solve"
     ]
   },
   "hooks": {

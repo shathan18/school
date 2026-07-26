@@ -768,7 +768,7 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                             region_masks=None, region_scales=None,
                             colour_blend=0.0, colour_primary_tol=0.10,
                             outline_masks=None, outline_protect_weight=0.0,
-                            intensity_gain=1.0):
+                            intensity_gain=1.0, joint_prior=None, joint_weight=1.0):
     """'Stochastic Shard Overlap': interleave C/M/Y/K shards onto the SAME set of depth
     planes (typically 1-2 per family) instead of separating each channel onto its own plane.
 
@@ -948,6 +948,13 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
         wallS, target_S, res_S = wallS_by[secondary], targetS_by[secondary], resS_by[secondary]
         protect_S, Gs = protectS_by[secondary], Gs_by[secondary]
 
+        # JOINT PRIOR (B2): `joint_prior[family]` is [P,Hn,Wn] -- each panel's opacity from the
+        # two-wall JOINT optimiser (optimizer.solve), warped to THIS wall. A high value at a shard's
+        # location on panel gi means the joint solution (which satisfies BOTH walls at once) placed
+        # material there, so hosting the shard on gi inherits that joint, cross-talk-exploiting depth
+        # choice rather than the per-family "dodge the other wall" heuristic. None -> no effect.
+        jpf = None if joint_prior is None else joint_prior.get(family)
+
         panel_wall_stack = {gi: np.zeros((S, Hn, Wn), np.int16) for gi, _ in fam}
         panel_wall_intensity = {gi: np.zeros((S, Hn, Wn), np.float32) for gi, _ in fam}
 
@@ -1016,6 +1023,8 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                                         match_tol=match_tol, match_metric=match_metric,
                                         protect=protect_S, protect_weight=outline_protect_weight)
                     o_k = cover[k] - damage_weight * d_k
+                    if jpf is not None:
+                        o_k = o_k + joint_weight * float(jpf[fam[k][0]][ys, xs].mean())
                     if o_k > best_obj:
                         best_obj, best_k, best_col = o_k, int(k), (act_k, cv_k)
                 local_k = best_k
@@ -1041,6 +1050,9 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                 # degeneracy that killed the additive placement-scorer penalty cannot recur
                 # here, because doing nothing is not on the menu.
                 obj = cover[viable] - damage_weight * dmg
+                if jpf is not None:                            # B2: pull toward the joint solution's depths
+                    jt = np.array([jpf[fam[k][0]][ys, xs].mean() for k in viable])
+                    obj = obj + joint_weight * jt
                 local_k = int(viable[int(np.argmax(obj))])
             gi, panel = fam[local_k]                            # scatter: which plane hosts this stroke
 
