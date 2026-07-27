@@ -1,0 +1,21 @@
+{
+  "label": "lassen__yellowstone_wpa",
+  "target_a": "examples/new_candidates/wpa_lassen_volcanic_1938.jpg",
+  "target_b": "examples/new_candidates/wpa_yellowstone_1938.jpg",
+  "n_shards": 276,
+  "elapsed_s": 3.9,
+  "ssim_A": 0.5485396784941701,
+  "ssim_B": 0.5828820173637187,
+  "edge_A": 0.2823733392386284,
+  "edge_B": 0.2640018650318709,
+  "good_A": 1.3911905800261666,
+  "good_B": 1.108244874479808,
+  "bad_A": 8.370693414740515,
+  "bad_B": 2.544558994040824,
+  "good_mean": 1.2497177272529871,
+  "bad_mean": 5.457626204390669,
+  "good_bad_ratio": 0.22898558465722463,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 97.96683450641503
+}

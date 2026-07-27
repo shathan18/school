@@ -1,0 +1,21 @@
+{
+  "label": "fuji_a__wpa_yellowstone",
+  "target_a": "examples/fuji_a.jpg",
+  "target_b": "examples/new_candidates/wpa_yellowstone_1938.jpg",
+  "n_shards": 247,
+  "elapsed_s": 4.1,
+  "ssim_A": 0.7208591345141016,
+  "ssim_B": 0.5826073221037956,
+  "edge_A": 0.41659733596518306,
+  "edge_B": 0.27212564027389924,
+  "good_A": 4.064946629505846,
+  "good_B": 0.8799446326972685,
+  "bad_A": 13.372113194018803,
+  "bad_B": 4.675660857294372,
+  "good_mean": 2.4724456311015572,
+  "bad_mean": 9.023887025656588,
+  "good_bad_ratio": 0.2739889832476775,
+  "joint_01": 100.00000000000001,
+  "joint_02": 100.00000000000001,
+  "joint_03": 97.41123643413277
+}

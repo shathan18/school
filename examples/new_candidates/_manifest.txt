@@ -1,0 +1,10 @@
+hiroshige_plum_garden_kameido	hiroshige	File:Ando Hiroshige - Plum Garden, Kameido - Google Art Project.jpg
+hiroshige_fukagawa_susaki_hawk	hiroshige	File:Fukagawa susaki jūmantsubo LCCN2008660617.jpg
+hiroshige_shin_ohashi_shower	hiroshige	File:Hiroshige, Sudden shower over Shin-Ōhashi bridge and Atake, 1857.jpg
+mondrian_comp_ii_red_blue_yellow_1930	mondrian	File:Piet Mondriaan, 1930 - Mondrian Composition II in Red, Blue, and Yellow.jpg
+mondrian_comp_red_yellow_blue_black_1921	mondrian	File:Piet Mondriaan, 1921 - Composition en rouge, jaune, bleu et noir.jpg
+mondrian_comp_iii_1929	mondrian	File:Piet Mondrian - Composition No. III, with red, blue, yellow and black, 1929.jpg
+wpa_grand_canyon_1938	artdeco_wpa	File:Grand Canyon poster 1938.jpg
+wpa_yellowstone_1938	artdeco_wpa	File:Yellowstone Natl Park poster 1938.jpg
+wpa_lassen_volcanic_1938	artdeco_wpa	File:Lassen Volcanic Natl Park poster 1938.jpg
+friedrich_monk_by_the_sea	friedrich	File:Caspar David Friedrich - Monk by the Sea.jpg

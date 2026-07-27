@@ -1,0 +1,21 @@
+{
+  "label": "yellowstone__wildlife_bighorn",
+  "target_a": "examples/new_candidates/wpa_yellowstone_1938.jpg",
+  "target_b": "examples/new_candidates_v3/wpa_national_parks_wildlife_1938.jpg",
+  "n_shards": 288,
+  "elapsed_s": 4.8,
+  "ssim_A": 0.5637708072118255,
+  "ssim_B": 0.6463739208231316,
+  "edge_A": 0.2649859722351113,
+  "edge_B": 0.31358654389585844,
+  "good_A": 3.5269690895853745,
+  "good_B": 9.056842295363221,
+  "bad_A": 11.308951346881544,
+  "bad_B": 10.23146266949599,
+  "good_mean": 6.291905692474298,
+  "bad_mean": 10.770207008188766,
+  "good_bad_ratio": 0.5841954279699971,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 97.48853744895963
+}

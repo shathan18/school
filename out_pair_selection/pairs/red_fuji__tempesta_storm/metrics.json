@@ -1,0 +1,21 @@
+{
+  "label": "red_fuji__tempesta_storm",
+  "target_a": "examples/red_fuji.jpg",
+  "target_b": "examples/series/katsushika_hokusai_tempesta_sotto_la_vetta_dalla.jpg",
+  "n_shards": 263,
+  "elapsed_s": 3.9,
+  "ssim_A": 0.5886726998017335,
+  "ssim_B": 0.602824386442057,
+  "edge_A": 0.372880848267944,
+  "edge_B": 0.24808702199512309,
+  "good_A": 8.32398190045249,
+  "good_B": 2.7341391050157973,
+  "bad_A": 18.58552036199095,
+  "bad_B": 17.456830534137353,
+  "good_mean": 5.5290605027341435,
+  "bad_mean": 18.021175448064152,
+  "good_bad_ratio": 0.30680909348385926,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.3545894627754
+}
