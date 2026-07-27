@@ -1,0 +1,21 @@
+{
+  "label": "munch_scream_nobg_litho",
+  "target_a": "examples/new_candidates_v8/munch_scream_1893_nobg.png",
+  "target_b": "examples/new_candidates_v8/munch_scream_lithograph.png",
+  "n_shards": 255,
+  "elapsed_s": 3.5,
+  "ssim_A": 0.8232759975392235,
+  "ssim_B": 0.5431337451417931,
+  "edge_A": 0.6731570626781783,
+  "edge_B": 0.6320907079470278,
+  "good_A": 25.798181739842303,
+  "good_B": 2.3122321933866927,
+  "bad_A": 26.89689344650782,
+  "bad_B": 9.080160077613389,
+  "good_mean": 14.055206966614497,
+  "bad_mean": 17.988526762060605,
+  "good_bad_ratio": 0.7813428610650969,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 97.22774135976846
+}

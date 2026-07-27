@@ -1,0 +1,21 @@
+{
+  "label": "friedrich_wanderer_watzmann",
+  "target_a": "examples/new_candidates_v6/friedrich_wanderer.jpg",
+  "target_b": "examples/new_candidates_v6/friedrich_watzmann.jpg",
+  "n_shards": 332,
+  "elapsed_s": 4.2,
+  "ssim_A": 0.6228267791048537,
+  "ssim_B": 0.6028903030043883,
+  "edge_A": 0.3301890366361816,
+  "edge_B": 0.43424953997066557,
+  "good_A": 12.828075239634156,
+  "good_B": 12.41130147187999,
+  "bad_A": 14.112137803366645,
+  "bad_B": 17.809213189633443,
+  "good_mean": 12.619688355757074,
+  "bad_mean": 15.960675496500045,
+  "good_bad_ratio": 0.7906738257114743,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 97.83863809192913
+}

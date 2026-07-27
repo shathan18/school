@@ -1,0 +1,21 @@
+{
+  "label": "rembrandt_young_old",
+  "target_a": "examples/new_candidates_v4/rembrandt_self_1629_young.jpg",
+  "target_b": "examples/new_candidates_v4/rembrandt_self_1669_old.jpg",
+  "n_shards": 318,
+  "elapsed_s": 5.8,
+  "ssim_A": 0.5445423819774307,
+  "ssim_B": 0.5729077334840245,
+  "edge_A": 0.42353218043710544,
+  "edge_B": 0.4915625382664974,
+  "good_A": 0.8059125573481603,
+  "good_B": 8.472132093157402,
+  "bad_A": 6.506547564792028,
+  "bad_B": 18.837695580070662,
+  "good_mean": 4.639022325252781,
+  "bad_mean": 12.672121572431344,
+  "good_bad_ratio": 0.3660809516967657,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 96.14188864452476
+}

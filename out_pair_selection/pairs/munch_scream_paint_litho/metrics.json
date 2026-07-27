@@ -1,0 +1,21 @@
+{
+  "label": "munch_scream_paint_litho",
+  "target_a": "examples/new_candidates_v8/munch_scream_1893.jpg",
+  "target_b": "examples/new_candidates_v8/munch_scream_lithograph.png",
+  "n_shards": 376,
+  "elapsed_s": 4.5,
+  "ssim_A": 0.4324128259866893,
+  "ssim_B": 0.5756088574414434,
+  "edge_A": 0.2308576197627107,
+  "edge_B": 0.6778649833683812,
+  "good_A": 12.769291030160595,
+  "good_B": 1.2521222410865875,
+  "bad_A": 18.937778358068215,
+  "bad_B": 7.369229525426469,
+  "good_mean": 7.010706635623591,
+  "bad_mean": 13.153503941747342,
+  "good_bad_ratio": 0.5329915638199347,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 99.07944345273427
+}
