@@ -1,0 +1,21 @@
+{
+  "label": "twotone_poe_dostoevsky",
+  "arm": "face_dense",
+  "who_A": "Edgar Allan Poe",
+  "who_B": "Dostoevsky",
+  "group": "two_tone",
+  "shards_A": 129,
+  "shards_B": 185,
+  "shards_total": 314,
+  "budget_per_wall": 150,
+  "over_budget": true,
+  "ssim_A": 0.6575709343361641,
+  "ssim_B": 0.5741666609469495,
+  "edge_A": 0.6396076391567231,
+  "edge_B": 0.6264124286835566,
+  "face_detail_A": 0.7858428500626055,
+  "face_detail_B": 0.7046979838026788,
+  "head_detail_A": 0.37446622186265227,
+  "head_detail_B": 0.5375706134602665,
+  "elapsed_s": 5.3
+}

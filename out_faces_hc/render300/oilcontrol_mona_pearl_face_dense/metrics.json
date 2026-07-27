@@ -1,0 +1,21 @@
+{
+  "label": "oilcontrol_mona_pearl",
+  "arm": "face_dense",
+  "who_A": "Mona Lisa",
+  "who_B": "Girl w/ Pearl Earring",
+  "group": "oil_control",
+  "shards_A": 338,
+  "shards_B": 327,
+  "shards_total": 665,
+  "budget_per_wall": 150,
+  "over_budget": true,
+  "ssim_A": 0.5047857341046575,
+  "ssim_B": 0.6120754381199086,
+  "edge_A": 0.29736504420924653,
+  "edge_B": 0.35309102073468507,
+  "face_detail_A": 0.22085614143017118,
+  "face_detail_B": 0.583436263900771,
+  "head_detail_A": 0.06769950188271415,
+  "head_detail_B": 0.6189779387254187,
+  "elapsed_s": 6.6
+}
