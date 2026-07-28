@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import json
 import textwrap
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -43,6 +44,10 @@ import torch.nn.functional as F
 from PIL import Image
 
 from shadowart import metrics as _metrics
+from shadowart.fabricate import export_color, export_dxf, export_svg
+from shadowart.fabricate import export_obj as export_obj_mod
+from shadowart.fabricate.export_ply import export_ply_stack
+from shadowart.fabricate.joints import build_panel_drawings
 from shadowart.forward.backend import DTYPE, DEVICE, to_t, to_np
 from shadowart.geometry.projection import primary_wall_of, wall_coverage_area
 from shadowart.preview.interactive3d import build_interactive
@@ -207,6 +212,44 @@ def score(b, label, ka, kb, density, seed=SEED):
         shared_ratio=shared)
 
 
+def export_fab(out, scene, stack_pieces, stack_colorid, names) -> dict:
+    """Write the fabricable output: per-slot per-colour cut files + shards.obj/.ply.
+
+    Mirrors the stacked-colour path in `shadowart.cli._run_color_stack`. The pieces are the
+    SAME `panel_stack_pieces` object already used for the interactive preview, so the cut
+    files and the 3D preview are guaranteed to describe one identical sculpture.
+    """
+    S = stack_colorid.shape[0]
+    channel_order = [n for n in names if n != "clear"]
+
+    structure = build_panel_drawings(scene, {})          # clear carriers: outline + slots
+    if "dxf" in scene.fab.formats:
+        export_dxf.export_all_dxf(structure, out / "cut" / "structure")
+    if "svg" in scene.fab.formats:
+        export_svg.export_all_svg(structure, out / "cut" / "structure")
+
+    pieces_by_slot = [{p.name: [] for p in scene.panels} for _ in range(S)]
+    for panel_name, items in stack_pieces.items():
+        for poly, _ch, slot in items:
+            pieces_by_slot[slot][panel_name].append(poly)
+
+    counts = Counter()
+    for s in range(S):
+        _, cnt = export_color.export_all_color(scene, pieces_by_slot[s], stack_colorid[s],
+                                               names, out / "cut" / f"stack{s}",
+                                               formats=scene.fab.formats)
+        counts.update(cnt)
+
+    export_ply_stack(scene, stack_pieces, scene.material_thickness, S,
+                     C.transmit_rgb, channel_order, out / "shards.ply")
+    export_obj_mod.export_obj(scene, stack_pieces, scene.material_thickness, S,
+                              out / "shards.obj", channel_order=channel_order)
+    total = sum(len(v) for v in stack_pieces.values())
+    print(f"    {total} laminated shards -> cut/ ({', '.join(f'{k}:{v}' for k, v in sorted(counts.items()))}), "
+          f"shards.obj, shards.ply")
+    return dict(shards=total, cut_counts=dict(counts), slots=S)
+
+
 def run_piece(label, ka, kb, arm, density, jw, cb, seed, angles, note) -> dict:
     out = OUT / label
     out.mkdir(parents=True, exist_ok=True)
@@ -257,8 +300,10 @@ def run_piece(label, ka, kb, arm, density, jw, cb, seed, angles, note) -> dict:
                       color_of=lambda panel, poly: tuple(
                           C.display_rgb(poly_channel.get(id(poly), "clear"))))
 
+    fab = export_fab(out, layout, pieces, b["stack_colorid"], names)
+
     rec = dict(label=label, pair=[ka, kb], arm=arm, density=density, note=note,
-               seed=seed, angles=list(angles),
+               seed=seed, angles=list(angles), fabrication=fab,
                joint_weight=jw, colour_blend=cb, shipped=s, lever_ablation=s_lev,
                panel_ablation=rows,
                panel_coverage={p.name: dict(

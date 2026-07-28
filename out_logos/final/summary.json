@@ -13,6 +13,13 @@
       43,
       47
     ],
+    "fabrication": {
+      "shards": 47,
+      "cut_counts": {
+        "GRAY_M": 47
+      },
+      "slots": 3
+    },
     "joint_weight": 0.35,
     "colour_blend": 0.35,
     "shipped": {
@@ -70,6 +77,13 @@
       43,
       47
     ],
+    "fabrication": {
+      "shards": 56,
+      "cut_counts": {
+        "GRAY_M": 56
+      },
+      "slots": 3
+    },
     "joint_weight": 0.35,
     "colour_blend": 0.35,
     "shipped": {
