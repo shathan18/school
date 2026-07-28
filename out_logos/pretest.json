@@ -1,0 +1,32 @@
+[
+  {
+    "key": "technion",
+    "who": "Technion (official mark)",
+    "ink_normal": 34.66033935546875,
+    "ink_inverted": 65.33966064453125
+  },
+  {
+    "key": "technion5",
+    "who": "Technion (alt mark)",
+    "ink_normal": 32.2998046875,
+    "ink_inverted": 67.7001953125
+  },
+  {
+    "key": "huji",
+    "who": "Hebrew University",
+    "ink_normal": 15.79132080078125,
+    "ink_inverted": 100.0
+  },
+  {
+    "key": "tau",
+    "who": "Tel Aviv University",
+    "ink_normal": 26.806640625,
+    "ink_inverted": 73.193359375
+  },
+  {
+    "key": "bgu",
+    "who": "Ben-Gurion University",
+    "ink_normal": 23.77471923828125,
+    "ink_inverted": 76.22528076171875
+  }
+]

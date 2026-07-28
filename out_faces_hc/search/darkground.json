@@ -1,0 +1,123 @@
+[
+  {
+    "key": "incumbent_dostoevsky",
+    "title": "incumbent_dostoevsky",
+    "path": "examples\\faces_dg\\incumbent_dostoevsky.jpg",
+    "ink": 0.7578627950643777,
+    "n_blobs": 2,
+    "biggest": 0.7385494903433476,
+    "edge_rate": 0.0668952549496737,
+    "contrast": 1.0,
+    "score": 1.0
+  },
+  {
+    "key": "vallotton_vallotton_dostojevsky",
+    "title": "vallotton_vallotton_dostojevsky",
+    "path": "examples\\faces_dg\\vallotton_vallotton_dostojevsky.jpg",
+    "ink": 0.7578627950643777,
+    "n_blobs": 2,
+    "biggest": 0.7385494903433476,
+    "edge_rate": 0.0668952549496737,
+    "contrast": 1.0,
+    "score": 1.0
+  },
+  {
+    "key": "incumbent_mallarme",
+    "title": "incumbent_mallarme",
+    "path": "examples\\faces_dg\\incumbent_mallarme.jpg",
+    "ink": 0.634069683908046,
+    "n_blobs": 1,
+    "biggest": 0.6274694683908046,
+    "edge_rate": 0.05572865033281405,
+    "contrast": 1.0,
+    "score": 0.7362787356321838
+  },
+  {
+    "key": "vallotton_vallotton_mallarm_",
+    "title": "vallotton_vallotton_mallarm_",
+    "path": "examples\\faces_dg\\vallotton_vallotton_mallarm_.jpg",
+    "ink": 0.634069683908046,
+    "n_blobs": 1,
+    "biggest": 0.6274694683908046,
+    "edge_rate": 0.05572865033281405,
+    "contrast": 1.0,
+    "score": 0.7362787356321838
+  },
+  {
+    "key": "incumbent_poe",
+    "title": "incumbent_poe",
+    "path": "examples\\faces_dg\\incumbent_poe.jpg",
+    "ink": 0.5678249378109452,
+    "n_blobs": 4,
+    "biggest": 0.5407338308457711,
+    "edge_rate": 0.13847628174413032,
+    "contrast": 0.5254902243614197,
+    "score": 0.30506380454970683
+  },
+  {
+    "key": "incumbent_ibsen",
+    "title": "incumbent_ibsen",
+    "path": "examples\\faces_dg\\incumbent_ibsen.jpg",
+    "ink": 0.26389627659574466,
+    "n_blobs": 3,
+    "biggest": 0.19833776595744682,
+    "edge_rate": 0.41370622323003275,
+    "contrast": 0.9176470637321472,
+    "score": 0.0
+  },
+  {
+    "key": "incumbent_wagner",
+    "title": "incumbent_wagner",
+    "path": "examples\\faces_dg\\incumbent_wagner.jpg",
+    "ink": 0.3559763418079096,
+    "n_blobs": 3,
+    "biggest": 0.2651394774011299,
+    "edge_rate": 0.34959702417854926,
+    "contrast": 0.6836601495742798,
+    "score": 0.0
+  },
+  {
+    "key": "vallotton_f_lix_vallotton_auto_portrait_1891_boi",
+    "title": "vallotton_f_lix_vallotton_auto_portrait_1891_boi",
+    "path": "examples\\faces_dg\\vallotton_f_lix_vallotton_auto_portrait_1891_boi.jpg",
+    "ink": 0.20354352678571427,
+    "n_blobs": 1,
+    "biggest": 0.19517299107142858,
+    "edge_rate": 0.3430431802604524,
+    "contrast": 0.5490195751190186,
+    "score": 0.0
+  },
+  {
+    "key": "vallotton_flix_vallotton_a_ibsen",
+    "title": "vallotton_flix_vallotton_a_ibsen",
+    "path": "examples\\faces_dg\\vallotton_flix_vallotton_a_ibsen.jpg",
+    "ink": 0.26389627659574466,
+    "n_blobs": 3,
+    "biggest": 0.19833776595744682,
+    "edge_rate": 0.41370622323003275,
+    "contrast": 0.9176470637321472,
+    "score": 0.0
+  },
+  {
+    "key": "vallotton_vallotton_a_ibsen_btv1b6951691f",
+    "title": "vallotton_vallotton_a_ibsen_btv1b6951691f",
+    "path": "examples\\faces_dg\\vallotton_vallotton_a_ibsen_btv1b6951691f.jpg",
+    "ink": 0.1131161971830986,
+    "n_blobs": 2,
+    "biggest": 0.08291153169014084,
+    "edge_rate": 0.46125162127107655,
+    "contrast": 0.6496732234954834,
+    "score": 0.0
+  },
+  {
+    "key": "vallotton_vallotton_a_ibsen_e_79_0502",
+    "title": "vallotton_vallotton_a_ibsen_e_79_0502",
+    "path": "examples\\faces_dg\\vallotton_vallotton_a_ibsen_e_79_0502.jpg",
+    "ink": 0.11882390202702703,
+    "n_blobs": 2,
+    "biggest": 0.08599028716216216,
+    "edge_rate": 0.44972604768251145,
+    "contrast": 0.8875817060470581,
+    "score": 0.0
+  }
+]

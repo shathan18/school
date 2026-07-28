@@ -114,7 +114,7 @@ def face_mask_floor(target_rgb: np.ndarray, face: tuple, floor: float) -> np.nda
 
 
 def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
-                angle_range=ANGLE_RANGE, density=1.0):
+                angle_range=ANGLE_RANGE, density=1.0, extra_kw=None):
     """`density` < 1 shrinks the shards, which is the ONLY way to actually raise the count.
 
     `shard_budget` is a fabrication CEILING: `_autotune_spacing` coarsens when the natural
@@ -153,6 +153,10 @@ def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
         # flat paper is cheap to tile with a few huge shards, so the budget can be pushed
         # back into the face box -- this is what is meant to pay for the tint's resolution cost
         extra = dict(face_masks=fmask, face_density=4.0, bg_coarsen=2.2)
+    if extra_kw:
+        # passthrough for solver levers no face arm uses (joint_prior / colour_blend);
+        # empty by default so every existing face result is bit-identical.
+        extra.update(extra_kw)
 
     sc, opacity, fragments, resolved, sd, bs, si = decompose.fragment_shards_overlap(
         layout, table, targets, names=names, white_thr=layout.white_threshold,
