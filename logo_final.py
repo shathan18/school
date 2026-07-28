@@ -65,13 +65,19 @@ GRAY_M = 0.53
 GRAY_D = 0.34
 MARGIN = 0.12          # white border around the mark, as a fraction of its long side
 
-# (label, keyA, keyB, arm, density, joint_weight, colour_blend, note)
+# (label, keyA, keyB, arm, density, joint_weight, colour_blend, seed, angles, note)
+#
+# `seed` is per-piece because the panel layout is the single biggest lever on HOW THE WORK IS
+# SPREAD across planes, and nothing else in the pipeline controls it. Two builds with identical
+# tone/density/angles but different seeds gave 8 planes at neff 7.2/5.7 (seed 8) versus 2 planes
+# at neff 4.5/1.6 (seed 7) on the same pair -- see spread_search().
 PIECES = [
-    ("piece1_technion_bgu", "technion", "bgu", "greymark_m", 1.00, 0.35, 0.35,
+    ("piece1_technion_bgu", "technion", "bgu", "greymark_m", 1.00, 0.35, 0.35, 2, (43, 47),
      "official shield vs the flame -- the strongest shared-duty pair of the set"),
-    ("piece2_cs_technion", "cs", "technion", "greymark_m", 0.70, 0.35, 0.35,
-     "CS faculty mark vs the Technion shield; CS is a thin 12%-ink mark, so it needs "
-     "finer shards (d=0.70) and it must sit on wall A to reach 8/10"),
+    ("piece2_cs_technion5", "cs", "technion5", "greymark_m", 0.70, 0.35, 0.35, 8, (43, 47),
+     "CS faculty mark vs the Technion emblem WITHOUT the shield. Chosen by a 20-build seed "
+     "search for SPREAD, not just plane count: the work is split over ~7 and ~6 effective "
+     "planes with no single plane carrying more than 28% of either wall"),
 ]
 
 
@@ -141,60 +147,87 @@ def joint_prior(scene, renderer, targets_rgb) -> dict:
     return prior
 
 
-def build(label, ka, kb, arm, density, jw, cb, cands, use_levers: bool):
+def build(label, ka, kb, arm, density, jw, cb, cands, use_levers: bool,
+          seed=SEED, angles=ANGLE_RANGE, panel_count=PANEL_COUNT):
     """`use_levers=False` reproduces the previous behaviour -- the honest control."""
+    tkw = dict(crop_mode="all", content_frac=0.88)
     extra = {}
     if use_levers:
         # The prior needs a renderer, which needs the panels -- so build once WITHOUT the
         # prior to get the geometry, compute the prior on that geometry, then rebuild.
         # Panel choice is seeded and independent of the prior, so the geometry is identical.
-        b0 = PF.build_floor((label, ka, kb), SEED, 1.0, "uniform", cands,
-                            panel_count=PANEL_COUNT, angle_range=ANGLE_RANGE,
-                            density=density,
-                            target_kw=dict(crop_mode="all", content_frac=0.88))
+        b0 = PF.build_floor((label, ka, kb), seed, 1.0, "uniform", cands,
+                            panel_count=panel_count, angle_range=angles,
+                            density=density, target_kw=tkw)
         extra = dict(joint_prior=joint_prior(b0["layout"], b0["renderer"], b0["targets"]),
                      joint_weight=jw, colour_blend=cb, colour_primary_tol=0.16)
-    return PF.build_floor((label, ka, kb), SEED, 1.0, "uniform", cands,
-                          panel_count=PANEL_COUNT, angle_range=ANGLE_RANGE,
-                          density=density, extra_kw=extra,
-                          target_kw=dict(crop_mode="all", content_frac=0.88))
+    return PF.build_floor((label, ka, kb), seed, 1.0, "uniform", cands,
+                          panel_count=panel_count, angle_range=angles,
+                          density=density, extra_kw=extra, target_kw=tkw)
 
 
-def score(b, label, ka, kb, density):
+def _concentration(vals):
+    """How lopsidedly one wall's image is carried by its planes.
+
+    `top`  = the single biggest plane's share of the total ablation delta for that wall.
+    `neff` = inverse-Simpson effective plane count, 1 / sum(p_i^2): the number of planes
+             that are *effectively* doing the work. 10 planes all pulling equally give 10;
+             one plane doing everything gives 1.
+
+    Needed because `n_both` alone is gameable: nine planes can each nudge a wall by a
+    rounding error while a tenth carries the whole image, and that still scores 10/10.
+    """
+    v = np.asarray(vals, float)
+    v = np.clip(v, 0.0, None)
+    s = v.sum()
+    if s <= 0:
+        return 1.0, 0.0
+    p = v / s
+    return float(p.max()), float(1.0 / np.sum(p ** 2))
+
+
+def score(b, label, ka, kb, density, seed=SEED):
     base, rows = DS.ablate(b)
     n_both = sum(r["serves_A"] and r["serves_B"] for r in rows)
     n_dead = sum((not r["serves_A"]) and (not r["serves_B"]) for r in rows)
     b["_faceA"], b["_faceB"] = LR.Shim.face, LR.Shim.face
-    m = PF.evaluate(b, (label, ka, kb), SEED, 1.0, "uniform", density=density)
+    m = PF.evaluate(b, (label, ka, kb), seed, 1.0, "uniform", density=density)
     acc = _metrics.evaluate_wall_accuracy(b["targets"], base)
     iou = {w: LR.mark_iou(b["targets"][w], base[w]) for w in ("A", "B")}
     shared = float(np.mean([r["shared_ratio"] for r in rows]))
+    topA, neffA = _concentration([r["ablate_dA"] for r in rows])
+    topB, neffB = _concentration([r["ablate_dB"] for r in rows])
     return base, rows, dict(
         n_both=n_both, n_dead=n_dead, n_panels=len(rows), shards=m["shards"],
         good=m["good_mean"], bad=m["bad_mean"], gb=m["good_bad"],
         ssim=float(np.mean([acc["A"]["ssim"], acc["B"]["ssim"]])),
         iou_A=iou["A"], iou_B=iou["B"], iou=float(np.mean(list(iou.values()))),
+        top_A=topA, top_B=topB, neff_A=neffA, neff_B=neffB,
+        neff=min(neffA, neffB), top=max(topA, topB),
         shared_ratio=shared)
 
 
-def run_piece(label, ka, kb, arm, density, jw, cb, note) -> dict:
+def run_piece(label, ka, kb, arm, density, jw, cb, seed, angles, note) -> dict:
     out = OUT / label
     out.mkdir(parents=True, exist_ok=True)
-    print(f"\n{'=' * 92}\n=== {label}  ({ka} x {kb}, {arm}) -- {note}\n{'=' * 92}")
+    print(f"\n{'=' * 92}\n=== {label}  ({ka} x {kb}, {arm}, seed={seed}) -- {note}\n{'=' * 92}")
     cands = write_targets((ka, kb), arm)
     nka, nkb = f"{ka}_{arm}", f"{kb}_{arm}"
 
     print("  [shipped] tonal design only ...")
-    b = build(label, nka, nkb, arm, density, jw, cb, cands, use_levers=False)
-    base, rows, s = score(b, label, nka, nkb, density)
+    b = build(label, nka, nkb, arm, density, jw, cb, cands, use_levers=False,
+              seed=seed, angles=angles)
+    base, rows, s = score(b, label, nka, nkb, density, seed)
     print(f"    both={s['n_both']}/{s['n_panels']}  good={s['good']:.2f}%  "
-          f"bad={s['bad']:.2f}%  g/b={s['gb']:.2f}  IoU={s['iou']:.3f}")
+          f"bad={s['bad']:.2f}%  g/b={s['gb']:.2f}  IoU={s['iou']:.3f}  "
+          f"neff={s['neff_A']:.2f}/{s['neff_B']:.2f}  top={s['top_A']:.2f}/{s['top_B']:.2f}")
 
     # Ablation, NOT the shipped piece: the two unused solver levers. They are reported
     # because they were the obvious idea and they did not reliably pay -- see the summary.
     print(f"  [ablation] joint_prior w={jw}, colour_blend={cb} ...")
-    b_lev = build(label, nka, nkb, arm, density, jw, cb, cands, use_levers=True)
-    _, _, s_lev = score(b_lev, label, nka, nkb, density)
+    b_lev = build(label, nka, nkb, arm, density, jw, cb, cands, use_levers=True,
+                  seed=seed, angles=angles)
+    _, _, s_lev = score(b_lev, label, nka, nkb, density, seed)
     print(f"    both={s_lev['n_both']}/{s_lev['n_panels']}  good={s_lev['good']:.2f}%  "
           f"bad={s_lev['bad']:.2f}%  g/b={s_lev['gb']:.2f}  IoU={s_lev['iou']:.3f}")
 
@@ -225,6 +258,7 @@ def run_piece(label, ka, kb, arm, density, jw, cb, note) -> dict:
                           C.display_rgb(poly_channel.get(id(poly), "clear"))))
 
     rec = dict(label=label, pair=[ka, kb], arm=arm, density=density, note=note,
+               seed=seed, angles=list(angles),
                joint_weight=jw, colour_blend=cb, shipped=s, lever_ablation=s_lev,
                panel_ablation=rows,
                panel_coverage={p.name: dict(
@@ -254,7 +288,9 @@ def sheet(recs) -> None:
             f"good {s['good']:.1f}%  bad {s['bad']:.1f}%  g/b {s['gb']:.1f}",
             fontsize=7.5)
         ax[1, 2 * j + 1].set_xlabel(
-            f"IoU {s['iou_A']:.2f} / {s['iou_B']:.2f}   {s['shards']} shards",
+            f"IoU {s['iou_A']:.2f} / {s['iou_B']:.2f}   {s['shards']} shards\n"
+            f"spread: {s['neff_A']:.1f} / {s['neff_B']:.1f} effective planes, "
+            f"busiest carries {100 * s['top']:.0f}%",
             fontsize=7.5)
         # the note is prose and can be long -- give it the full width of the piece, wrapped,
         # instead of letting it run into the neighbouring piece's caption
@@ -329,6 +365,51 @@ def scan_pairs() -> None:
               f"{s['iou']:>7.3f}{s['ssim']:>7.3f}{s['shards']:>8d}")
 
 
+def spread_search() -> None:
+    """Find a layout where BOTH images are carried by many planes, not one.
+
+    `n_both` is not enough on its own: a wall can score 10/10 while one plane supplies most
+    of it and the other nine contribute rounding errors. `neff` (effective plane count) and
+    `top` (biggest plane's share of the wall) are what actually answer "is it spread?".
+
+    The angle band is the main geometric lever. All panels near 45deg sit almost parallel,
+    so one of them tends to own the best view of a wall; widening the band forces genuinely
+    different footprints, which is what splits the work up.
+    """
+    arm = "greymark_m"
+    print(f"{'pair':18s}{'seed':>5s}{'angles':>10s}{'dens':>6s}{'both':>7s}"
+          f"{'neffA':>7s}{'neffB':>7s}{'topA':>6s}{'topB':>6s}"
+          f"{'g/b':>7s}{'IoU':>7s}{'shards':>8s}")
+    print("-" * 96)
+    rows = []
+    for ka, kb in (("cs", "technion5"), ("technion5", "cs")):
+        cands = write_targets((ka, kb), arm)
+        nka, nkb = f"{ka}_{arm}", f"{kb}_{arm}"
+        for angles in ((43, 47),):
+            for seed in range(10):
+                # d=0.50 was swept too and never beat d=0.70 on n_both or spread while
+                # costing ~2x the shards, so it is dropped from the grid.
+                for dens in (0.70,):
+                    b = build("spread", nka, nkb, arm, dens, 0, 0, cands, use_levers=False,
+                              seed=seed, angles=angles)
+                    _, _, s = score(b, "spread", nka, nkb, dens)
+                    print(f"{ka + ' x ' + kb:18s}{seed:>5d}{str(angles):>10s}{dens:>6.2f}"
+                          f"{s['n_both']:>4d}/{s['n_panels']:<2d}"
+                          f"{s['neff_A']:>7.2f}{s['neff_B']:>7.2f}"
+                          f"{s['top_A']:>6.2f}{s['top_B']:>6.2f}"
+                          f"{s['gb']:>7.2f}{s['iou']:>7.3f}{s['shards']:>8d}")
+                    rows.append((ka, kb, seed, angles, dens, s))
+    # rank on the thing actually being asked for: many planes, none of them dominant,
+    # with the shared-duty and legibility floors still met
+    ok = [r for r in rows if r[5]["n_both"] >= 5 and r[5]["iou"] >= 0.94 and r[5]["gb"] >= 8]
+    ok.sort(key=lambda r: (min(r[5]["neff_A"], r[5]["neff_B"]), r[5]["n_both"]), reverse=True)
+    print("\nbest by min(neff) with n_both>=5, IoU>=0.94, g/b>=8:")
+    for ka, kb, seed, angles, dens, s in ok[:5]:
+        print(f"  {ka} x {kb}  seed={seed} angles={angles} d={dens}  "
+              f"both={s['n_both']}/{s['n_panels']}  neff={s['neff_A']:.2f}/{s['neff_B']:.2f}  "
+              f"top={s['top_A']:.2f}/{s['top_B']:.2f}  g/b={s['gb']:.2f}  IoU={s['iou']:.3f}")
+
+
 def sweep_arms() -> None:
     """Pick the tonal design on evidence instead of taste: legibility AND duty, same pair."""
     label, ka, kb = "sweep", "technion5", "bgu"
@@ -355,21 +436,28 @@ def main() -> None:
                    indent=2), encoding="utf-8")
     sheet(recs)
 
-    print("\n" + "=" * 92)
-    print(f"{'piece':24s}{'arm':16s}{'':>4s}{'both':>7s}{'good%':>8s}{'bad%':>8s}"
-          f"{'g/b':>7s}{'IoU':>7s}{'shards':>8s}")
-    print("-" * 92)
+    print("\n" + "=" * 108)
+    print(f"{'piece':26s}{'arm':13s}{'':>8s}{'both':>7s}{'good%':>8s}{'bad%':>8s}"
+          f"{'g/b':>7s}{'IoU':>7s}{'neffA':>7s}{'neffB':>7s}{'top':>6s}{'shards':>8s}")
+    print("-" * 108)
     for r in recs:
         for tag, s in (("SHIPPED", r["shipped"]), ("levers", r["lever_ablation"])):
-            print(f"{r['label']:24s}{r['arm']:16s}{tag:>8s}"
+            print(f"{r['label']:26s}{r['arm']:13s}{tag:>8s}"
                   f"{s['n_both']:>3d}/{s['n_panels']:<3d}{s['good']:>8.2f}{s['bad']:>8.2f}"
-                  f"{s['gb']:>7.2f}{s['iou']:>7.3f}{s['shards']:>8d}")
+                  f"{s['gb']:>7.2f}{s['iou']:>7.3f}{s['neff_A']:>7.2f}{s['neff_B']:>7.2f}"
+                  f"{s['top']:>6.2f}{s['shards']:>8d}")
+    print("\nneffA/neffB = inverse-Simpson effective number of planes doing the work on each"
+          "\nwall; top = share carried by the busiest plane. These are reported because n_both"
+          "\nalone is gameable: a wall can show 8 contributing planes while one of them does"
+          "\nnearly 60% of the work, which is not really a distributed sculpture.")
     print(f"\nwrote {OUT}/*/scene_interactive.html")
 
 
 if __name__ == "__main__":
     import sys
-    if "--pairs" in sys.argv:
+    if "--spread" in sys.argv:
+        spread_search()
+    elif "--pairs" in sys.argv:
         scan_pairs()
     elif "--targets" in sys.argv:
         check_targets()

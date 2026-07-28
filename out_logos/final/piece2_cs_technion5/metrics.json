@@ -1,0 +1,201 @@
+{
+  "label": "piece2_cs_technion5",
+  "pair": [
+    "cs",
+    "technion5"
+  ],
+  "arm": "greymark_m",
+  "density": 0.7,
+  "note": "CS faculty mark vs the Technion emblem WITHOUT the shield. Chosen by a 20-build seed search for SPREAD, not just plane count: the work is split over ~7 and ~6 effective planes with no single plane carrying more than 28% of either wall",
+  "seed": 8,
+  "angles": [
+    43,
+    47
+  ],
+  "joint_weight": 0.35,
+  "colour_blend": 0.35,
+  "shipped": {
+    "n_both": 8,
+    "n_dead": 1,
+    "n_panels": 10,
+    "shards": 217,
+    "good": 32.302328224902055,
+    "bad": 1.7214479808554357,
+    "gb": 18.76462639832435,
+    "ssim": 0.882065527037503,
+    "iou_A": 0.9134322700697228,
+    "iou_B": 0.9674832458189417,
+    "iou": 0.9404577579443323,
+    "top_A": 0.22833519349104525,
+    "top_B": 0.27869195881009184,
+    "neff_A": 7.168008373759765,
+    "neff_B": 5.649555371067737,
+    "neff": 5.649555371067737,
+    "top": 0.27869195881009184,
+    "shared_ratio": 0.7281768374960405
+  },
+  "lever_ablation": {
+    "n_both": 8,
+    "n_dead": 0,
+    "n_panels": 10,
+    "shards": 217,
+    "good": 31.216089117515065,
+    "bad": 1.6432630176718632,
+    "gb": 18.996404581502293,
+    "ssim": 0.8847093275295537,
+    "iou_A": 0.9184375574342951,
+    "iou_B": 0.9715506398610473,
+    "iou": 0.9449940986476713,
+    "top_A": 0.2341998333160601,
+    "top_B": 0.2237842827393209,
+    "neff_A": 7.415725398902907,
+    "neff_B": 5.911954415302799,
+    "neff": 5.911954415302799,
+    "top": 0.2341998333160601,
+    "shared_ratio": 0.7281768374960405
+  },
+  "panel_ablation": [
+    {
+      "panel": "S0",
+      "ablate_dA": 0.010863940231502056,
+      "ablate_dB": 0.016520362347364426,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.9427167799440179,
+      "primary": "B"
+    },
+    {
+      "panel": "S1",
+      "ablate_dA": 0.007575389929115772,
+      "ablate_dB": 0.0037387297488749027,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.7691165662071675,
+      "primary": "A"
+    },
+    {
+      "panel": "S2",
+      "ablate_dA": 0.013323851861059666,
+      "ablate_dB": 0.026650164276361465,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.8327888876527213,
+      "primary": "B"
+    },
+    {
+      "panel": "S3",
+      "ablate_dA": 0.007888421416282654,
+      "ablate_dB": 0.03397030383348465,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.5889569695564281,
+      "primary": "B"
+    },
+    {
+      "panel": "S4",
+      "ablate_dA": 0.00678508635610342,
+      "ablate_dB": 0.0031377498526126146,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.7947004328239331,
+      "primary": "A"
+    },
+    {
+      "panel": "S5",
+      "ablate_dA": 0.01391572505235672,
+      "ablate_dB": 0.012401461601257324,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.9454375149057067,
+      "primary": "A"
+    },
+    {
+      "panel": "S6",
+      "ablate_dA": 0.020527822896838188,
+      "ablate_dB": 0.0006044986075721681,
+      "serves_A": true,
+      "serves_B": false,
+      "shared_ratio": 0.3992666935352084,
+      "primary": "A"
+    },
+    {
+      "panel": "S7",
+      "ablate_dA": 0.0022058142349123955,
+      "ablate_dB": 0.014097598381340504,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.5704084197662519,
+      "primary": "B"
+    },
+    {
+      "panel": "S8",
+      "ablate_dA": 0.0,
+      "ablate_dB": 0.0,
+      "serves_A": false,
+      "serves_B": false,
+      "shared_ratio": 0.4982701594803484,
+      "primary": "A"
+    },
+    {
+      "panel": "S9",
+      "ablate_dA": 0.006816089618951082,
+      "ablate_dB": 0.010771072469651699,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.940105951088621,
+      "primary": "B"
+    }
+  ],
+  "panel_coverage": {
+    "S0": {
+      "area_A": 0.9752157254962304,
+      "area_B": 1.0344737107088964,
+      "primary": "B"
+    },
+    "S1": {
+      "area_A": 1.7233632143641906,
+      "area_B": 1.325467197759533,
+      "primary": "A"
+    },
+    "S2": {
+      "area_A": 1.134910479238472,
+      "area_B": 1.362782928621086,
+      "primary": "B"
+    },
+    "S3": {
+      "area_A": 1.2113991954673624,
+      "area_B": 2.0568551831209767,
+      "primary": "B"
+    },
+    "S4": {
+      "area_A": 1.073413595987113,
+      "area_B": 0.8530422493300531,
+      "primary": "A"
+    },
+    "S5": {
+      "area_A": 1.0538119395983665,
+      "area_B": 0.9963133413518424,
+      "primary": "A"
+    },
+    "S6": {
+      "area_A": 3.562730562952095,
+      "area_B": 1.4224796518267144,
+      "primary": "A"
+    },
+    "S7": {
+      "area_A": 0.8047856853039521,
+      "area_B": 1.4108937691237902,
+      "primary": "B"
+    },
+    "S8": {
+      "area_A": 2.4359643073959543,
+      "area_B": 1.2137683239346186,
+      "primary": "A"
+    },
+    "S9": {
+      "area_A": 0.49801759811543655,
+      "area_B": 0.5297462456638463,
+      "primary": "B"
+    }
+  }
+}
