@@ -34,6 +34,7 @@ Out:  out_logos/final/<piece>/{scene_interactive.html, metrics.json, *.png}
 from __future__ import annotations
 
 import json
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -68,8 +69,9 @@ MARGIN = 0.12          # white border around the mark, as a fraction of its long
 PIECES = [
     ("piece1_technion_bgu", "technion", "bgu", "greymark_m", 1.00, 0.35, 0.35,
      "official shield vs the flame -- the strongest shared-duty pair of the set"),
-    ("piece2_technion5_tau", "technion5", "tau", "greymark_m", 1.00, 0.35, 0.35,
-     "different four marks, same rule -- the result is not one lucky pair"),
+    ("piece2_cs_technion", "cs", "technion", "greymark_m", 0.70, 0.35, 0.35,
+     "CS faculty mark vs the Technion shield; CS is a thin 12%-ink mark, so it needs "
+     "finer shards (d=0.70) and it must sit on wall A to reach 8/10"),
 ]
 
 
@@ -252,8 +254,12 @@ def sheet(recs) -> None:
             f"good {s['good']:.1f}%  bad {s['bad']:.1f}%  g/b {s['gb']:.1f}",
             fontsize=7.5)
         ax[1, 2 * j + 1].set_xlabel(
-            f"IoU {s['iou_A']:.2f} / {s['iou_B']:.2f}   {s['shards']} shards\n{r['note']}",
+            f"IoU {s['iou_A']:.2f} / {s['iou_B']:.2f}   {s['shards']} shards",
             fontsize=7.5)
+        # the note is prose and can be long -- give it the full width of the piece, wrapped,
+        # instead of letting it run into the neighbouring piece's caption
+        fig.text(0.28 + 0.5 * j, 0.005, "\n".join(textwrap.wrap(r["note"], 62)),
+                 ha="center", va="bottom", fontsize=7.5)
     ax[0, 0].set_ylabel("TARGET", fontsize=9)
     ax[1, 0].set_ylabel("RENDERED", fontsize=9)
     fig.suptitle("Two pieces, one tonal rule: the mark is GRAY_M -- a tone a SINGLE sheet hits "
@@ -261,7 +267,8 @@ def sheet(recs) -> None:
                  "both images at once; every plane below is ablation-verified on the real "
                  "forward renderer.", fontsize=10)
     fig.tight_layout()
-    fig.savefig(OUT / "_final.png", dpi=110, bbox_inches="tight")
+    fig.subplots_adjust(bottom=0.11)
+    fig.savefig(OUT / "_final.png", dpi=110)
     print(f"\nwrote {OUT}/_final.png")
 
 
@@ -271,7 +278,7 @@ def check_targets() -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    keys = ["technion", "technion5", "huji", "tau", "bgu"]
+    keys = ["technion", "technion5", "cs", "huji", "tau", "bgu"]
     fig, ax = plt.subplots(2, len(keys), figsize=(2.5 * len(keys), 5.4))
     for j, k in enumerate(keys):
         two = FP.posterize_gray(LP.load_square(k, MARGIN), 2)
@@ -301,14 +308,14 @@ def scan_pairs() -> None:
     the thinnest mark in the set and it is expected to fail here.
     """
     arm, dens = "greymark_m", 1.00
-    keys = ["technion", "technion5", "huji", "tau", "bgu"]
+    keys = ["technion", "technion5", "cs", "huji", "tau", "bgu"]
     ink = {k: 100.0 * float((np.where(FP.posterize_gray(LP.load_square(k, MARGIN), 2) > 0.5,
                                       1.0, GRAY_M) < 0.90).mean()) for k in keys}
     print("ink area at the shipped framing:")
     for k in keys:
         print(f"  {k:12s}{ink[k]:6.1f}%")
-    pairs = [("technion5", "bgu"), ("technion", "bgu"), ("technion", "tau"),
-             ("technion5", "tau"), ("technion", "huji"), ("bgu", "tau")]
+    pairs = [("technion", "bgu"), ("technion", "cs"), ("technion5", "cs"),
+             ("cs", "bgu"), ("cs", "tau"), ("technion5", "tau")]
     print(f"\n{'pair':26s}{'inkA/B':>12s}{'both':>7s}{'good%':>8s}{'g/b':>8s}"
           f"{'IoU':>7s}{'SSIM':>7s}{'shards':>8s}")
     print("-" * 84)

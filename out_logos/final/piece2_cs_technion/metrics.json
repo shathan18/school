@@ -1,56 +1,56 @@
 {
-  "label": "piece2_technion5_tau",
+  "label": "piece2_cs_technion",
   "pair": [
-    "technion5",
-    "tau"
+    "cs",
+    "technion"
   ],
   "arm": "greymark_m",
-  "density": 1.0,
-  "note": "different four marks, same rule -- the result is not one lucky pair",
+  "density": 0.7,
+  "note": "CS faculty mark vs the Technion shield; CS is a thin 12%-ink mark, so it needs finer shards (d=0.70) and it must sit on wall A to reach 8/10",
   "joint_weight": 0.35,
   "colour_blend": 0.35,
   "shipped": {
     "n_both": 8,
     "n_dead": 0,
     "n_panels": 10,
-    "shards": 142,
-    "good": 18.797963363405568,
-    "bad": 1.834417914176687,
-    "gb": 10.247372323466632,
-    "ssim": 0.8747037468319704,
-    "iou_A": 0.9570565171528465,
-    "iou_B": 0.890194449732062,
-    "iou": 0.9236254834424542,
-    "shared_ratio": 0.703969841720555
+    "shards": 254,
+    "good": 18.382067512139656,
+    "bad": 1.716505988194747,
+    "gb": 10.709002845642337,
+    "ssim": 0.8840204293461755,
+    "iou_A": 0.9463944099917352,
+    "iou_B": 0.942035949216318,
+    "iou": 0.9442151796040266,
+    "shared_ratio": 0.7008070093744706
   },
   "lever_ablation": {
     "n_both": 8,
-    "n_dead": 1,
+    "n_dead": 0,
     "n_panels": 10,
-    "shards": 142,
-    "good": 17.693731694138798,
-    "bad": 1.6832868689348772,
-    "gb": 10.511417881691639,
-    "ssim": 0.8770233366773675,
-    "iou_A": 0.9570767046585376,
-    "iou_B": 0.8955613125082941,
-    "iou": 0.9263190085834159,
-    "shared_ratio": 0.703969841720555
+    "shards": 254,
+    "good": 17.337143258031272,
+    "bad": 1.6383352784688856,
+    "gb": 10.582170503118132,
+    "ssim": 0.8868044810700701,
+    "iou_A": 0.9500774351624983,
+    "iou_B": 0.9427223309120696,
+    "iou": 0.946399883037284,
+    "shared_ratio": 0.7008070093744706
   },
   "panel_ablation": [
     {
       "panel": "S0",
-      "ablate_dA": 0.009254366159439087,
-      "ablate_dB": 0.004274378065019846,
+      "ablate_dA": 0.008511025458574295,
+      "ablate_dB": 0.003259240882471204,
       "serves_A": true,
       "serves_B": true,
-      "shared_ratio": 0.7324598895845016,
+      "shared_ratio": 0.7451684611440125,
       "primary": "A"
     },
     {
       "panel": "S1",
-      "ablate_dA": 0.01154191605746746,
-      "ablate_dB": 0.008139431476593018,
+      "ablate_dA": 0.006450820714235306,
+      "ablate_dB": 0.00400195037946105,
       "serves_A": true,
       "serves_B": true,
       "shared_ratio": 0.9387579106388444,
@@ -58,8 +58,8 @@
     },
     {
       "panel": "S2",
-      "ablate_dA": 0.006685306783765554,
-      "ablate_dB": 0.004658875055611134,
+      "ablate_dA": 0.005044646095484495,
+      "ablate_dB": 0.003231980837881565,
       "serves_A": true,
       "serves_B": true,
       "shared_ratio": 0.9818252792427075,
@@ -68,7 +68,7 @@
     {
       "panel": "S3",
       "ablate_dA": 0.0,
-      "ablate_dB": 0.02953847125172615,
+      "ablate_dB": 0.08049456030130386,
       "serves_A": false,
       "serves_B": true,
       "shared_ratio": 0.3156392142033865,
@@ -76,26 +76,26 @@
     },
     {
       "panel": "S4",
-      "ablate_dA": 0.04998370260000229,
-      "ablate_dB": 0.0022667881567031145,
+      "ablate_dA": 0.010219097137451172,
+      "ablate_dB": 1.874323274364542e-08,
       "serves_A": true,
-      "serves_B": true,
+      "serves_B": false,
       "shared_ratio": 0.47638737399262576,
       "primary": "A"
     },
     {
       "panel": "S5",
-      "ablate_dA": 0.010297823697328568,
-      "ablate_dB": 0.005081155337393284,
+      "ablate_dA": 0.009492219425737858,
+      "ablate_dB": 0.003242788603529334,
       "serves_A": true,
       "serves_B": true,
-      "shared_ratio": 0.7880401852407253,
+      "shared_ratio": 0.4716499900522929,
       "primary": "A"
     },
     {
       "panel": "S6",
-      "ablate_dA": 0.010708140209317207,
-      "ablate_dB": 0.01381085067987442,
+      "ablate_dA": 0.010745762847363949,
+      "ablate_dB": 0.013797705993056297,
       "serves_A": true,
       "serves_B": true,
       "shared_ratio": 0.965368212081184,
@@ -103,8 +103,8 @@
     },
     {
       "panel": "S7",
-      "ablate_dA": 0.005258099641650915,
-      "ablate_dB": 0.015465917997062206,
+      "ablate_dA": 0.008034853264689445,
+      "ablate_dB": 0.017071623355150223,
       "serves_A": true,
       "serves_B": true,
       "shared_ratio": 0.4744962501629947,
@@ -112,27 +112,27 @@
     },
     {
       "panel": "S8",
-      "ablate_dA": 0.0038456348702311516,
-      "ablate_dB": 0.0015347381122410297,
+      "ablate_dA": 0.006893600337207317,
+      "ablate_dB": 0.0024214189033955336,
       "serves_A": true,
-      "serves_B": false,
+      "serves_B": true,
       "shared_ratio": 0.7089155346469448,
       "primary": "A"
     },
     {
       "panel": "S9",
-      "ablate_dA": 0.015325773507356644,
-      "ablate_dB": 0.007595036644488573,
+      "ablate_dA": 0.014767388813197613,
+      "ablate_dB": 0.009608683176338673,
       "serves_A": true,
       "serves_B": true,
-      "shared_ratio": 0.6578085674116354,
+      "shared_ratio": 0.9298618675797135,
       "primary": "A"
     }
   ],
   "panel_coverage": {
     "S0": {
-      "area_A": 1.6120731183870458,
-      "area_B": 1.1807788982959186,
+      "area_A": 1.7772603983663637,
+      "area_B": 1.3243583961028578,
       "primary": "A"
     },
     "S1": {
@@ -156,8 +156,8 @@
       "primary": "A"
     },
     "S5": {
-      "area_A": 1.6414072838245826,
-      "area_B": 1.2934949000005997,
+      "area_A": 2.509446841824764,
+      "area_B": 1.1835805779834079,
       "primary": "A"
     },
     "S6": {
@@ -176,8 +176,8 @@
       "primary": "A"
     },
     "S9": {
-      "area_A": 1.8040805695068785,
-      "area_B": 1.1867396549224871,
+      "area_A": 1.4693588242078421,
+      "area_B": 1.366300740422636,
       "primary": "A"
     }
   }

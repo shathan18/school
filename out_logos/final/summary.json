@@ -40,43 +40,43 @@
     }
   },
   {
-    "label": "piece2_technion5_tau",
+    "label": "piece2_cs_technion",
     "pair": [
-      "technion5",
-      "tau"
+      "cs",
+      "technion"
     ],
     "arm": "greymark_m",
-    "density": 1.0,
-    "note": "different four marks, same rule -- the result is not one lucky pair",
+    "density": 0.7,
+    "note": "CS faculty mark vs the Technion shield; CS is a thin 12%-ink mark, so it needs finer shards (d=0.70) and it must sit on wall A to reach 8/10",
     "joint_weight": 0.35,
     "colour_blend": 0.35,
     "shipped": {
       "n_both": 8,
       "n_dead": 0,
       "n_panels": 10,
-      "shards": 142,
-      "good": 18.797963363405568,
-      "bad": 1.834417914176687,
-      "gb": 10.247372323466632,
-      "ssim": 0.8747037468319704,
-      "iou_A": 0.9570565171528465,
-      "iou_B": 0.890194449732062,
-      "iou": 0.9236254834424542,
-      "shared_ratio": 0.703969841720555
+      "shards": 254,
+      "good": 18.382067512139656,
+      "bad": 1.716505988194747,
+      "gb": 10.709002845642337,
+      "ssim": 0.8840204293461755,
+      "iou_A": 0.9463944099917352,
+      "iou_B": 0.942035949216318,
+      "iou": 0.9442151796040266,
+      "shared_ratio": 0.7008070093744706
     },
     "lever_ablation": {
       "n_both": 8,
-      "n_dead": 1,
+      "n_dead": 0,
       "n_panels": 10,
-      "shards": 142,
-      "good": 17.693731694138798,
-      "bad": 1.6832868689348772,
-      "gb": 10.511417881691639,
-      "ssim": 0.8770233366773675,
-      "iou_A": 0.9570767046585376,
-      "iou_B": 0.8955613125082941,
-      "iou": 0.9263190085834159,
-      "shared_ratio": 0.703969841720555
+      "shards": 254,
+      "good": 17.337143258031272,
+      "bad": 1.6383352784688856,
+      "gb": 10.582170503118132,
+      "ssim": 0.8868044810700701,
+      "iou_A": 0.9500774351624983,
+      "iou_B": 0.9427223309120696,
+      "iou": 0.946399883037284,
+      "shared_ratio": 0.7008070093744706
     }
   }
 ]
