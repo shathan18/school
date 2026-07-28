@@ -114,7 +114,7 @@ def face_mask_floor(target_rgb: np.ndarray, face: tuple, floor: float) -> np.nda
 
 
 def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
-                angle_range=ANGLE_RANGE, density=1.0, extra_kw=None):
+                angle_range=ANGLE_RANGE, density=1.0, extra_kw=None, target_kw=None):
     """`density` < 1 shrinks the shards, which is the ONLY way to actually raise the count.
 
     `shard_budget` is a fabrication CEILING: `_autotune_spacing` coarsens when the natural
@@ -134,9 +134,13 @@ def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
             fragment_max_area=sp.fragment_max_area * density ** 2))
     names = C.palette_names(scene.color_palette)
     wr = scene.solve.wall_res
+    tkw = dict(white_thr=scene.white_threshold)
+    if target_kw:
+        # e.g. crop_mode="all" for multi-part marks; empty by default so faces are unchanged
+        tkw.update(target_kw)
     targets = {
-        "A": C.load_color_target(str(TGT / f"{ka}_{tag}.png"), wr, white_thr=scene.white_threshold),
-        "B": C.load_color_target(str(TGT / f"{kb}_{tag}.png"), wr, white_thr=scene.white_threshold),
+        "A": C.load_color_target(str(TGT / f"{ka}_{tag}.png"), wr, **tkw),
+        "B": C.load_color_target(str(TGT / f"{kb}_{tag}.png"), wr, **tkw),
     }
     panels, _ = build_panels_greedy(scene, count=panel_count, mode="deliberate",
                                     K=FR.K_CANDIDATES, targets=targets, seed=seed,

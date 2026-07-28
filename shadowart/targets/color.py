@@ -172,9 +172,19 @@ def majority_color(px, names):
 # colour target loading (fit source image to the wall, colour-preserving)
 # ---------------------------------------------------------------------------
 def load_color_target(path, wall_res, content_frac=0.92, white_thr=0.90,
-                      posterize_k=None, denoise_sigma=0.0, boost_sat=1.15, boost_contrast=1.08):
+                      posterize_k=None, denoise_sigma=0.0, boost_sat=1.15, boost_contrast=1.08,
+                      crop_mode="largest"):
     """Load an RGB image, crop to its non-white subject, fit centred on a white square wall
     canvas, and return an RGB float map [Hn, Wn, 3] oriented so image-top -> wall-top.
+
+    `crop_mode` -- how the subject is framed:
+      "largest" (default, byte-identical to the legacy behaviour) crops to the bounding box of
+        the single largest connected blob. That is the right call for a photo, where the sitter
+        is one blob and everything else is background speckle.
+      "all" crops to the union of every surviving subject pixel. Use this for MULTI-PART
+        subjects -- a logo's separate glyphs, a wordmark, an emblem plus its text. Under
+        "largest" those extra parts fall outside the chosen blob's bbox and are silently cut
+        away, which reads as the image being mysteriously zoomed in.
 
     `posterize_k` (opt-in, default None = OFF -> byte-identical to the legacy behaviour): flatten
     the fitted subject to that many bold, hue-preserving flat colours via
@@ -188,11 +198,16 @@ def load_color_target(path, wall_res, content_frac=0.92, white_thr=0.90,
     arr = np.asarray(img, dtype=np.float32) / 255.0
     sub = subject_mask(arr, white_thr)
     sub = ndimage.binary_opening(sub, iterations=2)       # drop speckle/corner noise
-    lbl, n = ndimage.label(sub)
-    if n:                                                 # crop to the largest blob (robust)
-        counts = np.bincount(lbl.ravel()); counts[0] = 0
-        ys, xs = np.where(lbl == counts.argmax())
-        img = img.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+    if crop_mode == "all":
+        if sub.any():                                     # keep EVERY part of the mark
+            ys, xs = np.where(sub)
+            img = img.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+    else:
+        lbl, n = ndimage.label(sub)
+        if n:                                             # crop to the largest blob (robust)
+            counts = np.bincount(lbl.ravel()); counts[0] = 0
+            ys, xs = np.where(lbl == counts.argmax())
+            img = img.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
     cw, ch = img.size
     scale = content_frac * min(Wn / cw, Hn / ch)
     nw, nh = max(1, int(round(cw * scale))), max(1, int(round(ch * scale)))

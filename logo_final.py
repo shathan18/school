@@ -62,13 +62,14 @@ SEED = 2
 GRAY_L = 0.75
 GRAY_M = 0.53
 GRAY_D = 0.34
+MARGIN = 0.12          # white border around the mark, as a fraction of its long side
 
 # (label, keyA, keyB, arm, density, joint_weight, colour_blend, note)
 PIECES = [
-    ("piece1_technion_bgu", "technion5", "bgu", "greymark_m", 1.00, 0.35, 0.35,
-     "GRAY_M mark on bare wall -- the mark is a tone ONE sheet hits exactly"),
-    ("piece2_technion_huji", "technion", "huji", "greymark_m", 1.00, 0.35, 0.35,
-     "same tonal design, different marks -- checks the result is not one lucky pair"),
+    ("piece1_technion_bgu", "technion", "bgu", "greymark_m", 1.00, 0.35, 0.35,
+     "official shield vs the flame -- the strongest shared-duty pair of the set"),
+    ("piece2_technion5_tau", "technion5", "tau", "greymark_m", 1.00, 0.35, 0.35,
+     "different four marks, same rule -- the result is not one lucky pair"),
 ]
 
 
@@ -88,7 +89,7 @@ def write_targets(keys, arm) -> dict:
     PF.TGT.mkdir(parents=True, exist_ok=True)
     cands = {}
     for key in keys:
-        two = FP.posterize_gray(LP.load_square(key, 0.04), 2)
+        two = FP.posterize_gray(LP.load_square(key, MARGIN), 2)
         if arm == "normal":
             img = two
         elif arm == "inverted":
@@ -147,12 +148,14 @@ def build(label, ka, kb, arm, density, jw, cb, cands, use_levers: bool):
         # Panel choice is seeded and independent of the prior, so the geometry is identical.
         b0 = PF.build_floor((label, ka, kb), SEED, 1.0, "uniform", cands,
                             panel_count=PANEL_COUNT, angle_range=ANGLE_RANGE,
-                            density=density)
+                            density=density,
+                            target_kw=dict(crop_mode="all", content_frac=0.88))
         extra = dict(joint_prior=joint_prior(b0["layout"], b0["renderer"], b0["targets"]),
                      joint_weight=jw, colour_blend=cb, colour_primary_tol=0.16)
     return PF.build_floor((label, ka, kb), SEED, 1.0, "uniform", cands,
                           panel_count=PANEL_COUNT, angle_range=ANGLE_RANGE,
-                          density=density, extra_kw=extra)
+                          density=density, extra_kw=extra,
+                          target_kw=dict(crop_mode="all", content_frac=0.88))
 
 
 def score(b, label, ka, kb, density):
@@ -262,6 +265,63 @@ def sheet(recs) -> None:
     print(f"\nwrote {OUT}/_final.png")
 
 
+def check_targets() -> None:
+    """Look at the framing BEFORE spending a render on it -- the face campaign lost a whole
+    round to hand-set crops that were never actually looked at."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    keys = ["technion", "technion5", "huji", "tau", "bgu"]
+    fig, ax = plt.subplots(2, len(keys), figsize=(2.5 * len(keys), 5.4))
+    for j, k in enumerate(keys):
+        two = FP.posterize_gray(LP.load_square(k, MARGIN), 2)
+        shown = np.where(two > 0.5, 1.0, GRAY_M)
+        for i, img in enumerate((two, shown)):
+            ax[i, j].imshow(img, cmap="gray", vmin=0, vmax=1)
+            ax[i, j].set_xticks([]); ax[i, j].set_yticks([])
+            for f in (0.0, 1.0):                      # wall edge, so clipping is obvious
+                ax[i, j].axhline(f * (img.shape[0] - 1), color="r", lw=1.2)
+                ax[i, j].axvline(f * (img.shape[1] - 1), color="r", lw=1.2)
+        ax[0, j].set_title(k, fontsize=9)
+    ax[0, 0].set_ylabel("2-tone", fontsize=9)
+    ax[1, 0].set_ylabel(f"greymark_m", fontsize=9)
+    fig.suptitle(f"Target framing at MARGIN={MARGIN}: the whole mark must sit INSIDE the "
+                 f"red wall edge.", fontsize=10)
+    fig.tight_layout()
+    OUT.mkdir(parents=True, exist_ok=True)
+    fig.savefig(OUT / "_targets.png", dpi=110, bbox_inches="tight")
+    print(f"wrote {OUT}/_targets.png")
+
+
+def scan_pairs() -> None:
+    """Choose the second pair on ink area + measured duty, not on taste.
+
+    Ink area is the whole game (see out_logos ink table): a thin mark leaves too little
+    material for a plane to be shared, exactly as a low-ink face did. HUJI's menorah is
+    the thinnest mark in the set and it is expected to fail here.
+    """
+    arm, dens = "greymark_m", 1.00
+    keys = ["technion", "technion5", "huji", "tau", "bgu"]
+    ink = {k: 100.0 * float((np.where(FP.posterize_gray(LP.load_square(k, MARGIN), 2) > 0.5,
+                                      1.0, GRAY_M) < 0.90).mean()) for k in keys}
+    print("ink area at the shipped framing:")
+    for k in keys:
+        print(f"  {k:12s}{ink[k]:6.1f}%")
+    pairs = [("technion5", "bgu"), ("technion", "bgu"), ("technion", "tau"),
+             ("technion5", "tau"), ("technion", "huji"), ("bgu", "tau")]
+    print(f"\n{'pair':26s}{'inkA/B':>12s}{'both':>7s}{'good%':>8s}{'g/b':>8s}"
+          f"{'IoU':>7s}{'SSIM':>7s}{'shards':>8s}")
+    print("-" * 84)
+    for ka, kb in pairs:
+        cands = write_targets((ka, kb), arm)
+        nka, nkb = f"{ka}_{arm}", f"{kb}_{arm}"
+        b = build("scan", nka, nkb, arm, dens, 0.0, 0.0, cands, use_levers=False)
+        _, _, s = score(b, "scan", nka, nkb, dens)
+        print(f"{ka + ' x ' + kb:26s}{ink[ka]:>5.0f}/{ink[kb]:<6.0f}"
+              f"{s['n_both']:>4d}/{s['n_panels']:<2d}{s['good']:>8.2f}{s['gb']:>8.2f}"
+              f"{s['iou']:>7.3f}{s['ssim']:>7.3f}{s['shards']:>8d}")
+
+
 def sweep_arms() -> None:
     """Pick the tonal design on evidence instead of taste: legibility AND duty, same pair."""
     label, ka, kb = "sweep", "technion5", "bgu"
@@ -302,7 +362,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     import sys
-    if "--sweep" in sys.argv:
+    if "--pairs" in sys.argv:
+        scan_pairs()
+    elif "--targets" in sys.argv:
+        check_targets()
+    elif "--sweep" in sys.argv:
         sweep_arms()
     else:
         main()

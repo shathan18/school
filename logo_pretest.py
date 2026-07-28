@@ -52,29 +52,37 @@ LOGOS = [
 
 
 def load_square(key: str, pad: float, size: int = WORK) -> np.ndarray:
-    """Trim to the mark's bounding box, pad to a SQUARE by edge-replication, greyscale.
+    """Trim to the mark's bounding box, then centre it on a SQUARE WHITE canvas.
 
-    Same padding discipline as `face_pretest.Cand.crop`: never clamp/crop to force a
-    square, or the mark loses limbs. Trimming first matters because these files carry
-    a lot of dead white margin, which would otherwise dominate the ink-area figure.
+    Two things here are deliberate and were both got wrong first time round:
+
+    * the margin is added by BUILDING A BIGGER CANVAS, not by widening the crop box.
+      Widening the box has to clamp at the source border, so any logo file whose mark
+      already bleeds to its own edge (most of these do) silently got a ZERO margin and
+      ran off all four walls -- the mark looked cropped and "zoomed in".
+    * the square padding is constant WHITE, not `mode="edge"`. Edge-replication smears
+      whatever is on the boundary row, so a mark touching the edge grew streaks across
+      the padding. White is also the physically right filler: white = no shard.
+
+    A real margin is not cosmetic. The wall is what the panels can reach; a mark pushed
+    into the last few percent of it is competing with the weakest part of the coverage.
     """
     rgb = np.asarray(Image.open(SRC / f"{key}.png").convert("RGB"), np.float32) / 255.0
     g = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
 
     mark = g < 0.90
-    if mark.any():
+    if mark.any():                                   # tight to the mark, no clamping games
         ys, xs = np.where(mark)
-        py = int(pad * g.shape[0])
-        px = int(pad * g.shape[1])
-        y0, y1 = max(0, ys.min() - py), min(g.shape[0], ys.max() + 1 + py)
-        x0, x1 = max(0, xs.min() - px), min(g.shape[1], xs.max() + 1 + px)
-        g = g[y0:y1, x0:x1]
+        g = g[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 
     h, w = g.shape
     side = max(h, w)
-    g = np.pad(g, (((side - h) // 2, side - h - (side - h) // 2),
-                   ((side - w) // 2, side - w - (side - w) // 2)), mode="edge")
-    im = Image.fromarray((np.clip(g, 0, 1) * 255).astype(np.uint8))
+    m = int(round(pad * side))                       # guaranteed, in white
+    canvas = np.ones((side + 2 * m, side + 2 * m), np.float32)
+    y0, x0 = m + (side - h) // 2, m + (side - w) // 2
+    canvas[y0:y0 + h, x0:x0 + w] = g
+
+    im = Image.fromarray((np.clip(canvas, 0, 1) * 255).astype(np.uint8))
     out = np.asarray(im.resize((size, size), Image.LANCZOS), np.float32) / 255.0
     lo, hi = np.percentile(out, 2), np.percentile(out, 98)
     return np.clip((out - lo) / max(1e-6, hi - lo), 0.0, 1.0)
