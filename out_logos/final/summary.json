@@ -1,0 +1,130 @@
+[
+  {
+    "label": "piece1_technion_bgu",
+    "pair": [
+      "technion",
+      "bgu"
+    ],
+    "arm": "greymark_m",
+    "density": 1.0,
+    "note": "official shield vs the flame -- the strongest shared-duty pair of the set",
+    "seed": 2,
+    "angles": [
+      43,
+      47
+    ],
+    "fabrication": {
+      "shards": 47,
+      "cut_counts": {
+        "GRAY_M": 47
+      },
+      "slots": 3
+    },
+    "joint_weight": 0.35,
+    "colour_blend": 0.35,
+    "shipped": {
+      "n_both": 8,
+      "n_dead": 0,
+      "n_panels": 10,
+      "shards": 137,
+      "good": 24.9210487947872,
+      "bad": 1.334428636102857,
+      "gb": 18.675445145997525,
+      "ssim": 0.8847078007718078,
+      "iou_A": 0.9514326425045414,
+      "iou_B": 0.9328486123572909,
+      "iou": 0.9421406274309161,
+      "top_A": 0.2724625602116575,
+      "top_B": 0.36189661685834806,
+      "neff_A": 5.816252562688554,
+      "neff_B": 5.078600378595197,
+      "neff": 5.078600378595197,
+      "top": 0.36189661685834806,
+      "shared_ratio": 0.7252178627574769
+    },
+    "lever_ablation": {
+      "n_both": 7,
+      "n_dead": 1,
+      "n_panels": 10,
+      "shards": 137,
+      "good": 24.549401708153432,
+      "bad": 1.2845517048946993,
+      "gb": 19.111260071984304,
+      "ssim": 0.887977106747228,
+      "iou_A": 0.9559412459902077,
+      "iou_B": 0.9329294329510925,
+      "iou": 0.9444353394706502,
+      "top_A": 0.29225537813426017,
+      "top_B": 0.3893847873927264,
+      "neff_A": 5.4739980242288295,
+      "neff_B": 4.654186762357805,
+      "neff": 4.654186762357805,
+      "top": 0.3893847873927264,
+      "shared_ratio": 0.7252178627574769
+    }
+  },
+  {
+    "label": "piece2_cs_technion5",
+    "pair": [
+      "cs",
+      "technion5"
+    ],
+    "arm": "greymark_m",
+    "density": 0.7,
+    "note": "CS faculty mark vs the Technion emblem WITHOUT the shield. Chosen by a 20-build seed search for SPREAD, not just plane count: the work is split over ~7 and ~6 effective planes with no single plane carrying more than 28% of either wall",
+    "seed": 8,
+    "angles": [
+      43,
+      47
+    ],
+    "fabrication": {
+      "shards": 56,
+      "cut_counts": {
+        "GRAY_M": 56
+      },
+      "slots": 3
+    },
+    "joint_weight": 0.35,
+    "colour_blend": 0.35,
+    "shipped": {
+      "n_both": 8,
+      "n_dead": 1,
+      "n_panels": 10,
+      "shards": 217,
+      "good": 32.302328224902055,
+      "bad": 1.7214479808554357,
+      "gb": 18.76462639832435,
+      "ssim": 0.882065527037503,
+      "iou_A": 0.9134322700697228,
+      "iou_B": 0.9674832458189417,
+      "iou": 0.9404577579443323,
+      "top_A": 0.22833519349104525,
+      "top_B": 0.27869195881009184,
+      "neff_A": 7.168008373759765,
+      "neff_B": 5.649555371067737,
+      "neff": 5.649555371067737,
+      "top": 0.27869195881009184,
+      "shared_ratio": 0.7281768374960405
+    },
+    "lever_ablation": {
+      "n_both": 8,
+      "n_dead": 0,
+      "n_panels": 10,
+      "shards": 217,
+      "good": 31.216089117515065,
+      "bad": 1.6432630176718632,
+      "gb": 18.996404581502293,
+      "ssim": 0.8847093275295537,
+      "iou_A": 0.9184375574342951,
+      "iou_B": 0.9715506398610473,
+      "iou": 0.9449940986476713,
+      "top_A": 0.2341998333160601,
+      "top_B": 0.2237842827393209,
+      "neff_A": 7.415725398902907,
+      "neff_B": 5.911954415302799,
+      "neff": 5.911954415302799,
+      "top": 0.2341998333160601,
+      "shared_ratio": 0.7281768374960405
+    }
+  }
+]

@@ -1,0 +1,179 @@
+{
+  "label": "normal",
+  "seed": 2,
+  "floor": 1.0,
+  "arm": "normal",
+  "density": 1.0,
+  "n_both": 4,
+  "n_dead": 1,
+  "n_panels": 10,
+  "subj_pct": 35.44962962962963,
+  "xt_wall_pct": 5.425432098765432,
+  "good_mean": 1.1852710927158707,
+  "bad_mean": 10.942504908905418,
+  "good_bad": 0.10831807731255876,
+  "ssim": 0.6772239862888711,
+  "face_det": 0.6870572613477622,
+  "shards": 155,
+  "over_budget": false,
+  "pair": [
+    "technion5",
+    "bgu"
+  ],
+  "verdict": "INTERSECTS",
+  "ink": {
+    "A": 47.449382716049385,
+    "B": 23.44987654320988
+  },
+  "mark_iou": {
+    "A": 0.9132807196198235,
+    "B": 0.9383613991287291
+  },
+  "mark_iou_mean": 0.9258210593742763,
+  "ssim_A": 0.6004875143103026,
+  "ssim_B": 0.7539604582674398,
+  "panel_ablation": [
+    {
+      "panel": "S0",
+      "ablate_dA": 0.012421844527125359,
+      "ablate_dB": 0.0002393461181782186,
+      "serves_A": true,
+      "serves_B": false,
+      "shared_ratio": 0.7451684611440125,
+      "primary": "A"
+    },
+    {
+      "panel": "S1",
+      "ablate_dA": 0.017671987414360046,
+      "ablate_dB": 0.004582173656672239,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.9387579106388444,
+      "primary": "A"
+    },
+    {
+      "panel": "S2",
+      "ablate_dA": 0.011645308695733547,
+      "ablate_dB": 0.00316542643122375,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.9818252792427075,
+      "primary": "A"
+    },
+    {
+      "panel": "S3",
+      "ablate_dA": 0.0,
+      "ablate_dB": 0.1286313384771347,
+      "serves_A": false,
+      "serves_B": true,
+      "shared_ratio": 0.3156392142033865,
+      "primary": "B"
+    },
+    {
+      "panel": "S4",
+      "ablate_dA": 0.15250876545906067,
+      "ablate_dB": 0.0,
+      "serves_A": true,
+      "serves_B": false,
+      "shared_ratio": 0.47638737399262576,
+      "primary": "A"
+    },
+    {
+      "panel": "S5",
+      "ablate_dA": 0.09182590991258621,
+      "ablate_dB": 0.028764743357896805,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.4716499900522929,
+      "primary": "A"
+    },
+    {
+      "panel": "S6",
+      "ablate_dA": 0.003028319450095296,
+      "ablate_dB": 0.008053322322666645,
+      "serves_A": true,
+      "serves_B": true,
+      "shared_ratio": 0.8117575622938712,
+      "primary": "B"
+    },
+    {
+      "panel": "S7",
+      "ablate_dA": 0.0007006397936493158,
+      "ablate_dB": 0.0025638113729655743,
+      "serves_A": false,
+      "serves_B": true,
+      "shared_ratio": 0.8375222441945936,
+      "primary": "B"
+    },
+    {
+      "panel": "S8",
+      "ablate_dA": 0.0,
+      "ablate_dB": 0.0,
+      "serves_A": false,
+      "serves_B": false,
+      "shared_ratio": 0.743608724232721,
+      "primary": "B"
+    },
+    {
+      "panel": "S9",
+      "ablate_dA": 0.005190681200474501,
+      "ablate_dB": 0.0015712028834968805,
+      "serves_A": true,
+      "serves_B": false,
+      "shared_ratio": 0.9298618675797135,
+      "primary": "A"
+    }
+  ],
+  "panel_coverage": {
+    "S0": {
+      "area_A": 1.7772603983663637,
+      "area_B": 1.3243583961028578,
+      "primary": "A"
+    },
+    "S1": {
+      "area_A": 1.2339447605473548,
+      "area_B": 1.158375405255184,
+      "primary": "A"
+    },
+    "S2": {
+      "area_A": 1.2996225215860886,
+      "area_B": 1.276002245166373,
+      "primary": "A"
+    },
+    "S3": {
+      "area_A": 1.6593356980457035,
+      "area_B": 5.257064469107719,
+      "primary": "B"
+    },
+    "S4": {
+      "area_A": 3.643895459321498,
+      "area_B": 1.7359057889698213,
+      "primary": "A"
+    },
+    "S5": {
+      "area_A": 2.509446841824764,
+      "area_B": 1.1835805779834079,
+      "primary": "A"
+    },
+    "S6": {
+      "area_A": 0.8406639596304996,
+      "area_B": 1.0356096434198216,
+      "primary": "B"
+    },
+    "S7": {
+      "area_A": 0.9152592337099839,
+      "area_B": 1.092817820725641,
+      "primary": "B"
+    },
+    "S8": {
+      "area_A": 0.8447813952273167,
+      "area_B": 1.1360563259918566,
+      "primary": "B"
+    },
+    "S9": {
+      "area_A": 1.4693588242078421,
+      "area_B": 1.366300740422636,
+      "primary": "A"
+    }
+  }
+}
