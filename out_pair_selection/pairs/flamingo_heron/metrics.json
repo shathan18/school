@@ -1,0 +1,21 @@
+{
+  "label": "flamingo_heron",
+  "target_a": "examples/new_candidates_v11/audubon_flamingo_nobg.png",
+  "target_b": "examples/new_candidates_v11/audubon_great_blue_heron_nobg.png",
+  "n_shards": 204,
+  "elapsed_s": 3.8,
+  "ssim_A": 0.8979443762229149,
+  "ssim_B": 0.6172268088290304,
+  "edge_A": 0.7562524998374456,
+  "edge_B": 0.1679580856924129,
+  "good_A": 1.0182257764552725,
+  "good_B": 1.7548598464715468,
+  "bad_A": 5.672307978426632,
+  "bad_B": 4.9944670506330215,
+  "good_mean": 1.3865428114634097,
+  "bad_mean": 5.333387514529827,
+  "good_bad_ratio": 0.2599741360788112,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 96.93543430693322
+}

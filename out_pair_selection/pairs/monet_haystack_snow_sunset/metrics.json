@@ -1,0 +1,21 @@
+{
+  "label": "monet_haystack_snow_sunset",
+  "target_a": "examples/new_candidates_v9/monet_haystack_snow.jpg",
+  "target_b": "examples/new_candidates_v9/monet_grainstack_sunset.jpg",
+  "n_shards": 377,
+  "elapsed_s": 4.5,
+  "ssim_A": 0.6091359148042709,
+  "ssim_B": 0.6026131084300047,
+  "edge_A": 0.2522140793117018,
+  "edge_B": 0.4751439037266587,
+  "good_A": 11.404824448735052,
+  "good_B": 3.566268225403914,
+  "bad_A": 17.663680734522735,
+  "bad_B": 15.314447509377235,
+  "good_mean": 7.485546337069483,
+  "bad_mean": 16.489064121949987,
+  "good_bad_ratio": 0.4539703576690468,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 97.92735458117481
+}

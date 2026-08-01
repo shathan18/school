@@ -1,0 +1,21 @@
+{
+  "label": "flamingo_ibis",
+  "target_a": "examples/new_candidates_v11/audubon_flamingo_nobg.png",
+  "target_b": "examples/new_candidates_v11/audubon_scarlet_ibis_nobg.png",
+  "n_shards": 106,
+  "elapsed_s": 3.2,
+  "ssim_A": 0.9035028958921654,
+  "ssim_B": 0.894052322264262,
+  "edge_A": 0.7840245290281871,
+  "edge_B": 0.643046338300768,
+  "good_A": 1.620327320066952,
+  "good_B": 0.0,
+  "bad_A": 2.487446531523154,
+  "bad_B": 0.0,
+  "good_mean": 0.810163660033476,
+  "bad_mean": 1.243723265761577,
+  "good_bad_ratio": 0.6514018691588785,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 100.0
+}

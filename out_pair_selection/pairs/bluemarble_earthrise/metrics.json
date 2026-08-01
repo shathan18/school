@@ -1,0 +1,21 @@
+{
+  "label": "bluemarble_earthrise",
+  "target_a": "examples/new_candidates_v13/blue_marble_disc.png",
+  "target_b": "examples/new_candidates_v13/earthrise_disc.png",
+  "n_shards": 217,
+  "elapsed_s": 6.5,
+  "ssim_A": 0.5268315084390979,
+  "ssim_B": 0.9164110869565609,
+  "edge_A": 0.45913524178812226,
+  "edge_B": 0.3696823841567719,
+  "good_A": 1.628096689708471,
+  "good_B": 32.93965676324045,
+  "bad_A": 2.4721995620625994,
+  "bad_B": 2.7219044104078245,
+  "good_mean": 17.28387672647446,
+  "bad_mean": 2.597051986235212,
+  "good_bad_ratio": 6.655190892628161,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 100.0
+}
