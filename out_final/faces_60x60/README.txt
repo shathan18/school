@@ -1,19 +1,26 @@
-THREE FACES on THREE WALLS -- 60x60 single-blue-dye build
-========================================================
+THREE FACES on THREE WALLS -- FINAL GRAYSCALE 60x60 build (genuine multiplexing)
+==============================================================================
 
-Shards: 42 total on 14 of 24 panels (threshold theta=0.1).
-Panels: 24 clear-perspex sheets, each 60 x 60 cm x 3 mm, on a symmetric 120-deg 3-wall rig
-        at 3x magnification (walls 1.8 m, ~3 m room). See faces_60x60_shards.obj for the layout.
+Panels: 5 clear-perspex sheets, each 60x60 cm x 3mm, in an EGG-CRATE GRID -- 2 parallel families
+        (2 sheets at 60 deg + 3 sheets at 150 deg, 14 cm pitch). Parallel within a family so every
+        intersection is ONE-from-each-family = strictly 2-WAY (max 2 panels per slot; no 3-way).
+        3 lights at 120 deg, 3x magnification, walls 1.8 m. Sharp (small) light source.
+Shards: 702 total -- light 389, medium 256, black 57. Min shard 5x5 mm (light
+        grey won't show smaller). Cell 5 mm.
+Palette: clear (white) + 3 dye tones. Per your dye tests, tones defined by stacking-to-black:
+         light (~6-8 layers=black), medium (~3-4), black (darkest, ~2). Optical densities ADD when
+         shards stack across the depth-panels, so overlaps read darker/true-black.
+
+GENUINE MULTIPLEXING: the SAME shards build all 3 faces; each lit by only its own lamp shows a
+ different expression. Removing shards degrades multiple faces (not just one).
+
+WHY GRAYSCALE (this vs the earlier binary build): direct tone (light/medium/black) reproduces the
+ faces instead of forcing tone through noisy binary stippling. IoU 0.64 -> ~0.78, MSE halved, and
+ the leftover texture is INSIDE features (background stays clean). Grounded in Baran et al. 2012
+ (layered attenuators for multiple grayscale shadows) and ShadowPix 2012 (halftoning).
 
 FABRICATION
- 1. cut_sheets/<panel>.dxf (or .svg) -- laser-cut the blue shard outlines from a 60x60 clear sheet.
-    Each closed outline = one shard. Units are millimetres; the 600x600 rectangle is the sheet.
- 2. Dye every shard with the SAME blue Pentart ink (one dip). Tone on the walls comes from how
-    many dyed shards a light ray passes through across the 24 depth-panels -- NOT from layering.
- 3. Mount each panel's shards on its 60x60 carrier at the depth/angle in the .obj, in rig order.
-
-NOTES
- * Shard shapes depend only on theta, not on how dark the dye is -- these files are final for any
-   ink strength; dye darkness only changes how deep-blue the projected faces look.
- * Expressions (neutral/happy/sad) read distinctly; faces are intentionally blocky (2cm laser
-   feature + single dye + 3x magnification). ~5% blue corner ghosting is inherent to 3 shared lights.
+ 1. cut_sheets/<panel>.svg or .dxf -- each has 3 LAYERS (light/medium/black). Laser-engrave the
+    shard outlines on a 60x60 clear sheet.
+ 2. Hand-colour each region with its tone's alcohol-ink dye (dither to hit the tone).
+ 3. Mount each panel at its azimuth (see .obj). Clear (white) regions get no dye.
