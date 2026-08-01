@@ -1,0 +1,72 @@
+{
+ "2": {
+  "obj": 0.9164003402573069,
+  "params": {
+   "ink_t": 0.58,
+   "tone_bias": -0.06,
+   "bands": "sep60_90",
+   "panel_count": 16,
+   "density": 0.85,
+   "fragment_size": 0.135,
+   "source_radius": 0.0015,
+   "light_r": 1.0
+  },
+  "evals": 74
+ },
+ "4": {
+  "obj": 0.9164003402573069,
+  "params": {
+   "ink_t": 0.58,
+   "tone_bias": -0.06,
+   "bands": "sep60_90",
+   "panel_count": 16,
+   "density": 0.85,
+   "fragment_size": 0.135,
+   "source_radius": 0.0015,
+   "light_r": 1.0
+  },
+  "evals": 74
+ },
+ "6": {
+  "obj": 0.9164003402573069,
+  "params": {
+   "ink_t": 0.58,
+   "tone_bias": -0.06,
+   "bands": "sep60_90",
+   "panel_count": 16,
+   "density": 0.85,
+   "fragment_size": 0.135,
+   "source_radius": 0.0015,
+   "light_r": 1.0
+  },
+  "evals": 74
+ },
+ "8": {
+  "obj": 0.9164003402573069,
+  "params": {
+   "ink_t": 0.58,
+   "tone_bias": -0.06,
+   "bands": "sep60_90",
+   "panel_count": 16,
+   "density": 0.85,
+   "fragment_size": 0.135,
+   "source_radius": 0.0015,
+   "light_r": 1.0
+  },
+  "evals": 74
+ },
+ "10": {
+  "obj": 0.911632303258845,
+  "params": {
+   "ink_t": 0.5,
+   "tone_bias": -0.12,
+   "bands": "sep60_90",
+   "panel_count": 12,
+   "density": 0.7,
+   "fragment_size": 0.135,
+   "source_radius": 0.0015,
+   "light_r": 1.0
+  },
+  "evals": 60
+ }
+}

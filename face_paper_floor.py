@@ -114,18 +114,31 @@ def face_mask_floor(target_rgb: np.ndarray, face: tuple, floor: float) -> np.nda
 
 
 def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
-                angle_range=ANGLE_RANGE, density=1.0, extra_kw=None, target_kw=None):
+                angle_range=ANGLE_RANGE, density=1.0, extra_kw=None, target_kw=None,
+                scene_path=None, scene_fn=None, panel_kw=None, panel_post=None):
     """`density` < 1 shrinks the shards, which is the ONLY way to actually raise the count.
 
     `shard_budget` is a fabrication CEILING: `_autotune_spacing` coarsens when the natural
     count overshoots and otherwise leaves it alone, so raising the budget from 300 to 2750
     changes nothing (measured: 343 shards at every budget). The natural count is set by
     `solve.fragment_size`, with `fragment_min_area` as a hard floor that DROPS shards below
-    it -- so both must move together, areas as the square of the linear size."""
+    it -- so both must move together, areas as the square of the linear size.
+
+    `scene_path` / `scene_fn` / `panel_kw` / `panel_post` are passthroughs for the logo
+    optimiser, which drives a different scene (60 cm body), a single hand-mixed ink palette,
+    a panel-search box that must match that body, and a clip of the searched panels to that
+    body. All four default to None so every face result is bit-identical: `scene_path=None`
+    keeps FR.SCENE, `scene_fn=None` leaves the scene alone, `panel_kw=None` leaves
+    `build_panels_greedy` on its own defaults -- which are exactly the `search_*` values
+    scenes/example.yaml relies on -- and `panel_post=None` leaves the layout untouched.
+    """
     label, ka, kb = pair
     tag = f"f{int(round(floor * 100)):03d}"
-    scene = load_scene(FR.SCENE)
+    scene = load_scene(scene_path or FR.SCENE)
     scene = dataclasses.replace(scene, color_palette=C.PALETTES["noir"])
+    if scene_fn is not None:
+        # applied AFTER the noir default so a caller can install its own palette
+        scene = scene_fn(scene)
     if density != 1.0:
         sp = scene.solve
         scene = dataclasses.replace(scene, solve=dataclasses.replace(
@@ -144,7 +157,9 @@ def build_floor(pair, seed, floor, arm, cands, panel_count=PANEL_COUNT,
     }
     panels, _ = build_panels_greedy(scene, count=panel_count, mode="deliberate",
                                     K=FR.K_CANDIDATES, targets=targets, seed=seed,
-                                    angle_deg_range=angle_range)
+                                    angle_deg_range=angle_range, **(panel_kw or {}))
+    if panel_post is not None:
+        panels = panel_post(panels)
     layout = dataclasses.replace(scene, panels=panels)
     table = build_projection_table(layout)
     renderer = Renderer(layout, table)

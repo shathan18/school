@@ -1,0 +1,179 @@
+# ShadowArt LOGO-60 scene -- the fabrication-constrained CS x Technion installation.
+#
+# Derived from scenes/tabletop60.yaml. Differences, all forced by the build spec:
+#
+#   1. fab.min_feature 0.004 -> 0.020
+#      The shards are laser-scored into clear Perspex and then HAND-COLOURED with alcohol
+#      ink, so the 2 cm minimum is a constraint on the physical piece you hold, i.e. on
+#      PANEL space, not on the projected shadow. `enforce_min_feature` treats this as a
+#      minimum DIAMETER (morphological open+close with a disk), which is the right
+#      semantics: it kills slivers and pinholes, not merely small-area pieces.
+#      At panel_res 420 over 0.60 m = 1.43 mm/px this is a disk of radius 7 px.
+#      This is 5x coarser than every previous build in this repo. Expect it to bite.
+#
+#   2. Panel angles are searched in TWO BANDS straddling FACE-ON (driven from logo_opt.py,
+#      not from this file). Two things were measured here, and both matter:
+#
+#      (a) FACE-ON IN THIS SCENE IS 135 deg, NOT 45. With the lamps at (3.00, 2.55) and
+#          (2.55, 3.00), a 45 deg panel lies almost ALONG both light rays: it is seen
+#          edge-on and casts a narrow shadow, so the coverage search refuses it. Offered
+#          bands [(43,47),(133,137)], `build_panels_greedy` put ALL TEN panels in 133-137.
+#          The 43-47 band is inherited from scenes/example.yaml, whose lamps sit at
+#          (3.00, 0.70)/(0.70, 3.00) -- there 45 deg IS face-on. The useful panel angle is
+#          a property of the LIGHT LAYOUT; it does not transfer between scenes.
+#
+#      (b) The bands must straddle face-on SYMMETRICALLY, or the search collapses onto
+#          whichever band is nearer face-on and no crossing can form. A single band leaves
+#          every panel near-parallel, and `weave_crossings` correctly finds nothing;
+#          where near-parallels do cross, slot_width = thickness / sin(angle) blows up
+#          (3 mm at 90 deg, 6 mm at 30 deg, 17 mm at 10 deg -- the one crossing a single
+#          band produced was at 4 deg, needing a 43 mm notch, i.e. no joint at all).
+#          Measured best: [(90,105),(165,180)] -> 21-35 usable crossings at 3.2-3.5 mm.
+#          Shadow width falls only as cos(deviation from face-on): +-30 deg costs ~13%.
+#
+#   3. Palette is installed at runtime by logo_opt.py: ONE hand-mixed ink tone + clear
+#      Perspex. `color.palette` below is only a placeholder for tools that read the file
+#      directly; max_stack is 1 because a single ink cannot laminate to a second tone.
+#
+# Geometry is unchanged from tabletop60.yaml -- a 0.60 x 0.60 m body on the table:
+#   magnification m = 3.0 / (3.0 - x_panel): 2.31x at x=1.70 ... 4.29x at x=2.30,
+#   and EXACTLY 3.00x at the body-centre depth x=2.00. A 2 cm shard therefore casts a
+#   4.6-8.6 cm blob on the 1.80 m wall (6 cm at centre) = ~30 independent tiles across.
+# All lengths in metres.
+units: m
+
+walls:
+  A: # plane x = 0 ; image spans y (width) x z (height)
+    plane: x
+    offset: 0.0
+    width_axis: y
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+  B: # plane y = 0 ; image spans x (width) x z (height)
+    plane: y
+    offset: 0.0
+    width_axis: x
+    width: 1.80
+    height: 1.80
+    z0: 0.30
+
+lights:
+  # One lamp per image. The installation NEVER moves; only which lamp is lit changes.
+  A: { pos: [3.00, 2.55, 1.02] } # x must exceed every panel x
+  B: { pos: [2.55, 3.00, 1.02] } # y must exceed every panel y
+  source_radius: 0.0015 # small LED die
+
+material:
+  thickness: 0.003 # 3 mm clear Perspex
+
+table: # VISUALISATION ONLY
+  top_z: 0.75
+  center: [2.35, 2.35]
+  size: [1.50, 1.50]
+  thickness: 0.04
+  legs: true
+
+panels:
+  # PLACEHOLDER ONLY -- logo_opt.py replaces scene.panels wholesale with the output of
+  # build_panels_greedy (and of the beam / annealing search that refines it). Kept here so
+  # the file stands alone for the CLI and the 3D preview, and so it documents the intended
+  # 60 cm envelope: footprint x,y in 1.70..2.30, height z in 0.78..1.38.
+  - {
+      name: A0,
+      angle_deg: 45,
+      anchor: [2.00, 2.00],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+  - {
+      name: A1,
+      angle_deg: 45,
+      anchor: [2.15, 1.85],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+  - {
+      name: A2,
+      angle_deg: 45,
+      anchor: [1.85, 2.15],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+  - {
+      name: B0,
+      angle_deg: 135,
+      anchor: [2.00, 2.00],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+  - {
+      name: B1,
+      angle_deg: 135,
+      anchor: [1.85, 1.85],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+  - {
+      name: B2,
+      angle_deg: 135,
+      anchor: [2.15, 2.15],
+      u_range: [-0.30, 0.30],
+      v_range: [0.78, 1.38],
+    }
+
+solve:
+  mode: partition
+  diagonal_frac: 0.0 # both bands are already ~45 deg to both walls
+  # fragment_* are WALL/shadow-space. At 3x centre magnification a 0.135 m shadow is a
+  # 4.5 cm shard in panel space -- comfortably above the 2 cm floor. logo_opt.py scales
+  # these by `density`; density ~0.45 is where the natural shard size meets the 2 cm floor,
+  # which is exactly the regime the sweep needs to probe.
+  fragment_size: 0.135
+  fragment_max_area: 0.0315
+  fragment_min_area: 0.0027
+  shard_gap: 0.0
+  depth_bias: 0.0
+  wall_res: [450, 450]
+  panel_res: [420, 420] # 420 px over 0.60 m = 1.43 mm/px in panel space
+  seed: 0
+  restarts: 1
+  panel_restarts: 1
+  time_budget: 0.0
+  search_panels: false
+  damage_weight: 0.0
+  credit_weight: 0.0
+  score_ssim_weight: 1.0
+  score_edge_weight: 0.5
+  score_crosstalk_weight: 0.25
+  # --- panel-search box: MUST match the 60 cm body, or the greedy search will place
+  # panels outside the installation envelope.
+  search_anchor_range: [1.75, 2.25] # candidate panel CENTRES
+  search_standoff: 0.5
+  search_mag_cap: 6.0 # max m at x=2.25+0.30 is 5.0; the 3.0 default rejects the deep half
+  search_u_size_range: [0.20, 0.60]
+  search_v_range: [0.78, 1.38]
+  # --- only used when mode: optimize ---
+  iters: 350
+  lr: 0.06
+  lambda_sparsity: 0.0020
+  lambda_tv: 0.0010
+  lambda_crosstalk: 0.0
+
+color:
+  palette: [GRAY_M] # placeholder; logo_opt.py installs the swept ink tone
+  max_layers: 1
+  white_threshold: 0.90
+  max_stack: 1 # ONE ink tone -> no lamination, one cut layer
+  overlap_jitter: 0.0
+  shard_budget: 220
+  detail_bias: 2.0
+  penumbra_min_feature_sigmas: 2.0
+
+fabricate:
+  kerf: 0.0002 # 0.2 mm laser kerf
+  min_feature: 0.020 # PANEL-space: the 2 cm hand-colouring floor
+  threshold: 0.5
+  sheet_size: [0.60, 0.60] # one 60 x 60 cm Perspex sheet per panel
+  formats: [dxf, svg]
+  joint_clearance: 0.0001
