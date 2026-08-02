@@ -97,3 +97,64 @@ Plus the single interactive page (linked above) with the 360° orbit viewer.
 
 *All builds: 6 panels · 60×60 cm · 2-way egg-crate · clear + 2 greys + black · 5 mm min shard ·
 single light + turntable (3 stops).*
+
+---
+
+## Contribution — what's new vs. classic 3-wall shadow art
+
+Classic multi-view shadow art (e.g. Mitra & Pauly, *Shadow Art*, SIGGRAPH Asia 2009) carves a **single
+connected 3D object** that throws **binary** shadows from **three fixed lights onto three fixed walls**.
+Layered-attenuator work (cf. Baran et al. 2012, layered attenuators for prescribed shadows; ShadowPix)
+stacks semi-transparent sheets for grayscale multi-shadow. Our build differs on several axes:
+
+1. **One wall, one light, a turntable — not 3 walls + 3 lamps.** We show this is optically equivalent to
+   the N-wall rig (rotating the assembly by θ under a fixed light ≡ presenting a wall at azimuth θ),
+   collapsing the whole installation to a single lamp / wall / motor — simpler to build, calibrate, and
+   exhibit.
+2. **Stop angles and grid phase become free optimisation variables** — a degree of freedom the
+   fixed-wall rig doesn't have. We sweep them (even-120°, phase 15° wins) and show it changes the result.
+3. **Flat, laser-shaded shards in a 2-way egg-crate — not a solid carved object.** Everything is flat
+   60×60 cm sheets that slot together (no 3-way joints), laser-cuttable and hand-assemblable — a
+   fabrication model distinct from voxel carving.
+4. **Grayscale by laser-engraved attenuation + optical stacking**, enabling continuous-tone
+   **photographic portraits** (Vermeer, expressive faces) rather than bold binary silhouettes.
+5. **Genuine multiplexing, quantified.** We separate *real* multiplexing (shards contributing to several
+   views) from decoupled independent casters via a per-shard duty metric (% serving ≥2 views), and
+   optimise for it — 76% / 44% on the finale. Prior work reports shadow fidelity but not sharing.
+6. **Joint tomographic inverse solve** over a shared per-panel opacity field (vs. greedy per-shard
+   heuristics), plus a **feature-preservation pass** (SAM-isolated salient detail — the pearl).
+
+*One-line framing:* **grayscale, laser-fabricated, genuinely-multiplexed shadow art on a single-light
+turntable — with the rotation geometry itself optimised.**
+
+## Roadmap to publication level — what's left
+
+The engineering is largely in place; the missing pieces are validation, comparison, and analysis.
+
+**Physical validation (highest priority)**
+- Laser-cut, engrave, assemble, light, and **photograph the real casts**; compare photos to the honest
+  renders (registration + tone calibration). Renders are faithful, but a paper needs real-world evidence.
+- **Tone calibration:** measure the actual laser-frost optical densities and verify the 4-level palette
+  and the *additive-stacking* assumption on physical samples.
+- **Tolerance study:** sensitivity to cut precision, panel-placement error, laser-tone repeatability,
+  and light-source size (penumbra).
+
+**Comparisons & ablations**
+- Re-implement / compare against **classic 3-wall shadow art** and **layered attenuators** on identical
+  targets; quantify our advantage (hardware simplicity, grayscale detail, multiplexing).
+- Formalise our sweeps as **ablation tables** (grayscale vs binary · panel count/pitch · stop-angle &
+  phase · source resolution · 30 vs 60 cm) with one consistent metric set.
+
+**Analysis / theory**
+- State the forward model precisely and prove the **turntable ≡ N-wall equivalence**.
+- Characterise the **multiplexing bound** from non-negativity / attenuation coupling: how much
+  conflicting detail three images can share, and how it scales as #views grows (4 / 5 / 6 stops?).
+- Degrees-of-freedom vs. constraints counting.
+
+**Evaluation**
+- A small **perceptual study**: do viewers recognise each view and read them as distinct?
+- Report SSIM / IoU **plus a perceptual metric**, against the baselines above.
+
+**Write-up & release**
+- Related-work positioning; honest **limitations** (resolution ceiling, residual streaking, source
+  dependence); and **code + configs released** for reproducibility.
