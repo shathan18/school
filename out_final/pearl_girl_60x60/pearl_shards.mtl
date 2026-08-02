@@ -23,7 +23,7 @@ Kd 0.85 0.85 0.85
 d 0.20
 illum 1
 
-newmtl light
+newmtl lamp
 Kd 1.00 0.82 0.10
 d 1.00
 illum 1
