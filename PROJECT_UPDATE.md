@@ -144,6 +144,10 @@ The engineering is largely in place; the missing pieces are validation, comparis
   targets; quantify our advantage (hardware simplicity, grayscale detail, multiplexing).
 - Formalise our sweeps as **ablation tables** (grayscale vs binary · panel count/pitch · stop-angle &
   phase · source resolution · 30 vs 60 cm) with one consistent metric set.
+- **Push 30×30 harder — get its results up.** Its detail gap came from coarser shards at 6× magnification.
+  Worth trying a **better wall distance / lower magnification** (a nearer wall → lower mag → finer
+  effective shards) and **higher resolution** (smaller cells, more shards) to see whether a small, cheap
+  30×30 build can close the gap with 60×60.
 
 **Analysis / theory**
 - State the forward model precisely and prove the **turntable ≡ N-wall equivalence**.
