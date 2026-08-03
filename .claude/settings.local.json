@@ -38,7 +38,17 @@
       "Bash(git config *)",
       "Bash(git branch *)",
       "Bash(git checkout *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\show_k4_k8.py\")",
+      "Bash(python -c ' *)",
+      "Bash(python -m pytest tests/ -q --collect-only)",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\wave_posterize_sweep.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\thickness_posterized.py\")",
+      "Bash(grep -i \"\\\\.md$\")",
+      "Bash(git pull *)",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\rerender_teammate_pick.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\thickness_teammate_pick.py\")",
+      "Bash(python \"C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User1-CLionProjects-OS-school\\\\c454656e-f016-47d2-a94c-dfb9238bb29b\\\\scratchpad\\\\compare_teammate_pick.py\")"
     ]
   }
 }

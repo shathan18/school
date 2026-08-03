@@ -1,0 +1,21 @@
+{
+  "label": "mondrian_ii__mondrian_iii",
+  "target_a": "examples/new_candidates/mondrian_comp_ii_red_blue_yellow_1930.jpg",
+  "target_b": "examples/new_candidates/mondrian_comp_iii_1929.jpg",
+  "n_shards": 209,
+  "elapsed_s": 4.3,
+  "ssim_A": 0.7450258001933429,
+  "ssim_B": 0.818078966691064,
+  "edge_A": 0.45269554149980734,
+  "edge_B": 0.5517965386374529,
+  "good_A": 0.0,
+  "good_B": 0.33588118883785106,
+  "bad_A": 0.0,
+  "bad_B": 5.421303945242288,
+  "good_mean": 0.16794059441892553,
+  "bad_mean": 2.710651972621144,
+  "good_bad_ratio": 0.061955793703951774,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 100.0
+}

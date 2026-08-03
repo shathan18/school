@@ -1,0 +1,9 @@
+durer_rhinoceros_1515	any_culture_animal	File:Dürer's Rhinoceros, 1515.jpg
+wpa_hawk_1938	wpa_bird_conservation	File:Know your birds don't shoot protected hawks.jpg
+wpa_bird_insects_1938	wpa_bird_conservation	File:Protect birds they destroy harmful insects.jpg
+hokusai_cuckoo_azaleas	hokusai_kacho_e	File:Hokusai (1828) Cuckoo and Azaleas.jpg
+hokusai_hibiscus_sparrow	hokusai_kacho_e	File:Hibiscus and Sparrow.jpg
+hokusai_hydrangea_swallow	hokusai_kacho_e	File:Hydrangea and Swallow.jpg
+hokusai_peonies_canary	hokusai_kacho_e	File:Hokusai (1834) Peonies and Canary, MFAB 21.10228.jpg
+hokusai_dragonfly_bellflower	hokusai_kacho_e	File:葛飾北斎画 桔梗に蜻蛉-Dragonfly and Bellflower MET DP141266.jpg
+hokusai_sparrows_chrysanthemums	hokusai_kacho_e	File:葛飾北斎画 菊に雀-Sparrows and Chrysanthemums MET DP151594.jpg

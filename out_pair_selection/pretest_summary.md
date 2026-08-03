@@ -1,6 +1,6 @@
 # Blur pre-test results
 
-Pool: 52 candidates.  Passed: **9**.  Failed: 43.
+Pool: 65 candidates.  Passed: **14**.  Failed: 51.
 
 Config: downsample to 256px long edge, Gaussian sigma=12.0, K-means K=4 in CIELAB.
 Pass gates: score>=0.35, subj_compact>=0.2, n_big_regions<=7, subj_area in [0.08, 0.75].
@@ -11,18 +11,25 @@ Pass gates: score>=0.35, subj_compact>=0.2, n_big_regions<=7, subj_area in [0.08
 |---|------|------:|-------------:|--------------:|----------:|------------:|----------:|-------------:|
 | 1 | dawn_at_isawa_in_the_kai_province | 1.085 | 1.00 | 4 | 0.58 | 58.5 | 0.30 | 4 |
 | 2 | fuji_a | 1.060 | 1.00 | 5 | 0.71 | 57.5 | 0.34 | 4 |
-| 3 | kajikazawa | 0.754 | 0.79 | 5 | 0.65 | 49.0 | 0.36 | 4 |
-| 4 | at_sea_off_kazusa_kazusa_no_kairo_from_the_serie | 0.589 | 1.00 | 6 | 0.55 | 41.4 | 0.19 | 4 |
-| 5 | katsushika_hokusai_goten_yama_hill_shinagawa_on_ | 0.570 | 0.98 | 6 | 0.67 | 32.4 | 0.37 | 4 |
-| 6 | katsushika_hokusai_tempesta_sotto_la_vetta_dalla | 0.461 | 0.43 | 4 | 0.59 | 67.2 | 0.36 | 4 |
-| 7 | red_fuji_southern_wind_clear_morning | 0.417 | 0.70 | 4 | 0.52 | 27.7 | 0.27 | 4 |
-| 8 | red_fuji | 0.417 | 0.70 | 4 | 0.52 | 27.7 | 0.27 | 4 |
-| 9 | fuji_c | 0.412 | 0.46 | 5 | 0.66 | 41.8 | 0.35 | 4 |
+| 3 | mondrian_comp_iii_1929 | 0.962 | 1.00 | 6 | 0.83 | 81.1 | 0.19 | 4 |
+| 4 | kajikazawa | 0.754 | 0.79 | 5 | 0.65 | 49.0 | 0.36 | 4 |
+| 5 | wpa_yellowstone_1938 | 0.675 | 0.69 | 4 | 0.60 | 40.3 | 0.37 | 4 |
+| 6 | mondrian_comp_ii_red_blue_yellow_1930 | 0.631 | 0.76 | 5 | 0.61 | 83.4 | 0.41 | 4 |
+| 7 | at_sea_off_kazusa_kazusa_no_kairo_from_the_serie | 0.589 | 1.00 | 6 | 0.55 | 41.4 | 0.19 | 4 |
+| 8 | katsushika_hokusai_goten_yama_hill_shinagawa_on_ | 0.570 | 0.98 | 6 | 0.67 | 32.4 | 0.37 | 4 |
+| 9 | katsushika_hokusai_tempesta_sotto_la_vetta_dalla | 0.461 | 0.43 | 4 | 0.59 | 67.2 | 0.36 | 4 |
+| 10 | mondrian_comp_red_yellow_blue_black_1921 | 0.448 | 0.74 | 6 | 0.50 | 54.5 | 0.22 | 4 |
+| 11 | wpa_lassen_volcanic_1938 | 0.442 | 1.00 | 6 | 0.60 | 27.1 | 0.36 | 4 |
+| 12 | red_fuji_southern_wind_clear_morning | 0.417 | 0.70 | 4 | 0.52 | 27.7 | 0.27 | 4 |
+| 13 | red_fuji | 0.417 | 0.70 | 4 | 0.52 | 27.7 | 0.27 | 4 |
+| 14 | fuji_c | 0.412 | 0.46 | 5 | 0.66 | 41.8 | 0.35 | 4 |
 
 ## Rejected (ranked by score, best-first)
 
 | name | score | subj_compact | n_big_regions | top2_frac | contrast dE | subj_area | reason |
 |------|------:|-------------:|--------------:|----------:|------------:|----------:|--------|
+| hiroshige_shin_ohashi_shower | 0.321 | 0.64 | 6 | 0.59 | 31.5 | 0.24 | S<0.35 |
+| wpa_zion_1938 | 0.223 | 0.53 | 4 | 0.54 | 18.5 | 0.28 | S<0.35 |
 | enoshima_in_the_sagami_province | 0.216 | 0.55 | 6 | 0.67 | 21.9 | 0.39 | S<0.35 |
 | fuji_b | 0.196 | 0.17 | 4 | 0.70 | 44.4 | 0.18 | S<0.35 cmp<0.2 |
 | sunset_across_the_ryogoku_bridge_from_the_bank_o | 0.171 | 0.30 | 5 | 0.63 | 29.7 | 0.19 | S<0.35 |
@@ -31,12 +38,16 @@ Pass gates: score>=0.35, subj_compact>=0.2, n_big_regions<=7, subj_area in [0.08
 | soshu_nakahara | 0.147 | 0.44 | 6 | 0.61 | 20.7 | 0.39 | S<0.35 |
 | reflection_in_lake_at_misaka_in_kai_province_ksh | 0.145 | 0.52 | 6 | 0.57 | 17.9 | 0.35 | S<0.35 |
 | ejiri_in_suruga_province_sunsh_ejiri_from_the_se | 0.129 | 0.30 | 5 | 0.52 | 26.2 | 0.22 | S<0.35 |
+| hiroshige_kanbara_snow | 0.126 | 0.24 | 4 | 0.65 | 19.7 | 0.35 | S<0.35 |
 | under_the_mannen_bridge_at_fukagawa_fukagawa_man | 0.114 | 0.29 | 6 | 0.53 | 26.4 | 0.32 | S<0.35 |
+| hiroshige_plum_garden_kameido | 0.105 | 0.21 | 7 | 0.56 | 39.0 | 0.24 | S<0.35 |
 | the_tea_plantation_of_katakura_in_the_suruga_pro | 0.103 | 0.29 | 4 | 0.67 | 14.7 | 0.45 | S<0.35 |
 | noboto_bay_noboto_no_ura_from_the_series_thirty_ | 0.095 | 0.57 | 6 | 0.58 | 10.5 | 0.23 | S<0.35 |
 | the_back_of_the_fuji_from_the_minobu_river | 0.085 | 0.25 | 6 | 0.56 | 21.3 | 0.30 | S<0.35 |
+| wpa_grand_canyon_1938 | 0.081 | 0.37 | 7 | 0.59 | 15.7 | 0.32 | S<0.35 |
 | nihonbashi_in_edo_edo_nihonbashi_from_the_series | 0.070 | 0.30 | 7 | 0.51 | 19.4 | 0.29 | S<0.35 |
 | h_amida_falls | 0.065 | 0.08 | 4 | 0.59 | 35.2 | 0.28 | S<0.35 cmp<0.2 |
+| friedrich_monk_by_the_sea | 0.057 | 0.17 | 5 | 0.58 | 17.5 | 0.28 | S<0.35 cmp<0.2 |
 | climbing_on_mt_fuji | 0.056 | 0.27 | 9 | 0.48 | 24.1 | 0.24 | S<0.35 nreg>7 |
 | the_fuji_from_kanaya_on_the_tokaido | 0.049 | 0.17 | 6 | 0.56 | 18.1 | 0.32 | S<0.35 cmp<0.2 |
 | kajikazawa_in_kai_province_koshu_kajikazawa | 0.045 | 0.14 | 7 | 0.65 | 21.4 | 0.24 | S<0.35 cmp<0.2 |
@@ -51,6 +62,7 @@ Pass gates: score>=0.35, subj_compact>=0.2, n_big_regions<=7, subj_area in [0.08
 | enoshima | 0.020 | 0.09 | 5 | 0.61 | 11.4 | 0.35 | S<0.35 cmp<0.2 |
 | honjo_tatekawa_the_timberyard_at_honjo | 0.019 | 0.09 | 8 | 0.49 | 21.6 | 0.26 | S<0.35 cmp<0.2 nreg>7 |
 | the_coast_of_seven_leages_in_kamakura | 0.017 | 0.09 | 11 | 0.42 | 31.6 | 0.20 | S<0.35 cmp<0.2 nreg>7 |
+| hiroshige_kameyama_snow | 0.017 | 0.10 | 6 | 0.57 | 11.1 | 0.33 | S<0.35 cmp<0.2 |
 | lower_meguro_shimo_meguro_from_the_series_thirty | 0.017 | 0.08 | 5 | 0.66 | 9.5 | 0.37 | S<0.35 cmp<0.2 |
 | in_the_mountains_of_ttomi_province_ttomi_sanch_f | 0.017 | 0.07 | 5 | 0.68 | 12.2 | 0.46 | S<0.35 cmp<0.2 |
 | tago_bay_near_ejiri_on_the_tkaid_tkaid_ejiri_tag | 0.016 | 0.22 | 8 | 0.34 | 10.8 | 0.17 | S<0.35 nreg>7 |
@@ -62,6 +74,7 @@ Pass gates: score>=0.35, subj_compact>=0.2, n_big_regions<=7, subj_area in [0.08
 | ono_shindon_in_the_suraga_province | 0.009 | 0.08 | 8 | 0.45 | 12.5 | 0.27 | S<0.35 cmp<0.2 nreg>7 |
 | tsukudajima_in_musashi_province_buy_tsukudajima_ | 0.009 | 0.09 | 10 | 0.52 | 11.3 | 0.19 | S<0.35 cmp<0.2 nreg>7 |
 | the_inume_pass_in_kai_province_ksh_inume_tge_fro | 0.008 | 0.06 | 7 | 0.51 | 10.7 | 0.26 | S<0.35 cmp<0.2 |
+| hiroshige_fukagawa_susaki_hawk | 0.008 | 0.06 | 6 | 0.51 | 9.7 | 0.31 | S<0.35 cmp<0.2 |
 | mishima_pass_in_kai_province_ksh_mishima_goe_fro | 0.007 | 0.06 | 7 | 0.45 | 12.0 | 0.27 | S<0.35 cmp<0.2 |
 | hodogaya_on_the_tkaid_tkaid_hodogaya_from_the_se | 0.007 | 0.05 | 7 | 0.51 | 10.6 | 0.32 | S<0.35 cmp<0.2 |
 | fujithe_tama_river_musashi_province_from_the_ser | 0.006 | 0.09 | 8 | 0.40 | 9.2 | 0.23 | S<0.35 cmp<0.2 nreg>7 |

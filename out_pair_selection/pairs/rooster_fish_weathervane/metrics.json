@@ -1,0 +1,21 @@
+{
+  "label": "rooster_fish_weathervane",
+  "target_a": "examples/new_candidates_v5/rooster_weathervane_nobg.png",
+  "target_b": "examples/new_candidates_v5/fish_weathervane_nobg.png",
+  "n_shards": 123,
+  "elapsed_s": 4.1,
+  "ssim_A": 0.8016386338360111,
+  "ssim_B": 0.8699943933295919,
+  "edge_A": 0.5722244908658678,
+  "edge_B": 0.5608611850570786,
+  "good_A": 11.320714769647697,
+  "good_B": 21.728048465147207,
+  "bad_A": 6.158960027100271,
+  "bad_B": 13.693620479479886,
+  "good_mean": 16.524381617397452,
+  "bad_mean": 9.926290253290079,
+  "good_bad_ratio": 1.6647086873084767,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 99.3677838849529
+}

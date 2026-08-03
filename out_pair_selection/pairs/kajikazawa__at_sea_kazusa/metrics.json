@@ -1,0 +1,21 @@
+{
+  "label": "kajikazawa__at_sea_kazusa",
+  "target_a": "examples/kajikazawa.jpg",
+  "target_b": "examples/series/at_sea_off_kazusa_kazusa_no_kairo_from_the_serie.jpg",
+  "n_shards": 303,
+  "elapsed_s": 4.0,
+  "ssim_A": 0.5829235579842746,
+  "ssim_B": 0.662586317344158,
+  "edge_A": 0.19752358688215743,
+  "edge_B": 0.3379057618993134,
+  "good_A": 16.784670462924304,
+  "good_B": 13.981290891715062,
+  "bad_A": 16.77045670578411,
+  "bad_B": 8.478828199661839,
+  "good_mean": 15.382980677319683,
+  "bad_mean": 12.624642452722973,
+  "good_bad_ratio": 1.2184884233297055,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.68800489216936
+}

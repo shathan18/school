@@ -1,0 +1,21 @@
+{
+  "label": "chatnoir_bruant_nobg",
+  "target_a": "examples/new_candidates_v10/steinlen_chat_noir_nobg.png",
+  "target_b": "examples/new_candidates_v10/lautrec_bruant_nobg.png",
+  "n_shards": 164,
+  "elapsed_s": 3.3,
+  "ssim_A": 0.7808129005510567,
+  "ssim_B": 0.6860128784690874,
+  "edge_A": 0.6877025885674856,
+  "edge_B": 0.5195067653122369,
+  "good_A": 0.7038053202910652,
+  "good_B": 1.6625397948355147,
+  "bad_A": 31.323313054196987,
+  "bad_B": 15.118285793913667,
+  "good_mean": 1.18317255756329,
+  "bad_mean": 23.22079942405533,
+  "good_bad_ratio": 0.050953136279089324,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 95.47310486396698
+}

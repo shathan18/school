@@ -1,0 +1,21 @@
+{
+  "label": "rembrandt_young_old_nobg",
+  "target_a": "examples/new_candidates_v4/rembrandt_young_1629_nobg.png",
+  "target_b": "examples/new_candidates_v4/rembrandt_old_1669_nobg.png",
+  "n_shards": 243,
+  "elapsed_s": 4.8,
+  "ssim_A": 0.7740456441149578,
+  "ssim_B": 0.5815629689607716,
+  "edge_A": 0.5016208446491606,
+  "edge_B": 0.5691458823401037,
+  "good_A": 4.751394398544456,
+  "good_B": 4.006031083275342,
+  "bad_A": 27.480836340859607,
+  "bad_B": 18.56413825098585,
+  "good_mean": 4.378712740909899,
+  "bad_mean": 23.02248729592273,
+  "good_bad_ratio": 0.19019286164120794,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 91.54828316731759
+}

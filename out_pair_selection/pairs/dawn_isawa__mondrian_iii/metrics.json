@@ -1,0 +1,21 @@
+{
+  "label": "dawn_isawa__mondrian_iii",
+  "target_a": "examples/series/dawn_at_isawa_in_the_kai_province.jpg",
+  "target_b": "examples/new_candidates/mondrian_comp_iii_1929.jpg",
+  "n_shards": 204,
+  "elapsed_s": 4.6,
+  "ssim_A": 0.6409377280398855,
+  "ssim_B": 0.830433878252674,
+  "edge_A": 0.23871568366570636,
+  "edge_B": 0.5963612916622302,
+  "good_A": 0.4093356640285305,
+  "good_B": 0.5682746600337697,
+  "bad_A": 2.4410811380585544,
+  "bad_B": 7.71982062128942,
+  "good_mean": 0.4888051620311501,
+  "bad_mean": 5.080450879673988,
+  "good_bad_ratio": 0.09621294912756183,
+  "joint_01": 100.0,
+  "joint_02": 100.0,
+  "joint_03": 98.11629627793577
+}
