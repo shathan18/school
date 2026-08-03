@@ -35,7 +35,15 @@ def _slot_ring(u_center, half_w, v0, v1):
 
 
 def slots_for_panel(scene, panel, crossings):
-    half_w = (scene.material_thickness + scene.fab.joint_clearance) / 2.0
+    """Notch rings for one panel. Width comes from the CROSSING, not from the thickness.
+
+    A slot has to swallow the other sheet's cross-section as seen in this sheet's plane, and
+    that section is thickness/sin(angle) wide -- only equal to the thickness when the two
+    meet at 90 degrees. The old fixed-width version was correct for the shipped 2-family
+    egg-crate and silently wrong for anything else: the 3-family layout this project settled
+    on crosses at 60 degrees, where the true slot is 15% wider than the thickness, so
+    fixed-width notches would simply refuse to assemble.
+    """
     v0, v1 = panel.v_range
     vmid = 0.5 * (v0 + v1)
     out = []
@@ -46,6 +54,8 @@ def slots_for_panel(scene, panel, crossings):
             other_name, u = c.panelA_name, c.uB
         else:
             continue
+        width = c.slot_width if c.slot_width > 0 else scene.material_thickness
+        half_w = (width + scene.fab.joint_clearance) / 2.0
         if panel.name < other_name:
             out.append(_slot_ring(u, half_w, vmid, v1))        # notch from the top
         else:

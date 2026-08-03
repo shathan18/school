@@ -109,14 +109,21 @@ def _wall_gridlines(wall, step):
 
 
 def _floor_extent(scene):
-    """(xmax, ymax) covering both lights and every panel's floor-plan footprint,
-    ~matching preview's floor size. No family/coord to read -- every panel's own
-    `floor_segment_xy()` endpoints are checked instead."""
-    xs = [scene.lights["A"].xyz[0], 0.0]
-    ys = [scene.lights["B"].xyz[1], 0.0]
+    """(xmax, ymax) covering every light and every panel's floor-plan footprint.
+
+    Was hardcoded to lights 'A' and 'B'. A turntable build names its stops after the views
+    ('front'/'side'/'back'), has as many lights as stops, and they sit at arbitrary azimuths
+    -- so both the fixed names and the assumption that only A's x and B's y matter are wrong
+    there. Every light's x AND y is taken instead, which reduces to the old answer for the
+    two-wall scene and stays correct for N.
+    """
+    xs, ys = [0.0], [0.0]
+    for light in scene.lights.values():
+        xs.append(abs(float(light.xyz[0])))
+        ys.append(abs(float(light.xyz[1])))
     for p in scene.panels:
         for (x, y) in p.floor_segment_xy():
-            xs.append(x); ys.append(y)
+            xs.append(abs(x)); ys.append(abs(y))
     return max(xs) * 1.1, max(ys) * 1.1
 
 
