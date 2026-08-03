@@ -5,9 +5,10 @@ import math
 from pathlib import Path
 from typing import Union
 
+import numpy as np
 import yaml
 
-from .scene import FabParams, Light, Panel, Scene, SolveParams, TableSpec, Wall
+from .scene import FabParams, Light, Panel, Scene, SolveParams, TableSpec, TurntableSpec, Wall
 
 
 def _require(d: dict, key: str, ctx: str):
@@ -42,29 +43,67 @@ def _resolve_palette(col: dict) -> list:
     return palette
 
 
+def _load_turntable(raw: dict):
+    """Build walls+lights from a `turntable:` block, if present.
+
+    Returns (walls, lights, spec) or (None, None, None). A scene declares EITHER the
+    fixed `walls:`/`lights:` corner rig OR a `turntable:` rig -- never both, since the
+    turntable derives its walls and lights from the single physical lamp/wall.
+    """
+    t = raw.get("turntable")
+    if t is None:
+        return None, None, None
+    if "walls" in raw or "lights" in raw:
+        raise ValueError(
+            "scene: use either `turntable:` or `walls:`/`lights:`, not both -- the "
+            "turntable block derives its per-stop walls and lights from one lamp and "
+            "one wall.")
+    from ..geometry.turntable import build_walls_and_lights
+    stops = tuple(float(s) for s in _require(t, "stops_deg", "turntable"))
+    if len(stops) < 1:
+        raise ValueError("scene: turntable.stops_deg must list at least one view angle.")
+    names = t.get("names")
+    spec = TurntableSpec(
+        stops_deg=stops,
+        center=tuple(map(float, t.get("center", (0.0, 0.0)))),
+        view_azimuth_deg=float(t.get("view_azimuth_deg", 0.0)),
+        wall_distance=float(_require(t, "wall_distance", "turntable")),
+        lamp_distance=float(_require(t, "lamp_distance", "turntable")),
+        lamp_height=float(t.get("lamp_height", 0.5)),
+        wall_width=float(_require(t, "wall_width", "turntable")),
+        wall_height=float(_require(t, "wall_height", "turntable")),
+        wall_z0=float(t.get("wall_z0", 0.0)),
+        names=tuple(str(n) for n in names) if names is not None else None,
+    )
+    walls, lights = build_walls_and_lights(spec)
+    return walls, lights, spec
+
+
 def load_scene(path: Union[str, Path]) -> Scene:
     path = Path(path)
     with open(path, "r", encoding="utf-8") as fh:
         raw = yaml.safe_load(fh)
 
-    # --- walls -------------------------------------------------------------
-    walls = {}
-    for name in ("A", "B"):
-        w = _require(raw["walls"], name, "walls")
-        walls[name] = Wall(
-            name=name,
-            plane=w.get("plane", "x" if name == "A" else "y"),
-            offset=float(w.get("offset", 0.0)),
-            width_axis=w.get("width_axis", "y" if name == "A" else "x"),
-            width=float(_require(w, "width", f"walls.{name}")),
-            height=float(_require(w, "height", f"walls.{name}")),
-            z0=float(w.get("z0", 0.0)),
-        )
-
-    # --- lights ------------------------------------------------------------
-    lights = {name: Light(name=name, pos=tuple(map(float, _require(raw["lights"], name, "lights")["pos"])))
-              for name in ("A", "B")}
-    source_radius = float(raw["lights"].get("source_radius", 0.003))
+    # --- walls + lights ----------------------------------------------------
+    # Two rigs are supported: the original fixed corner (Wall A at x=0, Wall B at y=0,
+    # one light each) and a turntable (one lamp, one wall, N rotation stops).
+    walls, lights, turntable = _load_turntable(raw)
+    if walls is None:
+        walls = {}
+        for name in ("A", "B"):
+            w = _require(raw["walls"], name, "walls")
+            walls[name] = Wall(
+                name=name,
+                plane=w.get("plane", "x" if name == "A" else "y"),
+                offset=float(w.get("offset", 0.0)),
+                width_axis=w.get("width_axis", "y" if name == "A" else "x"),
+                width=float(_require(w, "width", f"walls.{name}")),
+                height=float(_require(w, "height", f"walls.{name}")),
+                z0=float(w.get("z0", 0.0)),
+            )
+        lights = {name: Light(name=name, pos=tuple(map(float, _require(raw["lights"], name, "lights")["pos"])))
+                  for name in ("A", "B")}
+    source_radius = float(raw.get("lights", raw.get("turntable", {})).get("source_radius", 0.003))
 
     # --- panels (woven lattice) --------------------------------------------
     # Every panel is independent: its own angle + anchor, no grouping. A flat
@@ -150,7 +189,8 @@ def load_scene(path: Union[str, Path]) -> Scene:
                   overlap_jitter=float(col.get("overlap_jitter", 0.0)),
                   overlap_shard_budget=int(col.get("shard_budget", 220)),
                   overlap_detail_bias=float(col.get("detail_bias", 2.0)),
-                  overlap_penumbra_min_feature_sigmas=float(col.get("penumbra_min_feature_sigmas", 2.0)))
+                  overlap_penumbra_min_feature_sigmas=float(col.get("penumbra_min_feature_sigmas", 2.0)),
+                  turntable=turntable)
     _sanity_check(scene)
     return scene
 
@@ -158,29 +198,40 @@ def load_scene(path: Union[str, Path]) -> Scene:
 def _sanity_check(scene: Scene):
     """Cheap geometric sanity checks with actionable messages.
 
-    Every panel may contribute to either or both walls (there's no family label
-    saying which), so both endpoints of every panel's floor-plan footprint must
-    sit between each light and that light's wall's plane -- one check, applied
-    uniformly, rather than a separate rule per family. The wall-plane side is a
-    non-strict bound (a panel's along-wall extent legitimately touches x=0 or
-    y=0 at the room's corner -- that's normal, e.g. every axis-aligned-style
-    panel in the example scene runs its u_range from exactly 0.0); the light
-    side stays strict (a panel must not reach or pass the light itself, which
-    would be a real physical impossibility, not a boundary case).
+    Every panel may contribute to every wall (there's no family label saying which), so
+    every endpoint of every panel's floor-plan footprint must sit between each light and
+    that light's wall -- one rule, applied uniformly, rather than a separate rule per
+    family or per rig. Expressed as a signed distance along the wall normal `n`: the wall
+    plane sits at `n.x = offset` and its light at `n.L`, so a panel point `P` must satisfy
+    `offset <= n.P < n.L` (with the inequalities flipped when the light lies on the
+    negative side of the plane).
+
+    The wall-plane side is a non-strict bound: a panel's extent legitimately touches the
+    plane at the room's corner (every axis-aligned panel in the example scene runs its
+    u_range from exactly 0.0). The light side stays strict -- a panel reaching or passing
+    the lamp is a real physical impossibility, not a boundary case.
+
+    This works unchanged for the fixed corner rig and for a turntable, whose per-stop
+    walls and lamps are just more (wall, light) pairs in the same dicts.
     """
-    la, lb = scene.lights["A"].xyz, scene.lights["B"].xyz
-    if la[0] <= 0 or lb[1] <= 0:
-        raise ValueError("Light A must have x>0 and Light B must have y>0.")
-    for p in scene.panels:
-        for (x, y) in p.floor_segment_xy():
-            if not (0.0 <= x < la[0]):
-                raise ValueError(
-                    f"panel {p.name}: endpoint x={x:.3f} must satisfy "
-                    f"0 <= x < light A x ({la[0]}) so it sits between Light A and Wall A.")
-            if not (0.0 <= y < lb[1]):
-                raise ValueError(
-                    f"panel {p.name}: endpoint y={y:.3f} must satisfy "
-                    f"0 <= y < light B y ({lb[1]}) so it sits between Light B and Wall B.")
+    for name, wall in scene.walls.items():
+        n = wall.normal
+        L = scene.light_for_wall(name).xyz
+        s_wall = float(n @ wall.origin)          # exact plane position along the normal
+        s_light = float(n @ L)
+        if abs(s_light - s_wall) < 1e-9:
+            raise ValueError(f"light {name} lies in the plane of wall {name}; it cannot light it.")
+        lo, hi = (s_wall, s_light) if s_light > s_wall else (s_light, s_wall)
+        for p in scene.panels:
+            for (x, y) in p.floor_segment_xy():
+                s = float(n @ np.array([x, y, 0.0]))
+                inside = (s_wall <= s < s_light) if s_light > s_wall else (s_light < s <= s_wall)
+                if not inside:
+                    raise ValueError(
+                        f"panel {p.name}: endpoint (x={x:.3f}, y={y:.3f}) is at {s:.3f} along "
+                        f"wall {name}'s normal, outside [{lo:.3f}, {hi:.3f}] -- it must sit "
+                        f"between light {name} (at {s_light:.3f}) and wall {name} (at "
+                        f"{s_wall:.3f}) to cast a shadow on it.")
     if scene.table is not None:
         # A panel standing over the table must not dip below its top -- the shard body
         # would physically intersect the furniture. Judged at the footprint midpoint so a

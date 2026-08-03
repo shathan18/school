@@ -48,9 +48,9 @@ def solve(scene, renderer, targets, init_opacity=None, verbose=True, log_every=5
         history.append(float(loss.detach()))
         if verbose and (it % log_every == 0 or it == sp.iters - 1):
             with torch.no_grad():
-                errA = float(((pred["A"] - tgt["A"]) ** 2).mean())
-                errB = float(((pred["B"] - tgt["B"]) ** 2).mean())
-            print(f"  iter {it:4d}  loss {float(loss):.5f}  mseA {errA:.5f}  mseB {errB:.5f}")
+                errs = "  ".join(f"mse{k} {float(((pred[k] - tgt[k]) ** 2).mean()):.5f}"
+                                 for k in sorted(pred))
+            print(f"  iter {it:4d}  loss {float(loss):.5f}  {errs}")
 
     with torch.no_grad():
         op = torch.sigmoid(logits)

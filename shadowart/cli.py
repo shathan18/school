@@ -162,13 +162,13 @@ def _run_color(scene, out, args):
     print(metrics.format_accuracy_report(metrics.evaluate_wall_accuracy(targets, pred_rgb)))
 
     save_color_comparison(targets, pred_rgb, out / "preview_final.png")
-    for fam in ("A", "B"):
+    for fam in scene.walls:
         C.save_cmyk_channels(targets[fam], out / "cmyk_channels", fam)
     np.save(out / "opacity.npy", opacity)
     np.save(out / "colorid.npy", colorid)
 
     print("\n=== CMYK shard counts (per channel) ===")
-    for fam in ("A", "B"):
+    for fam in scene.walls:
         cnt = Counter(f["channel"] for f in fragments if f["wall"] == fam)
         print(f"Wall {fam}: {sum(cnt.values())} shards  "
               + ", ".join(f"{k}:{v}" for k, v in sorted(cnt.items())))
@@ -274,13 +274,13 @@ def _run_color_overlap(scene, out, args):
     print(metrics.format_accuracy_report(metrics.evaluate_wall_accuracy(targets, pred_rgb)))
 
     save_color_comparison(targets, pred_rgb, out / "preview_final.png")
-    for fam in ("A", "B"):
+    for fam in scene.walls:
         C.save_cmyk_channels(targets[fam], out / "cmyk_channels", fam)
     np.save(out / "opacity.npy", opacity)
     np.save(out / "stack_colorid.npy", stack_colorid)
 
     print("\n=== shard regions vs. fabrication ceiling ===")
-    for fam in ("A", "B"):
+    for fam in scene.walls:
         b = budget_stats.get(fam, {})
         ceil = b.get("target")
         ceil_s = f"{ceil}" if ceil else "unlimited"
@@ -291,7 +291,7 @@ def _run_color_overlap(scene, out, args):
               f"{b.get('penumbra_min_feature_mm', 0.0):.2f} mm")
 
     print("\n=== overlap shard counts (per channel, across all stack slots) ===")
-    for fam in ("A", "B"):
+    for fam in scene.walls:
         cnt = Counter(f["channel"] for f in fragments if f["wall"] == fam)
         print(f"Wall {fam}: {sum(cnt.values())} laminated layers  "
               + ", ".join(f"{k}:{v}" for k, v in sorted(cnt.items())))
@@ -424,7 +424,7 @@ def cmd_run(args):
              for w in scene.walls}
     save_wall_comparison(targets, pred, out / "preview_final.png", crosstalk=cross)
     np.save(out / "opacity.npy", opacity)
-    for w in ("A", "B"):
+    for w in scene.walls:
         mse = float(((pred[w] - targets[w]) ** 2).mean())
         print(f"  wall {w}: final MSE {mse:.5f}   mean cross-talk {cross[w].mean():.4f}")
     if fragments is not None:

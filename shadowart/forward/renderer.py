@@ -80,9 +80,8 @@ class Renderer:
 
     # -- forward -----------------------------------------------------------
     def render(self, opacities):
-        """opacities: tensor [P,Hp,Wp] in [0,1].  Returns {'A':D_A,'B':D_B} darkness."""
-        if not torch.is_tensor(opacities):
-            opacities = to_t(opacities)
+        """opacities: tensor [P,Hp,Wp] in [0,1].  Returns {wall_name: darkness}."""
+        opacities = to_t(opacities)
         out = {}
         for wall_name in self.scene.walls:
             grids = self._grids[wall_name]; kerns = self._kernels[wall_name]

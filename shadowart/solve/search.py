@@ -55,7 +55,7 @@ def colour_agreeing_duty(renderer, panel_T, panels, targets, white_thr, prim=Non
     if prim is None:
         prim = {}
     good, bad = {}, {}
-    for wall in ("A", "B"):
+    for wall in renderer.scene.walls:
         q = panel_T.copy()
         for gi, p in enumerate(panels):
             if prim.get(p.name) == wall:

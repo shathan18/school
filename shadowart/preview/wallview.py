@@ -16,8 +16,11 @@ def _show(ax, img, title, cmap="gray_r", vmin=0, vmax=1):
 
 
 def save_wall_comparison(targets, pred, out_path, crosstalk=None):
-    fig, axes = plt.subplots(2, 4, figsize=(12, 6))
-    for r, w in enumerate(("A", "B")):
+    """One row per wall/view -- works for the 2-wall corner setup and for an N-stop
+    turntable alike (row count follows `pred`, it is not hardcoded)."""
+    names = list(pred)
+    fig, axes = plt.subplots(len(names), 4, figsize=(12, 3 * len(names)), squeeze=False)
+    for r, w in enumerate(names):
         _show(axes[r, 0], targets[w], f"Wall {w}: target")
         _show(axes[r, 1], pred[w], f"Wall {w}: predicted")
         err = abs(pred[w] - targets[w])
@@ -33,9 +36,11 @@ def save_wall_comparison(targets, pred, out_path, crosstalk=None):
 
 
 def save_color_comparison(targets, pred, out_path):
-    """targets/pred: {'A','B'} RGB [H,W,3] in [0,1]. Source vs predicted colour projection."""
-    fig, axes = plt.subplots(2, 2, figsize=(9, 7))
-    for r, w in enumerate(("A", "B")):
+    """targets/pred: {wall: RGB [H,W,3] in [0,1]}. Source vs predicted colour projection,
+    one row per wall/view (any number of them)."""
+    names = list(pred)
+    fig, axes = plt.subplots(len(names), 2, figsize=(9, 3.5 * len(names)), squeeze=False)
+    for r, w in enumerate(names):
         axes[r, 0].imshow(np.clip(targets[w], 0, 1), origin="lower", aspect="auto")
         axes[r, 0].set_title(f"Wall {w}: source (fitted)", fontsize=9)
         axes[r, 1].imshow(np.clip(pred[w], 0, 1), origin="lower", aspect="auto")

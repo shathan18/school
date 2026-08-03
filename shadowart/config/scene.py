@@ -245,6 +245,30 @@ class TableSpec:
 
 
 @dataclass
+class TurntableSpec:
+    """A rotating base under the assembly, lit by ONE lamp against ONE wall.
+
+    A view is selected by turning the piece, not by adding hardware -- so an N-view
+    turntable piece is far cheaper to install than N walls and N lamps, and every view
+    necessarily shares the same optics. `geometry.turntable.build_walls_and_lights`
+    converts this into the N (Wall, Light) pairs the renderer consumes, by rotating the
+    rig by -theta instead of the assembly by +theta.
+
+    All distances in metres, all angles in degrees measured from the +x axis.
+    """
+    stops_deg: Tuple[float, ...] = (15.0, 135.0, 255.0)  # turntable angle for each view
+    center: Tuple[float, float] = (0.0, 0.0)   # (x,y) of the vertical rotation axis
+    view_azimuth_deg: float = 0.0              # direction from the centre to the wall
+    wall_distance: float = 1.0                 # centre -> wall plane
+    lamp_distance: float = 1.0                 # centre -> lamp (on the opposite side)
+    lamp_height: float = 0.5                   # lamp z
+    wall_width: float = 0.6                    # imaged rectangle on the wall
+    wall_height: float = 0.6
+    wall_z0: float = 0.0                       # bottom of the imaged rectangle
+    names: Optional[Tuple[str, ...]] = None    # per-stop wall/light names; default V0..Vn-1
+
+
+@dataclass
 class Scene:
     walls: dict                                 # {'A': Wall, 'B': Wall}
     lights: dict                                # {'A': Light, 'B': Light}
@@ -277,7 +301,12 @@ class Scene:
                                                 # non-ideal (non-point) light could ever resolve gets
                                                 # merged into its neighbour instead of fabricated as
                                                 # illusory precision. 0 disables (old behaviour).
+    turntable: Optional[TurntableSpec] = None   # set when walls/lights came from a rotating
+                                                # base rather than a fixed multi-wall corner;
+                                                # records the rig so fabrication and previews
+                                                # can report the real one-lamp/one-wall setup
 
     def light_for_wall(self, wall_name: str) -> Light:
-        """Wall A is lit by Light A, Wall B by Light B."""
+        """Each wall is lit by the light of the same name (Wall A by Light A, and each
+        turntable stop by its own rig-frame lamp)."""
         return self.lights[wall_name]
