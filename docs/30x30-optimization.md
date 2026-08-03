@@ -237,7 +237,7 @@ solver redistributes onto the rest and the geometry changes underneath. **18 she
 - **The three views are more alike than before.** Distinctness fell from 0.43 to 0.35 when the
   targets changed, because `pearlN`'s three poses (front, three-quarter, back) share more of
   their mass than `girl3`'s did (front, true profile, back). That makes the reconstruction
-  easier and the *illusion* less startling — a real trade, and one worth revisiting if the
+  easier and the _illusion_ less startling — a real trade, and one worth revisiting if the
   point of the piece is the surprise rather than the fidelity.
 - **Vertical streaking** remains visible in all three views. Frequency-shaped/blue-noise error
   diffusion is the untested idea most likely to help; a naive heavy de-streak was tried
@@ -262,14 +262,14 @@ solver was reproducing it faithfully.
 
 `check_targets.py` scores this so it cannot recur silently:
 
-| image              |  holes % | raggedness |
-| ------------------ | -------: | ---------: |
-| `girl3_back.png`   | **0.00** |   **5.08** |
-| `girl3_profile.png`|     0.49 |       4.14 |
-| `girl3_front.png`  |     0.48 |       3.22 |
-| `pearlN_back.png`  |     0.16 |       2.26 |
-| `pearlN_side.png`  |     1.54 |       2.42 |
-| `pearlN_front.png` |     1.98 |       2.80 |
+| image               |  holes % | raggedness |
+| ------------------- | -------: | ---------: |
+| `girl3_back.png`    | **0.00** |   **5.08** |
+| `girl3_profile.png` |     0.49 |       4.14 |
+| `girl3_front.png`   |     0.48 |       3.22 |
+| `pearlN_back.png`   |     0.16 |       2.26 |
+| `pearlN_side.png`   |     1.54 |       2.42 |
+| `pearlN_front.png`  |     1.98 |       2.80 |
 
 The instructive column is the first one. `girl3_back.png` scores **0% holes** — a
 `binary_fill_holes` test, the natural way to look for this, says the image is perfect. The
@@ -282,13 +282,12 @@ Switching to `pearlN` cost about 40% of the source pixels and was still clearly 
 resolution had already measured **flat** as a lever (§3), and the built piece resolves roughly
 55 features across the image — far below either source. What it bought:
 
-| | mean IoU | worst view | idle sheets |
-| --- | --- | --- | --- |
-| `girl3` (torn back view) | 0.838 | 0.817 | 1 of 18 |
-| **`pearlN` (clean)** | **0.882** | **0.871** | **0 of 18** |
+|                          | mean IoU  | worst view | idle sheets |
+| ------------------------ | --------- | ---------- | ----------- |
+| `girl3` (torn back view) | 0.838     | 0.817      | 1 of 18     |
+| **`pearlN` (clean)**     | **0.882** | **0.871**  | **0 of 18** |
 
 The idle sheet was a symptom, not a design flaw. A view missing a third of its content cannot
 give its panel family enough work to do, so a sheet sat out; with complete targets the load
 balances 6 / 6 / 6 and every sheet earns its place. Roughly a third of the total improvement in
 this project came from fixing inputs and constraints rather than from optimisation.
-
