@@ -14,3 +14,4 @@ Project.zip
 # worth keeping is the small stuff: journals, metrics, previews, and the cut files.
 out_pearl3*/**/_scratch/
 out_pearl3*/**/*.npy
+examples/pearl3/_scratch/
