@@ -203,7 +203,7 @@ def _table_traces(table):
 def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=True,
                       show_panels=False, shard_thickness=0.02,
                       panel_colorid=None, names=None, wall_rgb=None, pieces=None,
-                      color_of=None, embed_plotly=False):
+                      color_of=None, embed_plotly=False, show_walls=True):
     if pieces is None:
         pieces = pieces_from_opacity(scene, opacity)
     if color_of is None:
@@ -211,10 +211,10 @@ def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=
         color_of = (_palette_color_of(scene, panel_colorid, names) if color_mode
                     else _depth_color_of(scene, table))
     traces = []
-    if wall_rgb is not None:                               # colour walls
-        traces += [_wall_rgb_mesh(scene, "A", wall_rgb["A"]), _wall_rgb_mesh(scene, "B", wall_rgb["B"])]
-    else:                                                  # scalar darkness walls
-        traces += [_wall_surface(scene, "A", pred), _wall_surface(scene, "B", pred)]
+    if show_walls:
+        for wname in scene.walls:                          # one wall per turntable stop
+            traces.append(_wall_rgb_mesh(scene, wname, wall_rgb[wname]) if wall_rgb is not None
+                          else _wall_surface(scene, wname, pred))
     sm = _shard_trace(scene, pieces, shard_thickness, color_of)
     if sm is not None:
         traces.append(sm)
@@ -222,15 +222,15 @@ def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=
         rr = _rays(scene, table, pieces, rays)
         if rr is not None:
             traces.append(rr)
-    traces += _lights_floor(scene)
+    traces += _lights_floor(scene) if show_walls else []
     if getattr(scene, "table", None) is not None:
         traces += _table_traces(scene.table)
 
     fig = go.Figure(data=traces)
     fig.update_layout(
         title="ShadowArt — interactive 3D (drag to orbit, scroll to zoom)",
-        scene=dict(aspectmode="data", xaxis_title="x (toward Wall A)",
-                   yaxis_title="y (toward Wall B)", zaxis_title="z (up)",
+        scene=dict(aspectmode="data", xaxis_title="x (m)",
+                   yaxis_title="y (m)", zaxis_title="z (up)",
                    camera=dict(eye=dict(x=1.8, y=1.8, z=1.3))),
         legend=dict(itemsizing="constant"), margin=dict(l=0, r=0, t=40, b=0))
     out_path = Path(out_path); out_path.parent.mkdir(parents=True, exist_ok=True)
