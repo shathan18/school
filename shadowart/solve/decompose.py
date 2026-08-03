@@ -1104,6 +1104,12 @@ def fragment_shards_overlap(scene, table, targets, names=None, white_thr=0.90,
                 fragments.append({"wall": family, "panel": panel.name, "channel": ch,
                                   "stack": s, "jitter_px": jitter_px,
                                   "softening_sigmas": softening_sigmas,
+                                  # wall-space centroid (metres) of the shard's shadow -- lets
+                                  # metrics.shard_view_duty re-project it into the OTHER views
+                                  # and ask how many of them it actually serves, without
+                                  # re-deriving the fragmentation.
+                                  "centroid_m": (float((xs.mean() + 0.5) / Wn * wall.width),
+                                                 float((ys.mean() + 0.5) / Hn * wall.height)),
                                   "phys_mm2": shadow_mm2 / table[(panel.name, family)].magnification ** 2})
 
         for gi, panel in fam:
