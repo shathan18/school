@@ -6,3 +6,11 @@ __pycache__/
 
 # Over GitHub 100MB per-file limit
 Project.zip
+.venv/
+
+# Solver intermediates. `_scratch` is where a sweep parks the build for the arm it is
+# currently scoring, and the dense arrays are 8-50 MB each -- 539 MB across the pearl3 runs,
+# all of it exactly reproducible from the config in the sibling metrics.json. The evidence
+# worth keeping is the small stuff: journals, metrics, previews, and the cut files.
+out_pearl3*/**/_scratch/
+out_pearl3*/**/*.npy

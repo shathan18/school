@@ -1,0 +1,14 @@
+﻿random   best score 0.7838 after 25 distinct evals (761s)
+anneal   best score 0.7487 after 25 distinct evals (424s)
+cmaes    best score 0.7799 after 25 distinct evals (420s)
+tpe      best score 0.7806 after 25 distinct evals (451s)
+ga       best score 0.7874 after 25 distinct evals (577s)
+
+  === bake-off, equal budget ===
+  ga       0.7874   {'n_per_family': 6, 'pitch': 0.019061444146673295, 'fragment_size': 0.10349731857894187, 'intensity_gain': 0.8235615050044803, 'detail_bias': 2.6819442660260133, 'engrave_levels': (0.7456, 0.263, 0.1767), 'family_angles_deg': (81.02, 141.02, 21.02)}
+  random   0.7838   {'n_per_family': 7, 'pitch': 0.017224624651267735, 'fragment_size': 0.1108388476739815, 'intensity_gain': 0.8718108328978857, 'detail_bias': 3.1912105770267596, 'engrave_levels': (0.7493, 0.2906, 0.2057), 'family_angles_deg': (78.51, 138.51, 18.51)}
+  tpe      0.7806   {'n_per_family': 5, 'pitch': 0.019688363217171833, 'fragment_size': 0.060536455260286344, 'intensity_gain': 0.9268298078451404, 'detail_bias': 2.505338723051326, 'engrave_levels': (0.754, 0.2961, 0.0757), 'family_angles_deg': (134.23, 14.23, 74.23)}
+  cmaes    0.7799   {'n_per_family': 7, 'pitch': 0.014135615984236422, 'fragment_size': 0.06269700973637973, 'intensity_gain': 1.00878257881578, 'detail_bias': 1.018582675965796, 'engrave_levels': (0.5812, 0.3762, 0.2122), 'family_angles_deg': (126.47, 6.47, 66.47)}
+  anneal   0.7487   {'n_per_family': 6, 'pitch': 0.013997790104507944, 'fragment_size': 0.11126358235708758, 'intensity_gain': 0.9330187730256254, 'detail_bias': 2.091573920580199, 'engrave_levels': (0.6358, 0.2225, 0.1575), 'family_angles_deg': (91.21, 151.21, 31.21)}
+
+-> out_pearl3\search\bakeoff.json

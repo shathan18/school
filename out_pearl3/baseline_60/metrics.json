@@ -1,0 +1,176 @@
+{
+  "config": {
+    "name": "60x60 reference (reconstructed)",
+    "body": 0.6,
+    "n_per_family": 2,
+    "pitch": 0.06,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "views": {
+      "back": "examples/girl3_back.png",
+      "side": "examples/girl3_profile.png",
+      "front": "examples/girl3_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 3.0,
+    "lamp_to_body_m": 1.0,
+    "body_to_wall_m": 2.0,
+    "lamp_height_m": 1.02,
+    "footprint_m": [
+      0.5950846384795923,
+      0.5950846384795923
+    ],
+    "swept_diameter_m": 0.6029925372672534,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 15.0,
+    "penumbra_sigma_mm": {
+      "back": 1.4344660194174754,
+      "side": 1.5342639593908631,
+      "front": 1.5342639593908636
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.04587406405702534,
+      "rmse": 0.21418231499595233,
+      "psnr_db": 13.38432783317855,
+      "ssim": 0.7442314383228351,
+      "edge_fidelity": 0.536891555447244,
+      "iou": 0.6622269725122639,
+      "pred_fg_frac": 0.29716944444444443,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.04466495959667288,
+      "rmse": 0.21134086116194586,
+      "psnr_db": 13.500330545319983,
+      "ssim": 0.7185881230346864,
+      "edge_fidelity": 0.42948235449754046,
+      "iou": 0.65977316381597,
+      "pred_fg_frac": 0.2917638888888889,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.018454204847068313,
+      "rmse": 0.13584625444622428,
+      "psnr_db": 17.339046629023624,
+      "ssim": 0.716735299737431,
+      "edge_fidelity": 0.5509892140307007,
+      "iou": 0.8446353001691204,
+      "pred_fg_frac": 0.34060277777777775,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary": {
+    "mean_iou": 0.7222118121657847,
+    "min_iou": 0.65977316381597,
+    "distinctness": 0.27030945981082954,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.004401640889066357,
+      "rmse": 0.06634486332088083,
+      "psnr_db": 23.563853925547626,
+      "ssim": 0.8610028793363371,
+      "edge_fidelity": 0.8033474926453205,
+      "iou": 0.8474630939089443,
+      "pred_fg_frac": 0.20540555555555556,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.00877013207688858,
+      "rmse": 0.09364898332010113,
+      "psnr_db": 20.569938661742132,
+      "ssim": 0.8347636955289834,
+      "edge_fidelity": 0.6526019513840559,
+      "iou": 0.8116951427431349,
+      "pred_fg_frac": 0.20389166666666667,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.01719356262561575,
+      "rmse": 0.13112422592951978,
+      "psnr_db": 17.646341251549096,
+      "ssim": 0.7631486472539596,
+      "edge_fidelity": 0.5329927590550364,
+      "iou": 0.8320262674972638,
+      "pred_fg_frac": 0.30154444444444445,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8303948347164477,
+    "min_iou": 0.8116951427431349,
+    "distinctness": 0.47804496123524154,
+    "views": 3
+  },
+  "crosstalk_cost_iou": 0.10818302255066303,
+  "shards": {
+    "n_fragments": 587,
+    "stack_depths": {
+      "1": 587
+    },
+    "collisions_resolved": 12,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 167,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 3.139175257731958
+      },
+      "side": {
+        "target": 260,
+        "achieved": 187,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 3.139175257731959
+      },
+      "front": {
+        "target": 260,
+        "achieved": 233,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 3.139175257731959
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 587,
+    "mean_views": 2.626916524701874,
+    "frac_multi": 0.979557069846678,
+    "frac_all": 0.6473594548551959
+  },
+  "runtime_s": 7.130738700012444,
+  "device": "cuda"
+}

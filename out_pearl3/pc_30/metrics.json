@@ -1,0 +1,204 @@
+{
+  "config": {
+    "name": "30x30, footprint-legal + cross-talk pre-compensation",
+    "body": 0.3,
+    "n_per_family": 2,
+    "pitch": 0.06,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "precompensate": 3,
+    "footprint_limit": 0.3,
+    "views": {
+      "back": "examples/girl3_back.png",
+      "side": "examples/girl3_profile.png",
+      "front": "examples/girl3_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.123724356957945,
+    "lamp_to_body_m": 0.48989794855663565,
+    "body_to_wall_m": 2.5101020514433645,
+    "lamp_height_m": 0.8736818545572551,
+    "footprint_m": [
+      0.2994521911602839,
+      0.2994521911602839
+    ],
+    "swept_diameter_m": 0.30000000000000004,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 30.618621784789724,
+    "penumbra_sigma_mm": {
+      "back": 3.577772414271977,
+      "side": 3.9878600114792215,
+      "front": 3.9878600114792198
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.05217888995333169,
+      "rmse": 0.22842699042217338,
+      "psnr_db": 12.82505164259765,
+      "ssim": 0.6975560022202856,
+      "edge_fidelity": 0.38693358501074154,
+      "iou": 0.6296270652484357,
+      "pred_fg_frac": 0.3147611111111111,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.05136023437967676,
+      "rmse": 0.22662796469031962,
+      "psnr_db": 12.893730030550902,
+      "ssim": 0.6941914532166563,
+      "edge_fidelity": 0.3552641889158717,
+      "iou": 0.6165239371370119,
+      "pred_fg_frac": 0.31885833333333335,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.022109440888587243,
+      "rmse": 0.14869243722727543,
+      "psnr_db": 16.554222398759016,
+      "ssim": 0.7029388202257305,
+      "edge_fidelity": 0.46624940618858396,
+      "iou": 0.8224994478336037,
+      "pred_fg_frac": 0.34785,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary": {
+    "mean_iou": 0.6895501500730171,
+    "min_iou": 0.6165239371370119,
+    "distinctness": 0.24041825393118132,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.005105257984214269,
+      "rmse": 0.0714510880547964,
+      "psnr_db": 22.91982306801412,
+      "ssim": 0.8459020372886954,
+      "edge_fidelity": 0.7492559777845725,
+      "iou": 0.8441454308551956,
+      "pred_fg_frac": 0.20060555555555556,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.00828099177135557,
+      "rmse": 0.09099995478765673,
+      "psnr_db": 20.819176469067372,
+      "ssim": 0.8290250367127805,
+      "edge_fidelity": 0.6549329227895603,
+      "iou": 0.8128259680262598,
+      "pred_fg_frac": 0.20190555555555556,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.01738668617903911,
+      "rmse": 0.1318585840172687,
+      "psnr_db": 17.597831846044492,
+      "ssim": 0.7572749113997108,
+      "edge_fidelity": 0.5274219437638467,
+      "iou": 0.8248222312359792,
+      "pred_fg_frac": 0.2954833333333333,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8272645433724781,
+    "min_iou": 0.8128259680262598,
+    "distinctness": 0.4765506368188931,
+    "views": 3
+  },
+  "crosstalk_cost_iou": 0.137714393299461,
+  "shards": {
+    "n_fragments": 579,
+    "stack_depths": {
+      "1": 579
+    },
+    "collisions_resolved": 11,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 163,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.28477945840594
+      },
+      "side": {
+        "target": 260,
+        "achieved": 186,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.284779458405941
+      },
+      "front": {
+        "target": 260,
+        "achieved": 230,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.28477945840594
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 579,
+    "mean_views": 2.488773747841105,
+    "frac_multi": 0.9395509499136442,
+    "frac_all": 0.5492227979274611
+  },
+  "precompensation": {
+    "iters": 3,
+    "best_pass": 0,
+    "trace": [
+      {
+        "pass": 0,
+        "mean_iou": 0.6895501500730171,
+        "min_iou": 0.6165239371370119
+      },
+      {
+        "pass": 1,
+        "mean_iou": 0.5982061957043584,
+        "min_iou": 0.5196843696843697
+      },
+      {
+        "pass": 2,
+        "mean_iou": 0.6649191907788442,
+        "min_iou": 0.6083281891136206
+      },
+      {
+        "pass": 3,
+        "mean_iou": 0.6413838214574413,
+        "min_iou": 0.5667971353213377
+      }
+    ]
+  },
+  "runtime_s": 24.626129099997343,
+  "device": "cuda"
+}

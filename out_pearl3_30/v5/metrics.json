@@ -1,0 +1,204 @@
+{
+  "config": {
+    "name": "30x30, 5 sheets per family",
+    "body": 0.3,
+    "n_per_family": 5,
+    "pitch": 0.02,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "engrave_min_feature": 0.0002,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "damage_weight": 0.25,
+    "credit_weight": null,
+    "match_tol": 0.3,
+    "colour_blend": 0.0,
+    "colour_primary_tol": 0.1,
+    "engrave_levels": [
+      0.6,
+      0.3,
+      0.1
+    ],
+    "intensity_gain": 1.0,
+    "white_threshold": 0.9,
+    "precompensate": 0,
+    "precompensate_gain": 1.0,
+    "target_blur_px": 0.0,
+    "footprint_limit": 0.3,
+    "views": {
+      "back": "examples/girl3_back.png",
+      "side": "examples/girl3_profile.png",
+      "front": "examples/girl3_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.225430174794673,
+    "lamp_to_body_m": 0.48189440982669857,
+    "body_to_wall_m": 2.5181055901733016,
+    "lamp_height_m": 0.8718584659910533,
+    "footprint_m": [
+      0.2999900772057637,
+      0.2999900772057637
+    ],
+    "swept_diameter_m": 0.3,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 31.127150873973367,
+    "penumbra_sigma_mm": {
+      "back": 3.5612169006507264,
+      "side": 4.12124319353463,
+      "front": 4.12124319353463
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 5,
+      "side": 5,
+      "front": 5
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.022782046599496265,
+      "rmse": 0.15093722734798154,
+      "psnr_db": 16.424072641487832,
+      "ssim": 0.7713042650899504,
+      "edge_fidelity": 0.5898229575808506,
+      "iou": 0.800930058293938,
+      "pred_fg_frac": 0.24569722222222223,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.02325877913187917,
+      "rmse": 0.1525082920102352,
+      "psnr_db": 16.33413085403076,
+      "ssim": 0.7533030447023512,
+      "edge_fidelity": 0.5296615334343673,
+      "iou": 0.765416200468661,
+      "pred_fg_frac": 0.2522888888888889,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.014544568418847133,
+      "rmse": 0.12060086408831047,
+      "psnr_db": 18.372991610510926,
+      "ssim": 0.7303347771751135,
+      "edge_fidelity": 0.5669670942896746,
+      "iou": 0.8613156759692647,
+      "pred_fg_frac": 0.33045277777777776,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary": {
+    "mean_iou": 0.8092206449106213,
+    "min_iou": 0.765416200468661,
+    "distinctness": 0.4165361874397795,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.0051150605478797705,
+      "rmse": 0.0715196514804132,
+      "psnr_db": 22.91149221100513,
+      "ssim": 0.8464620077392426,
+      "edge_fidelity": 0.7455309348247072,
+      "iou": 0.8545746948748956,
+      "pred_fg_frac": 0.2049527777777778,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.009719115952691855,
+      "rmse": 0.09858557679849449,
+      "psnr_db": 20.12373236547853,
+      "ssim": 0.8314053739218923,
+      "edge_fidelity": 0.575734820225974,
+      "iou": 0.7984640929846409,
+      "pred_fg_frac": 0.19688055555555556,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.020184929965425074,
+      "rmse": 0.1420736779471309,
+      "psnr_db": 16.949727530994533,
+      "ssim": 0.7627461196050647,
+      "edge_fidelity": 0.43183417714504857,
+      "iou": 0.8043917442464522,
+      "pred_fg_frac": 0.2909833333333333,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8191435107019962,
+    "min_iou": 0.7984640929846409,
+    "distinctness": 0.4749265440904744,
+    "views": 3
+  },
+  "crosstalk_cost_iou": 0.009922865791374913,
+  "shards": {
+    "n_fragments": 578,
+    "stack_depths": {
+      "1": 578
+    },
+    "collisions_resolved": 42,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 162,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.68342821255603
+      },
+      "side": {
+        "target": 260,
+        "achieved": 186,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.683428212556034
+      },
+      "front": {
+        "target": 260,
+        "achieved": 230,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.683428212556034
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 578,
+    "mean_views": 2.913494809688581,
+    "frac_multi": 0.9948096885813149,
+    "frac_all": 0.9186851211072664
+  },
+  "precompensation": {
+    "iters": 0,
+    "best_pass": 0,
+    "trace": [
+      {
+        "pass": 0,
+        "mean_iou": 0.8092206449106213,
+        "min_iou": 0.765416200468661
+      }
+    ]
+  },
+  "runtime_s": 9.999064199990244,
+  "device": "cuda"
+}

@@ -1,0 +1,262 @@
+{
+  "config": {
+    "name": "30x30 turning sequence (5 stops, 60 deg apart)",
+    "body": 0.3,
+    "n_per_family": 6,
+    "pitch": 0.02,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      75.0,
+      135.0,
+      195.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "damage_weight": 0.25,
+    "credit_weight": null,
+    "match_tol": 0.3,
+    "colour_blend": 0.0,
+    "colour_primary_tol": 0.1,
+    "engrave_levels": [
+      0.6,
+      0.3,
+      0.1
+    ],
+    "precompensate": 0,
+    "precompensate_gain": 1.0,
+    "footprint_limit": 0.3,
+    "views": {
+      "back": "examples/girl3_back.png",
+      "q34back": "examples/girl3_q34back.png",
+      "side": "examples/girl3_profile.png",
+      "q34front": "examples/girl3_q34front.png",
+      "front": "examples/girl3_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.363961030678928,
+    "lamp_to_body_m": 0.4714045207910317,
+    "body_to_wall_m": 2.528595479208968,
+    "lamp_height_m": 0.8694861087272377,
+    "footprint_m": [
+      0.2974137521079749,
+      0.2974137521079748
+    ],
+    "swept_diameter_m": 0.30000000000000004,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 31.819805153394636,
+    "penumbra_sigma_mm": {
+      "back": 3.7066717813894816,
+      "q34back": 3.5743293040590816,
+      "side": 3.8714956972623273,
+      "q34front": 4.38759635606379,
+      "front": 4.575479826875918
+    },
+    "family_angles_deg": [
+      27.0,
+      171.0,
+      135.0,
+      99.0,
+      63.0
+    ],
+    "panels_per_view": {
+      "back": 6,
+      "q34back": 6,
+      "side": 6,
+      "q34front": 6,
+      "front": 6
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.0906396617666594,
+      "rmse": 0.3010642153538999,
+      "psnr_db": 10.426817237663217,
+      "ssim": 0.6551975267999892,
+      "edge_fidelity": 0.3265041060267074,
+      "iou": 0.5806819170906559,
+      "pred_fg_frac": 0.34663055555555555,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "q34back": {
+      "mse": 0.029509360032472492,
+      "rmse": 0.17178288632012356,
+      "psnr_db": 15.300402089134442,
+      "ssim": 0.6490574087768468,
+      "edge_fidelity": 0.5293086140124375,
+      "iou": 0.9005292530196243,
+      "pred_fg_frac": 0.42215555555555556,
+      "target_fg_frac": 0.38381666666666664
+    },
+    "side": {
+      "mse": 0.07876439334021185,
+      "rmse": 0.2806499480495442,
+      "psnr_db": 11.036700676710753,
+      "ssim": 0.6381776328219569,
+      "edge_fidelity": 0.29541829896156624,
+      "iou": 0.6113529627965859,
+      "pred_fg_frac": 0.33571666666666666,
+      "target_fg_frac": 0.2123
+    },
+    "q34front": {
+      "mse": 0.04010141035344687,
+      "rmse": 0.20025336539855423,
+      "psnr_db": 13.968403531167624,
+      "ssim": 0.6689744963897927,
+      "edge_fidelity": 0.3672710945466853,
+      "iou": 0.8042944785276074,
+      "pred_fg_frac": 0.36414444444444444,
+      "target_fg_frac": 0.30575
+    },
+    "front": {
+      "mse": 0.044384634702823667,
+      "rmse": 0.21067661166542354,
+      "psnr_db": 13.527673501263868,
+      "ssim": 0.640772778140404,
+      "edge_fidelity": 0.4020051648866664,
+      "iou": 0.8042574278758107,
+      "pred_fg_frac": 0.38098055555555554,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary": {
+    "mean_iou": 0.7402232078620569,
+    "min_iou": 0.5806819170906559,
+    "distinctness": 0.19879662782714225,
+    "views": 5
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.014692887614278043,
+      "rmse": 0.12121422199675269,
+      "psnr_db": 18.328928433039454,
+      "ssim": 0.8097986108163345,
+      "edge_fidelity": 0.5841839616572079,
+      "iou": 0.7356149732620321,
+      "pred_fg_frac": 0.1748888888888889,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "q34back": {
+      "mse": 0.007835370345482378,
+      "rmse": 0.08851762731502906,
+      "psnr_db": 21.059404714100385,
+      "ssim": 0.7591247091124452,
+      "edge_fidelity": 0.5229930586237085,
+      "iou": 0.9186250999200639,
+      "pred_fg_frac": 0.3829138888888889,
+      "target_fg_frac": 0.38381666666666664
+    },
+    "side": {
+      "mse": 0.01579669321527535,
+      "rmse": 0.12568489652808468,
+      "psnr_db": 18.0143381612548,
+      "ssim": 0.8067706977833201,
+      "edge_fidelity": 0.4959960874891013,
+      "iou": 0.7278801425723433,
+      "pred_fg_frac": 0.18494444444444444,
+      "target_fg_frac": 0.2123
+    },
+    "q34front": {
+      "mse": 0.029167923896031824,
+      "rmse": 0.17078619351701654,
+      "psnr_db": 15.350944818342082,
+      "ssim": 0.7577579592251272,
+      "edge_fidelity": 0.39549835876151535,
+      "iou": 0.7586903973367513,
+      "pred_fg_frac": 0.26215555555555553,
+      "target_fg_frac": 0.30575
+    },
+    "front": {
+      "mse": 0.008152852909680517,
+      "rmse": 0.090293149849147,
+      "psnr_db": 20.88690392962409,
+      "ssim": 0.7910605267349379,
+      "edge_fidelity": 0.5960032396790568,
+      "iou": 0.8764825873102041,
+      "pred_fg_frac": 0.31685833333333335,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8034586400802789,
+    "min_iou": 0.7278801425723433,
+    "distinctness": 0.3851134098753274,
+    "views": 5
+  },
+  "crosstalk_cost_iou": 0.06323543221822203,
+  "shards": {
+    "n_fragments": 1047,
+    "stack_depths": {
+      "1": 1047
+    },
+    "collisions_resolved": 132,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 162,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 9.15095965375183
+      },
+      "q34back": {
+        "target": 260,
+        "achieved": 250,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 9.150959653751837
+      },
+      "side": {
+        "target": 260,
+        "achieved": 176,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 9.178575520625428
+      },
+      "q34front": {
+        "target": 260,
+        "achieved": 214,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 9.150959653751837
+      },
+      "front": {
+        "target": 260,
+        "achieved": 245,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 9.150959653751835
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 1047,
+    "mean_views": 4.700095510983763,
+    "frac_multi": 1.0,
+    "frac_all": 0.725883476599809
+  },
+  "precompensation": {
+    "iters": 0,
+    "best_pass": 0,
+    "trace": [
+      {
+        "pass": 0,
+        "mean_iou": 0.7402232078620569,
+        "min_iou": 0.5806819170906559
+      }
+    ]
+  },
+  "runtime_s": 21.704805799992755,
+  "device": "cuda"
+}

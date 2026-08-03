@@ -1,0 +1,231 @@
+{
+  "material": "clear cast acrylic (perspex)",
+  "process": "raster engrave for tone, vector through-cut for outline and slots",
+  "machine_order": [
+    "ENG_L",
+    "ENG_D",
+    "ENG_K",
+    "CUT_SLOT",
+    "CUT_OUTLINE"
+  ],
+  "order_rationale": "engrave while the sheet is still a rigid rectangle; cutting the slots first leaves a floppy carrier that lifts and defocuses",
+  "tones": [
+    {
+      "layer": "ENG_L",
+      "target_transmittance": 0.6,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    },
+    {
+      "layer": "ENG_D",
+      "target_transmittance": 0.3,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    },
+    {
+      "layer": "ENG_K",
+      "target_transmittance": 0.1,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    }
+  ],
+  "unengraved": {
+    "layer": null,
+    "target_transmittance": 1.0,
+    "note": "clear perspex, left untouched"
+  },
+  "panels": [
+    {
+      "name": "F0_0",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 121,
+        "ENG_D": 86,
+        "ENG_K": 57
+      }
+    },
+    {
+      "name": "F0_1",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 105,
+        "ENG_D": 166,
+        "ENG_K": 193
+      }
+    },
+    {
+      "name": "F0_2",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 162,
+        "ENG_D": 239,
+        "ENG_K": 232
+      }
+    },
+    {
+      "name": "F0_3",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 61,
+        "ENG_D": 126,
+        "ENG_K": 96
+      }
+    },
+    {
+      "name": "F0_4",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 60,
+        "ENG_D": 60,
+        "ENG_K": 33
+      }
+    },
+    {
+      "name": "F1_0",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 138,
+        "ENG_D": 167,
+        "ENG_K": 142
+      }
+    },
+    {
+      "name": "F1_1",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 175,
+        "ENG_D": 262,
+        "ENG_K": 249
+      }
+    },
+    {
+      "name": "F1_2",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 150,
+        "ENG_D": 184,
+        "ENG_K": 151
+      }
+    },
+    {
+      "name": "F1_3",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 132,
+        "ENG_D": 127,
+        "ENG_K": 96
+      }
+    },
+    {
+      "name": "F1_4",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 1,
+        "ENG_D": 1,
+        "ENG_K": 3
+      }
+    },
+    {
+      "name": "F2_0",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 58,
+        "ENG_D": 32,
+        "ENG_K": 41
+      }
+    },
+    {
+      "name": "F2_1",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 208,
+        "ENG_D": 213,
+        "ENG_K": 183
+      }
+    },
+    {
+      "name": "F2_2",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 279,
+        "ENG_D": 406,
+        "ENG_K": 301
+      }
+    },
+    {
+      "name": "F2_3",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 100,
+        "ENG_D": 136,
+        "ENG_K": 100
+      }
+    },
+    {
+      "name": "F2_4",
+      "size_mm": [
+        289.14,
+        289.14
+      ],
+      "slots": 10,
+      "engrave_regions": {
+        "ENG_L": 55,
+        "ENG_D": 100,
+        "ENG_K": 49
+      }
+    }
+  ]
+}

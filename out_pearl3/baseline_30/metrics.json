@@ -1,0 +1,176 @@
+{
+  "config": {
+    "name": "30x30 arm (as previously handicapped)",
+    "body": 0.3,
+    "n_per_family": 2,
+    "pitch": 0.06,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "views": {
+      "back": "examples/girl3_back.png",
+      "side": "examples/girl3_profile.png",
+      "front": "examples/girl3_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.0,
+    "lamp_to_body_m": 0.5,
+    "body_to_wall_m": 2.5,
+    "lamp_height_m": 0.876,
+    "footprint_m": [
+      0.30530689059287175,
+      0.30530689059287175
+    ],
+    "swept_diameter_m": 0.3059411708155671,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 30.0,
+    "penumbra_sigma_mm": {
+      "back": 3.495283018867923,
+      "side": 3.889175257731959,
+      "front": 3.88917525773196
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.05288710488045826,
+      "rmse": 0.22997196542287118,
+      "psnr_db": 12.766502062624486,
+      "ssim": 0.6967393386156339,
+      "edge_fidelity": 0.3942334963717948,
+      "iou": 0.627221544768181,
+      "pred_fg_frac": 0.31437777777777776,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.05116920267609193,
+      "rmse": 0.22620610662864946,
+      "psnr_db": 12.909913501975405,
+      "ssim": 0.6956137018322649,
+      "edge_fidelity": 0.36419383539968614,
+      "iou": 0.6230348685944581,
+      "pred_fg_frac": 0.31795,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.021877650589911334,
+      "rmse": 0.1479109549354318,
+      "psnr_db": 16.599993181074137,
+      "ssim": 0.7040236862071364,
+      "edge_fidelity": 0.48196471474839375,
+      "iou": 0.8219725571852428,
+      "pred_fg_frac": 0.3466861111111111,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary": {
+    "mean_iou": 0.6907429901826273,
+    "min_iou": 0.6230348685944581,
+    "distinctness": 0.2397116847772499,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.005090216367420498,
+      "rmse": 0.07134575227314166,
+      "psnr_db": 22.932637569206776,
+      "ssim": 0.8465071760057876,
+      "edge_fidelity": 0.7531290910949853,
+      "iou": 0.8432686286787727,
+      "pred_fg_frac": 0.200575,
+      "target_fg_frac": 0.20827222222222222
+    },
+    "side": {
+      "mse": 0.008325574697602109,
+      "rmse": 0.09124458722358335,
+      "psnr_db": 20.795857783161914,
+      "ssim": 0.8288028892914486,
+      "edge_fidelity": 0.6580916258550917,
+      "iou": 0.812206572769953,
+      "pred_fg_frac": 0.20157777777777777,
+      "target_fg_frac": 0.2123
+    },
+    "front": {
+      "mse": 0.017305131771022934,
+      "rmse": 0.13154897099948343,
+      "psnr_db": 17.618250893943983,
+      "ssim": 0.7586280481173563,
+      "edge_fidelity": 0.5433022768596223,
+      "iou": 0.8271599834642415,
+      "pred_fg_frac": 0.2970138888888889,
+      "target_fg_frac": 0.3168611111111111
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8275450616376557,
+    "min_iou": 0.812206572769953,
+    "distinctness": 0.4770054886444699,
+    "views": 3
+  },
+  "crosstalk_cost_iou": 0.13680207145502843,
+  "shards": {
+    "n_fragments": 580,
+    "stack_depths": {
+      "1": 580
+    },
+    "collisions_resolved": 11,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 163,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.074468085106382
+      },
+      "side": {
+        "target": 260,
+        "achieved": 186,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.074468085106382
+      },
+      "front": {
+        "target": 260,
+        "achieved": 231,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 8.074468085106387
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 580,
+    "mean_views": 2.4844827586206897,
+    "frac_multi": 0.9413793103448276,
+    "frac_all": 0.5431034482758621
+  },
+  "runtime_s": 7.068756499997107,
+  "device": "cuda"
+}

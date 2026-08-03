@@ -1,0 +1,32 @@
+﻿CROSS-TALK COSTS -0.020 mean IoU -- that gap is the projection noise, and it is the thing to attack
+shards: 578 laminated layers over 18 sheets   collisions resolved 56
+duty: 99% of shards serve >=2 views, 93% serve all 3 (mean 2.92 views/shard)
+runtime 11.0s on cuda   -> out_pearl3_30\v4_stage1\metrics.json
+
+vectorising shards (threshold -> min-feature -> contours -> kerf) ...
+  281 polygons over 18 sheets
+  cut files -> out_pearl3_30\v4_stage1\cut  (37 files)
+
+gate A: weave feasibility
+  108 crossings in 108 clusters, max multiplicity 2, min angle 60.0 deg, widest slot 3.46 mm (material 3.0 mm)
+  PASS
+
+gate B: fabrication round trip (re-render from the cut files)
+.venv\Scripts\python.exe : Traceback (most recent call last):
+At line:1 char:31
++ ... ICE="cuda"; .venv\Scripts\python.exe pearl3_fab.py --arm 30v4 --reton ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last) 
+   ::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "F:\Studies\school\pearl3_fab.py", line 270, in <module>
+    main()
+    ~~~~^^
+  File "F:\Studies\school\pearl3_fab.py", line 232, in main
+    r_ssim, r_rmse, r_edge = _bundle(live)
+                             ~~~~~~~^^^^^^
+  File "F:\Studies\school\pearl3_fab.py", line 231, in _bundle
+    float(np.mean([v["edge"] for v in vs])))
+                   ~^^^^^^^^
+KeyError: 'edge'
