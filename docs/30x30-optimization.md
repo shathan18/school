@@ -13,45 +13,56 @@ Nothing was carried over from the previous solution. Every number below was re-m
 
 ## 1. What ships
 
-**Arm `30v4` + stage-2 re-toning.** Files in `out_pearl3_30/v4/`.
+**Arm `30v6` + stage-2 re-toning.** Files in `out_pearl3_30/v6/`.
 
-|                                               | mean IoU  | worst view | SSIM      | RMSE      | edge fidelity |
-| --------------------------------------------- | --------- | ---------- | --------- | --------- | ------------- |
-| Previous 60 × 60 solution                     | 0.722     | —          | —         | —         | —             |
-| 30 × 30, first attempt                        | 0.689     | 0.623      | —         | —         | —             |
-| 30 × 30 optimised (stage 1)                   | 0.854     | 0.846      | 0.672     | 0.160     | 0.524         |
-| **30 × 30 optimised + re-toned, as exported** | **0.882** | **0.871**  | **0.756** | **0.127** | **0.630**     |
+The build is **six sheets**, two per family. That is a hard constraint handed down after the
+18-sheet build was complete, not a search result — and §3a is the record of re-deriving every
+parameter underneath it, because two of the rules found at 18 sheets turned out to be **wrong**
+at 6.
+
+|                                              | mean IoU  | worst view | SSIM      | RMSE      | edge fidelity |
+| -------------------------------------------- | --------- | ---------- | --------- | --------- | ------------- |
+| Previous 60 × 60 solution (18 sheets)        | 0.722     | —          | —         | —         | —             |
+| 6 sheets, carrying the 18-sheet parameters   | 0.814     | 0.786      | 0.672     | 0.186     | 0.493         |
+| 6 sheets re-optimised (stage 1)              | 0.845     | 0.827      | 0.700     | 0.161     | 0.513         |
+| **6 sheets re-optimised + re-toned, as exported** | **0.846** | **0.836** | **0.751** | **0.141** | **0.570**     |
 
 The last row is the one that counts: it is measured by re-rendering **from the exported cut
-files**, not from the solver's raster. The halved footprint now scores _better_ than the
-original double-size piece on the metric the original was reported on.
+files**, not from the solver's raster. A quarter of the footprint and a third of the sheets of
+the original, and still comfortably ahead of it.
+
+**What the constraint costs.** The 18-sheet build (`30v4`, still in `out_pearl3_30/v4/`)
+exports at 0.882 mean / 0.871 worst. Six sheets gives up **0.036 mean IoU and 0.035 on the
+worst view** — but re-optimising recovered 0.031 of the 0.040 that the constraint initially
+took, so most of the naive loss was tuning, not material.
 
 | view         | IoU   | SSIM  | RMSE  | edge  |
 | ------------ | ----- | ----- | ----- | ----- |
-| back (0°)    | 0.897 | 0.790 | 0.114 | 0.696 |
-| side (120°)  | 0.902 | 0.767 | 0.125 | 0.651 |
-| front (240°) | 0.883 | 0.747 | 0.126 | 0.687 |
+| back (0°)    | 0.851 | 0.787 | 0.129 | 0.660 |
+| side (120°)  | 0.853 | 0.768 | 0.144 | 0.636 |
+| front (240°) | 0.839 | 0.729 | 0.145 | 0.635 |
 
-(Per-view figures are the solver raster; the exported files cost a further +0.012 mean IoU,
+(Per-view figures are the solver raster; the exported files cost a further +0.002 mean IoU,
 §6 gate B.)
 
 ### Chosen configuration
 
 | parameter           | value                                                    | why                                       |
 | ------------------- | -------------------------------------------------------- | ----------------------------------------- |
-| panels              | **18** sheets, 3 families of 6                           | knee of the layout frontier (§3, lever 2) |
-| panel pitch         | **20 mm**                                                | ditto                                     |
-| family angles       | 15° / 135° / 255° → one family per viewing stop          | §2, finding 2                             |
+| panels              | **6** sheets, 3 families of 2                            | hard build constraint                     |
+| panel pitch         | **50 mm**                                                | §3a — reversed from 20 mm                 |
+| family angles       | 15° / 75° / 135° → one family per viewing stop           | §2, finding 2                             |
 | footprint           | **30 × 30 cm**, swept circle 30.0 cm                     | hard constraint, verified by gate 3       |
-| sheet               | 28.3 cm square, 3 mm clear Perspex                       |                                           |
+| sheet               | 29.9 cm square, 3 mm clear Perspex                       | one pitch gap, so the sheets run near full |
 | viewing stops       | 3, at 120° spacing                                       | §5                                        |
-| engrave tones       | clear / 0.60 / 0.30 / 0.10 transmittance                 | §3, lever 3                               |
-| lamp                | 0.471 m behind the body, 0.869 m high                    |                                           |
-| wall (image)        | 2.529 m in front, 1.80 m image → **6.36× magnification** |                                           |
+| engrave tones       | clear / 0.85 / 0.62 / 0.35 transmittance                 | §3a — reversed from dark-biased           |
+| shard granularity   | `fragment_size` 0.05, budget 400                         | §3a                                       |
+| lamp                | 0.493 m behind the body, 0.874 m high                    |                                           |
+| wall (image)        | 2.507 m in front, 1.80 m image → **6.09× magnification** |                                           |
 | engrave min feature | **0.2 mm** (beam spot)                                   | §4                                        |
 | cut min feature     | 5 mm                                                     | structural, cut layers only               |
 
-766 shards, 5583 engraved regions over 18 sheets, 108 crossings, 37 cut files.
+1140 shards, 3629 engraved regions over 6 sheets, 12 crossings, 13 cut files.
 
 ---
 
@@ -118,6 +129,75 @@ achievable stack tones at the light end and leaves the midtones unreachable.
 | Band-limiting the targets                  | monotone loss, no interior optimum (see `prior-art.md` §2)            |
 | `fragment_size` 0.05–0.12                  | flat                                                                  |
 | Dropping to 15 sheets to shed the idle one | fails the weave gate (19 triple points), −0.021 IoU                   |
+
+---
+
+## 3a. Re-optimising for six sheets — where the 18-sheet rules broke
+
+Six sheets arrived as a build constraint after §3 was finished. The honest thing to do with a
+table of levers measured at 18 sheets is to distrust it, because §3's lever 2 says the
+cross-talk cost only turns negative past about 12 sheets. Below that knee, stray light is noise
+again, and every parameter that was tuned against constructive cross-talk is being asked a
+different question. So all of it was re-swept (`pearl3_sweep.py v6*`, ≥2 seeds).
+
+Dropping straight from 18 to 6 with the shipped parameters cost **0.040 mean IoU** (0.854 →
+0.814) and flipped the cross-talk cost from −0.042 (helping) to +0.017 (hurting). Re-optimising
+recovered 0.031 of that. Two levers reversed outright.
+
+**Reversal 1 — pitch wants to OPEN, not tighten.**
+
+| pitch  | mean IoU  | worst     | cross-talk cost |
+| ------ | --------- | --------- | --------------- |
+| 20 mm  | 0.815     | 0.785     | +0.015          |
+| 30 mm  | 0.822     | 0.797     | +0.006          |
+| **50 mm** | **0.830** | **0.816** | **−0.002**   |
+| 70 mm  | 0.821     | 0.792     | +0.009          |
+| 100 mm | 0.780     | 0.769     | +0.060          |
+
+§3's lever 2 concluded "tighter is better at every sheet count". That was measured where the
+30 × 30 footprint solve **capped pitch at 20 mm** — with six sheets per family there are five
+gaps to fit inside a 30 cm swept circle. So "tighter is better" was only ever observed on one
+side of the optimum. With one gap instead of five there is room to open up, and 50 mm both
+recovers the worst view (0.785 → 0.816) and drives cross-talk back to neutral. Past that it
+collapses: at 100 mm the outer sheets sit far enough off-axis that their stray shadows land
+somewhere unrelated to where they were priced.
+
+**Reversal 2 — the engrave alphabet must go LIGHT.**
+
+| levels             |           | mean IoU  | SSIM      | RMSE      |
+| ------------------ | --------- | --------- | --------- | --------- |
+| (0.78, 0.60, 0.42) | *shallow* | 0.839     | **0.708** | **0.161** |
+| **(0.85, 0.62, 0.35)** | *light-biased* | **0.840** | 0.697 | 0.164 |
+| (0.56, 0.32, 0.18) | uniform-D | 0.831     | 0.677     | 0.178     |
+| (0.60, 0.30, 0.10) | *dark-biased — shipped at 18* | 0.830 | 0.661 | 0.186 |
+| (0.75, 0.50, 0.25) | uniform-T | 0.818     | 0.683     | 0.172     |
+| (0.80, 0.40, 0.06) | wide      | 0.820     | 0.644     | 0.192     |
+
+This is the sharper reversal. At 18 sheets dark-biased won and (0.78, 0.60, 0.42) was entered
+as a *deliberately weak control arm*; at 6 sheets the control comes **first** and dark-biased
+falls to sixth of seven. The probe said why before the sweep did: it over-covered every view
+(front foreground 0.43 against a target 0.36). With two sheets per family instead of six there
+are far fewer transmittances to multiply, so a dark alphabet has no light one to walk back
+with and the picture just goes muddy. Lighter levels restore the ladder — SSIM 0.661 → 0.697,
+RMSE 0.186 → 0.164.
+
+(0.85, 0.62, 0.35) ships over the marginally better-scoring (0.78, 0.60, 0.42) on a
+**fabrication** argument, not a numerical one: the two are inside seed noise of each other, but
+its levels are 23 and 27 points apart instead of 18, so the engraver has room to hold them
+apart. `intensity_gain` swept flat over 0.8–1.0 and stays at 1.0.
+
+**Confirmed, not reversed.** `damage_weight` is still perfectly binary — 0.02, 0.1, 0.25, 0.5
+and 1.0 give *identical* results to four decimals. Shard granularity is still nearly flat: every
+combination of `fragment_size` and `shard_budget` lands within 0.005, against a seed sigma of
+0.002. It was taken to the fine end (0.05 / 400 → 1140 shards, ~190 per sheet) because the brief
+lifted the minimum shard size, edge fidelity is the one metric that separates the runs
+(0.513 against 0.489–0.498 for everything coarser), and with six sheets doing the work of
+eighteen, resolution is the only currency left.
+
+**The lesson worth keeping.** Both reversals have the same shape: a rule was inferred inside a
+region where one variable was pinned by an unrelated constraint (pitch by the footprint solve,
+tone by the number of layers available to multiply), and it did not survive being asked outside
+that region. A measured lever is only valid over the range it was measured on.
 
 ---
 
@@ -203,37 +283,54 @@ tone levels (lever 3).
 
 Three gates, all run on the shipped build by `pearl3_fab.py`.
 
-**Gate A — weave feasibility: PASS.** 108 crossings resolve into 108 clusters with maximum
+**Gate A — weave feasibility: PASS.** 12 crossings resolve into 12 clusters with maximum
 multiplicity 2, so there are no triple points (which cannot be assembled from flat sheets even
 though the solver is happy to propose them). Minimum crossing angle 60°. The widest slot is
 **3.46 mm for 3.0 mm material**, because a slot at 60° must be `thickness / sin θ` wide — the
 joint generator had been cutting fixed-width notches, and those sheets would not have gone
-together.
+together. Six sheets at 50 mm pitch is a much simpler weave than 18 at 20 mm: 12 crossings
+rather than 108, and the triple-point risk that killed the 15-sheet variant does not arise.
 
-**Gate B — export round trip: +0.0119 mean IoU.** Re-renders from the exported polygons using
-point-in-polygon on pixel centres. This gate found both problems in §4.
+**Gate B — export round trip: +0.0018 mean IoU.** Re-renders from the exported polygons using
+point-in-polygon on pixel centres. This gate found both problems in §4. The cost is far smaller
+than the 18-sheet build's +0.0119 simply because there are 3629 polygons to register rather
+than 5583, and this error scales with total perimeter.
 
-**Gate C — single-panel ablation: 0 of 18 sheets idle, and the load splits 6 / 6 / 6 across the
+**Gate C — single-panel ablation: 0 of 6 sheets idle, and the load splits 2 / 2 / 2 across the
 three views.** Blanking each sheet in turn and measuring the IoU each view loses is the only
-test of duty that cannot be faked by a shard that merely exists. Every sheet now earns its
-place — on the earlier target set one sheet was idle, and the torn back-view matte (§8) was the
-reason: a view missing a third of its content cannot give its family enough to do.
+test of duty that cannot be faked by a shard that merely exists. With only six sheets the test
+bites much harder: removing the weakest sheet now costs 0.052 mean IoU and the strongest costs
+0.166, against a handful of thousandths when eighteen sheets could cover for each other.
+
+**Region count is not contribution.** Sheet `F2_0` carries just 32 engraved regions against
+~700 on its neighbours, which looks like an idle sheet and is not — it has the *largest*
+ablation drop of all six (0.166 mean, 0.287 on the front view). Re-toning merged its tones into
+a few big contiguous areas. Counting polygons would have condemned the single most important
+sheet in the build.
 
 **Removing sheets is not free, and gate A is why.** Before the target fix, the obvious response
 to an idle sheet was to drop to five per family. Re-solved at 15 sheets (`30v5`), that build
 **fails gate A with 19 triple points** — at 20 mm pitch the three families land on a lattice
 where three sheets meet at a common point, which cannot be assembled from flat interlocking
 material at all. Ablation says a sheet is _idle_, not that it is _removable_: remove it and the
-solver redistributes onto the rest and the geometry changes underneath. **18 sheets stands.**
+solver redistributes onto the rest and the geometry changes underneath.
 
 ---
 
 ## 7. Known limitations, stated plainly
 
 - **Tonal quality still lags silhouette quality.** All three views are now legible as the
-  portrait, but SSIM sits at 0.75 against IoU at 0.88 — the outline is much better resolved
+  portrait, but SSIM sits at 0.75 against IoU at 0.85 — the outline is much better resolved
   than the shading inside it. IoU measures the silhouette, and the silhouette is not the
   picture; SSIM, RMSE and edge fidelity are reported throughout for exactly this reason.
+- **Six sheets costs 0.036 mean IoU against eighteen, and that is real.** §3a recovered most of
+  the naive loss but not all of it, and the gap that remains is edge fidelity above all
+  (0.570 against 0.630). There is no tuning left to close it — the material is simply not
+  there. If the sheet count ever reopens, the frontier in §3 lever 2 says the return runs to
+  about 18 and is flat after.
+- **There is no redundancy left.** With eighteen sheets, losing one cost thousandths; with six,
+  the ablation drops run 0.052 to 0.166. Every sheet is load-bearing, so a mis-cut sheet is not
+  a cosmetic problem, and there is no spare capacity to absorb fabrication tolerance.
 - **The three views are more alike than before.** Distinctness fell from 0.43 to 0.35 when the
   targets changed, because `pearlN`'s three poses (front, three-quarter, back) share more of
   their mass than `girl3`'s did (front, true profile, back). That makes the reconstruction
@@ -243,7 +340,7 @@ solver redistributes onto the rest and the geometry changes underneath. **18 she
   diffusion is the untested idea most likely to help; a naive heavy de-streak was tried
   previously and cost IoU 0.83 → 0.55.
 - **Between the stops, the piece is not resolved.** At the three viewing angles it scores
-  0.88–0.90; at the intermediate ¾ angles it falls away sharply. A 5-stop variant (`30seq`)
+  0.84–0.85; at the intermediate ¾ angles it falls away sharply. A 5-stop variant (`30seq`)
   spreads the quality more evenly but drops the worst view a long way, which is worse where it
   matters most. The 3-stop build was chosen deliberately: a turning sculpture is judged at its
   stops.
