@@ -194,6 +194,37 @@ SWEEPS = {
     # unreproducible edges it has shards to spare, which may want a different exposure.
     "bandtone": dict(target_blur_px=[0.0, 2.0, 3.0],
                      intensity_gain=[0.85, 0.9, 1.0]),
+    # --- six-sheet re-optimisation (arm 30v6) ------------------------------------------
+    # Everything below re-asks, at 6 sheets, a question that was answered at 18. The answers
+    # are not expected to carry: at 18 the cross-talk had turned constructive (-0.042 mean
+    # IoU) and the tuning leaned on it, at 6 it costs +0.017 and is noise again.
+    #
+    # Pitch was pinned at 20 mm by the footprint solve when six sheets per family had to
+    # share a 30 cm swept circle. Two sheets span one gap, not five, so the cap is ~5x
+    # looser and the tight-stack argument (keep every sheet near the axis so stray shadows
+    # land near their own) is worth re-testing over a range it was never tested on.
+    "v6pitch": dict(pitch=[0.02, 0.03, 0.05, 0.07, 0.10]),
+    # The tone alphabet is the lever most likely to have moved. Reachable tones are products
+    # of the layers a ray crosses, so cutting the stack from 6 sheets per family to 2 cuts
+    # the reachable set roughly quadratically -- the darks that 18 sheets reached by
+    # multiplying light levels now have to be engraved directly.
+    "v6engrave": dict(engrave_levels=list(engrave.LEVEL_SWEEPS.values())),
+    # The probe over-covers on every view (fg 0.43 predicted vs 0.36 wanted on front), which
+    # is a tone error IoU cannot see. Fewer layers to multiply means each one must be lighter.
+    # `v6engrave` confirmed the direction hard: the two lightest alphabets took the top two
+    # places and the dark-biased one that won at 18 sheets fell to sixth. This refines around
+    # the winners and asks whether the gain wants to come down with them.
+    "v6tone": dict(intensity_gain=[0.8, 0.9, 1.0],
+                   engrave_levels=[engrave.LEVEL_SWEEPS["shallow"],
+                                   engrave.LEVEL_SWEEPS["light_biased"],
+                                   (0.82, 0.66, 0.50), (0.72, 0.54, 0.38)]),
+    # 767 shards landed on 6 sheets rather than 18, so each sheet is 3x denser. Density was
+    # measured flat at 18 sheets, but flat there meant "the stack absorbs it"; here it may not.
+    "v6density": dict(fragment_size=[0.05, 0.07, 0.09, 0.12],
+                      shard_budget=[180, 260, 400]),
+    # Cross-talk is a cost again, so the price put on it at host-selection time should matter
+    # more than it did at 18 sheets, where it was measured binary on/off.
+    "v6damage": dict(damage_weight=[0.02, 0.10, 0.25, 0.5, 1.0]),
 }
 
 

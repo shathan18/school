@@ -597,6 +597,44 @@ ARMS = {
     "30v5": BuildConfig(name="30x30, 5 sheets per family",
                         body=0.30, footprint_limit=0.30, damage_weight=0.25,
                         n_per_family=5, pitch=0.02, engrave_levels=(0.60, 0.30, 0.10)),
+    # SIX SHEETS TOTAL -- two per family. A hard build constraint, not a search result, and
+    # far below the 18-sheet knee: the layout sweep measured cross-talk turning constructive
+    # only past ~12 sheets, so at 6 the stray light is noise again and every parameter tuned
+    # against 18 has to be re-examined. Two things do get easier. The footprint solve frees up
+    # (one pitch gap instead of five, so the sheets swing 30 cm instead of 25 and run nearly
+    # full size), and pitch is no longer boxed in at 20 mm.
+    #
+    # 50 mm pitch is measured, and it REVERSES the 18-sheet result that tighter was better at
+    # every sheet count. That rule was found where pitch was capped at 20 mm by the footprint
+    # solve, so "tighter is better" was only ever observed on one side of the optimum. With
+    # room to open up, 6 sheets want 50 mm: mean IoU 0.815 -> 0.830, worst view 0.785 -> 0.816,
+    # and the cross-talk cost falls from +0.015 to -0.002. Past that it collapses (0.780 at
+    # 100 mm) as the outer sheets swing far enough off-axis to throw their stray shadows
+    # somewhere else entirely.
+    #
+    # The engrave alphabet flips too, and harder. At 18 sheets the dark-biased set won and
+    # (0.78,0.60,0.42) was in as a deliberately weak control; at 6 sheets that control comes
+    # FIRST and dark-biased falls to sixth of seven. The probe explains why: it over-covered
+    # every view (front fg 0.43 against a target 0.36) because with two sheets per family
+    # instead of six there are far fewer transmittances to multiply, so a dark alphabet has no
+    # light one to walk back with and the piece just goes muddy. Lighter levels restore the
+    # tonal ladder: SSIM 0.661 -> 0.697 and RMSE 0.1862 -> 0.1642.
+    #
+    # (0.85,0.62,0.35) over the marginally better-scoring (0.78,0.60,0.42): they are inside
+    # seed noise of each other (0.765 vs 0.769, sigma 0.002) and this one has the higher mean
+    # and worst-view IoU, but the deciding argument is fabrication -- its levels are 23 and 27
+    # points apart instead of 18, so the engraver has room to hold them apart. intensity_gain
+    # swept flat over 0.8-1.0; left at 1.0.
+    #
+    # Shard granularity was flat at 18 sheets and is nearly flat here too -- every combination
+    # lands inside 0.005 of every other, against a seed sigma of 0.002. It goes fine anyway:
+    # the brief lifted the minimum shard size, edge fidelity is the one metric that separates
+    # the runs (0.513 against 0.489-0.498 for everything coarser), and with six sheets carrying
+    # what eighteen used to, resolution is the only currency left. 1168 shards, ~195 per sheet.
+    "30v6": BuildConfig(name="30x30, 6 sheets (2 per family)",
+                        body=0.30, footprint_limit=0.30, damage_weight=0.25,
+                        n_per_family=2, pitch=0.05, engrave_levels=(0.85, 0.62, 0.35),
+                        fragment_size=0.05, shard_budget=400),
 }
 
 
