@@ -31,6 +31,10 @@ from shadowart.targets import color as C
 ROOT = Path(__file__).parent
 STOPS = {"back": "back (0 deg)", "side": "side (120 deg)", "front": "front (240 deg)"}
 
+# Where `pearl3_fab.py` parks each arm's shipped package. Figures read their headline numbers
+# out of that report rather than carrying literals, so they cannot drift from what was cut.
+REPORT = {"30v4": "out_pearl3_30/v4", "30v6": "out_pearl3_30/v6"}
+
 
 def _grey(rgb):
     """Transmittance RGB -> what the eye sees on the wall (dark = blocked light)."""
@@ -70,7 +74,7 @@ def fig_result(out, arm="30v4", sweeps=5):
               f"IoU {m2[w]['iou']:.3f}   SSIM {m2[w]['ssim']:.3f}   RMSE {m2[w]['rmse']:.3f}")
     s1, s2 = m1["_summary"], m2["_summary"]
     fig.suptitle(
-        "One object, three shadows — 30x30 cm, 18 engraved Perspex sheets\n"
+        f"One object, three shadows — 30x30 cm, {len(scene.panels)} engraved Perspex sheets\n"
         f"mean IoU {s1['mean_iou']:.3f} -> {s2['mean_iou']:.3f}    "
         f"worst view {s1['min_iou']:.3f} -> {s2['min_iou']:.3f}    "
         "(stage 2 also deletes 21% of the material)",
@@ -87,7 +91,8 @@ def _journal(name):
     return [json.loads(l) for l in p.open()] if p.exists() else []
 
 
-def fig_levers(out):
+def fig_levers(out, arm="30v6"):
+    sheets = P.ARMS[arm].n_per_family * 3
     fig, axes = plt.subplots(2, 2, figsize=(12, 8.5))
 
     # (a) the layout frontier -- the single biggest lever.
@@ -107,69 +112,81 @@ def fig_levers(out):
         ax = axes[0, 0]
         ax.plot(n, [r["mean_iou"] for r in rows], "o-", color="#1f77b4", label="mean IoU")
         ax.plot(n, [r["min_iou"] for r in rows], "s--", color="#7fb3d5", label="worst view")
-        ax.axvline(18, color="k", lw=1, ls=":")
-        ax.annotate("18 sheets — chosen", (18, min(r["min_iou"] for r in rows)),
-                    xytext=(-98, 2), textcoords="offset points", fontsize=8)
+        ax.axvline(sheets, color="k", lw=1, ls=":")
+        ax.annotate(f"{sheets} sheets — build constraint",
+                    (sheets, min(r["min_iou"] for r in rows)),
+                    xytext=(6, 2), textcoords="offset points", fontsize=8)
         ax2 = ax.twinx()
         ax2.plot(n, [r["crosstalk_cost"] for r in rows], "^-", color="#d62728", alpha=.65,
                  label="cross-talk cost")
         ax2.axhline(0, color="#d62728", lw=.8, ls="--", alpha=.5)
         ax2.set_ylabel("cross-talk cost (IoU)", color="#d62728", fontsize=9)
         ax.set_xlabel("total sheets"); ax.set_ylabel("IoU")
-        ax.set_title("LEVER: more sheets, tighter pitch  (+0.070)\n"
-                     "past ~12 sheets the cross-talk cost goes NEGATIVE —\n"
-                     "stray light stopped being noise", fontsize=9)
+        ax.set_title(f"CONSTRAINT: the build is fixed at {sheets} sheets\n"
+                     "the frontier keeps climbing to ~18, where cross-talk turns\n"
+                     "constructive — so below it, stray light is noise again", fontsize=9)
         ax.legend(fontsize=8, loc="center right")
 
-    # (b) tone allocation
-    rows = [r for r in _journal("sweep_engrave_30v3") if r["overrides"]]
+    # (a2) ...and how the pitch lever was re-measured underneath that constraint. At 18 sheets
+    # the footprint solve capped pitch at 20 mm, so "tighter is better" was only ever observed
+    # on one side of the optimum. With one gap instead of five there is room to open up.
+    rows = sorted((r for r in _journal("sweep_v6pitch_30v6") if "pitch" in r["overrides"]),
+                  key=lambda r: r["overrides"]["pitch"])
+    if rows:
+        p = [r["overrides"]["pitch"] * 1000 for r in rows]
+        ax = axes[0, 1]
+        ax.plot(p, [r["mean_iou"] for r in rows], "o-", color="#1f77b4", label="mean IoU")
+        ax.plot(p, [r["min_iou"] for r in rows], "s--", color="#7fb3d5", label="worst view")
+        ax2 = ax.twinx()
+        ax2.plot(p, [r["crosstalk_cost"] for r in rows], "^-", color="#d62728", alpha=.65)
+        ax2.axhline(0, color="#d62728", lw=.8, ls="--", alpha=.5)
+        ax2.set_ylabel("cross-talk cost (IoU)", color="#d62728", fontsize=9)
+        ax.axvline(50, color="k", lw=1, ls=":")
+        ax.set_xlabel("sheet pitch (mm)"); ax.set_ylabel("IoU")
+        ax.set_title("REVERSED at 6 sheets: pitch wants to OPEN, not tighten\n"
+                     "50 mm recovers the worst view 0.785 -> 0.816 and drives\n"
+                     "cross-talk back to zero; 100 mm collapses it", fontsize=9)
+        ax.legend(fontsize=8, loc="lower center")
+
+    # (b) tone allocation -- also re-measured, and also reversed.
+    rows = [r for r in _journal("sweep_v6engrave_30v6") if r["overrides"]]
     if rows:
         rows.sort(key=lambda r: r["mean_iou"])
         lab = [str(r["overrides"].get("engrave_levels", "?")) for r in rows]
-        ax = axes[0, 1]
+        ax = axes[1, 0]
         cols = ["#2ca02c" if r is rows[-1] else "#c7c7c7" for r in rows]
         ax.barh(range(len(rows)), [r["mean_iou"] for r in rows], color=cols)
         ax.set_yticks(range(len(rows)))
         ax.set_yticklabels(lab, fontsize=7)
-        ax.set_xlim(min(r["mean_iou"] for r in rows) - 0.01, max(r["mean_iou"] for r in rows) + 0.005)
+        ax.set_xlim(min(r["mean_iou"] for r in rows) - 0.01,
+                    max(r["mean_iou"] for r in rows) + 0.005)
         ax.set_xlabel("mean IoU")
-        ax.set_title("LEVER: allocate tones evenly in optical DENSITY,\n"
-                     "not in transmittance  (+0.034)\n"
-                     "overlapping sheets multiply, so even spacing in T\n"
-                     "leaves the midtones unreachable", fontsize=9)
-
-    # (c) a refuted hypothesis, plotted so it stays refuted
-    rows = sorted(_journal("sweep_bandlimit_30v4"),
-                  key=lambda r: r["overrides"].get("target_blur_px", 0))
-    if rows:
-        b = [r["overrides"].get("target_blur_px", 0) for r in rows]
-        ax = axes[1, 0]
-        ax.plot(b, [r["mean_iou"] for r in rows], "o-", label="mean IoU")
-        ax.plot(b, [r["edge"] for r in rows], "s-", label="edge fidelity")
-        ax.set_xlabel("target blur (panel px)"); ax.set_ylabel("score")
-        ax.set_title("REFUTED: band-limiting the targets to the optical passband\n"
-                     "the theory was sound; there is no interior optimum,\n"
-                     "not even at 1 px", fontsize=9)
-        ax.legend(fontsize=8)
+        ax.set_title("REVERSED at 6 sheets: the engrave alphabet must go LIGHT\n"
+                     "two sheets per family leave few transmittances to multiply,\n"
+                     "so a dark alphabet has nothing to walk back with", fontsize=9)
 
     # (d) the headline, end to end. Read from the shipped report so it cannot drift.
     ax = axes[1, 1]
-    rep = json.loads((ROOT / "out_pearl3_30" / "v4" / "fab_report.json").read_text())
+    rep = json.loads((ROOT / REPORT[arm] / "fab_report.json").read_text())
     shipped = rep["gate_fab_round_trip"]["summary"]["mean_iou"]
-    lab = ["60x60\n(previous)", "30x30\nfirst try", "30x30\noptimised", "30x30\n+ re-toned\nSHIPPED"]
-    val = [0.722, 0.689, 0.8539, shipped]
+    # `solve_summary` is the raster AFTER re-toning; stage 1 is where the descent started.
+    stage1 = rep["retone_descent"][0]["mean_iou"]
+    lab = [f"60x60\n18 sheets\n(previous)", f"30x30\n{sheets} sheets\nfirst try",
+           f"30x30\n{sheets} sheets\nre-optimised", f"30x30\n{sheets} sheets\n+ re-toned\nSHIPPED"]
+    val = [0.722, 0.814, stage1, shipped]
     cols = ["#8c8c8c", "#d62728", "#7fb3d5", "#2ca02c"]
     bars = ax.bar(lab, val, color=cols)
     for b_, v in zip(bars, val):
         ax.text(b_.get_x() + b_.get_width() / 2, v + .004, f"{v:.3f}", ha="center", fontsize=9)
     ax.axhline(0.722, color="#8c8c8c", ls="--", lw=1)
     ax.set_ylim(0.6, max(val) + 0.05); ax.set_ylabel("mean IoU")
-    ax.set_title("Half the footprint, better than the original\n"
+    ax.set_title("A third of the sheets, a quarter of the footprint,\n"
+                 "still ahead of the original\n"
                  "(all bars all-light; last bar measured from the CUT FILES)", fontsize=9)
 
-    fig.suptitle("What moved the number — and what didn't\n"
-                 "lever panels are the original sweeps on the earlier target set; "
-                 "they rank the levers, and the ranking did not change",
+    fig.suptitle("Re-optimising for a six-sheet build — and two levers that reversed\n"
+                 "top left is the older sheet-count frontier, which is what sets the price of "
+                 "the constraint; the other three panels are measured at 6 sheets",
                  fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.925))
     fig.savefig(out / "2_levers.png", dpi=130)
@@ -209,7 +226,7 @@ def fig_bakeoff(out):
 
 
 # --- figure 4: the thing you actually cut ----------------------------------------------
-def fig_fabrication(out, art, cid, arm="30v4"):
+def fig_fabrication(out, art, cid, arm="30v6"):
     from shadowart.solve import decompose
     import dataclasses
     scene = art["scene"]
@@ -240,7 +257,7 @@ def fig_fabrication(out, art, cid, arm="30v4"):
         ax.set_title(panel.name, fontsize=7, pad=2)
     for j in range(len(panels), nrow * ncol):
         axes[j // ncol][j % ncol].axis("off")
-    fig.suptitle("The 18 sheets as exported — one DXF/SVG each, shaded by engrave tone\n"
+    fig.suptitle(f"The {len(panels)} sheets as exported — one DXF/SVG each, shaded by engrave tone\n"
                  "blue outline = the clear Perspex square that gets cut; "
                  "greys = laser engrave layers ENG_L / ENG_D / ENG_K", fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.93))
@@ -251,7 +268,7 @@ def fig_fabrication(out, art, cid, arm="30v4"):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--arm", default="30v4")
+    ap.add_argument("--arm", default="30v6", choices=sorted(REPORT))
     ap.add_argument("--out", default="examples/pearl3")
     ap.add_argument("--sweeps", type=int, default=5)
     a = ap.parse_args(argv)
@@ -261,7 +278,7 @@ def main(argv=None):
     print("1/4 result ...")
     art, cid = fig_result(out, a.arm, a.sweeps)
     print("2/4 levers ...")
-    fig_levers(out)
+    fig_levers(out, a.arm)
     print("3/4 bake-off ...")
     fig_bakeoff(out)
     print("4/4 fabrication ...")
