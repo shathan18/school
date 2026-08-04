@@ -227,11 +227,16 @@ def build_interactive(scene, table, opacity, pred, out_path, rays=40, auto_open=
         traces += _table_traces(scene.table)
 
     fig = go.Figure(data=traces)
+    # `aspectmode="data"` keeps real proportions, and the rig is far wider than it is tall, so
+    # the camera eye sits in a badly flattened box: z=1.3 against a z-extent of ~0.3 opens the
+    # scene looking almost straight down, with all three wall images edge-on. Drop the eye to
+    # roughly standing height instead, which is where the piece is meant to be seen from.
     fig.update_layout(
         title="ShadowArt — interactive 3D (drag to orbit, scroll to zoom)",
         scene=dict(aspectmode="data", xaxis_title="x (m)",
                    yaxis_title="y (m)", zaxis_title="z (up)",
-                   camera=dict(eye=dict(x=1.8, y=1.8, z=1.3))),
+                   camera=dict(eye=dict(x=1.35, y=1.35, z=0.35),
+                               center=dict(x=0, y=0, z=0))),
         legend=dict(itemsizing="constant"), margin=dict(l=0, r=0, t=40, b=0))
     out_path = Path(out_path); out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_html(str(out_path), auto_open=auto_open,
