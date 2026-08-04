@@ -1,0 +1,114 @@
+{
+  "material": "clear cast acrylic (perspex)",
+  "process": "raster engrave for tone, vector through-cut for outline and slots",
+  "machine_order": [
+    "ENG_L",
+    "ENG_D",
+    "ENG_K",
+    "CUT_SLOT",
+    "CUT_OUTLINE"
+  ],
+  "order_rationale": "engrave while the sheet is still a rigid rectangle; cutting the slots first leaves a floppy carrier that lifts and defocuses",
+  "tones": [
+    {
+      "layer": "ENG_L",
+      "target_transmittance": 0.85,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    },
+    {
+      "layer": "ENG_D",
+      "target_transmittance": 0.62,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    },
+    {
+      "layer": "ENG_K",
+      "target_transmittance": 0.35,
+      "note": "power/speed is machine-specific -- calibrate with the step wedge in shadowart/targets/engrave.py before running the real sheets"
+    }
+  ],
+  "unengraved": {
+    "layer": null,
+    "target_transmittance": 1.0,
+    "note": "clear perspex, left untouched"
+  },
+  "panels": [
+    {
+      "name": "F0_0",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 381,
+        "ENG_D": 289,
+        "ENG_K": 320
+      }
+    },
+    {
+      "name": "F0_1",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 296,
+        "ENG_D": 175,
+        "ENG_K": 176
+      }
+    },
+    {
+      "name": "F1_0",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 366,
+        "ENG_D": 246,
+        "ENG_K": 156
+      }
+    },
+    {
+      "name": "F1_1",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 259,
+        "ENG_D": 159,
+        "ENG_K": 114
+      }
+    },
+    {
+      "name": "F2_0",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 3,
+        "ENG_D": 5,
+        "ENG_K": 24
+      }
+    },
+    {
+      "name": "F2_1",
+      "size_mm": [
+        295.8,
+        295.8
+      ],
+      "slots": 4,
+      "engrave_regions": {
+        "ENG_L": 295,
+        "ENG_D": 218,
+        "ENG_K": 147
+      }
+    }
+  ]
+}

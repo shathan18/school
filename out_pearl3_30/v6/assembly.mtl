@@ -1,0 +1,60 @@
+newmtl ENG_L
+Kd 0.8500 0.8500 0.8500
+d 0.55
+illum 1
+
+newmtl ENG_D
+Kd 0.6200 0.6200 0.6200
+d 0.55
+illum 1
+
+newmtl ENG_K
+Kd 0.3500 0.3500 0.3500
+d 0.55
+illum 1
+
+newmtl wall_A
+Kd 0.60 0.60 0.60
+d 0.25
+illum 1
+
+newmtl wall_B
+Kd 0.50 0.50 0.50
+d 0.25
+illum 1
+
+newmtl panel
+Kd 0.55 0.55 0.60
+d 0.35
+illum 1
+
+newmtl light
+Kd 1.00 0.85 0.20
+d 1.00
+illum 2
+
+newmtl anchor
+Kd 1.00 0.00 0.85
+d 1.00
+illum 1
+
+newmtl grid
+Kd 0.70 0.70 0.70
+d 0.40
+illum 1
+
+newmtl axis_x
+Kd 0.90 0.10 0.10
+d 1.00
+illum 1
+
+newmtl axis_y
+Kd 0.10 0.80 0.10
+d 1.00
+illum 1
+
+newmtl axis_z
+Kd 0.10 0.30 0.95
+d 1.00
+illum 1
+

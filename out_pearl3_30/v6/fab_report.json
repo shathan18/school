@@ -1,0 +1,263 @@
+{
+  "arm": "30v6",
+  "retone_sweeps": 5,
+  "retone_descent": [
+    {
+      "sweep": -1,
+      "loss": 83975.4453125,
+      "unit": "pixel",
+      "score": 0.7684447750189687,
+      "mean_iou": 0.845335004129308
+    },
+    {
+      "sweep": 0,
+      "loss": 64156.20703125,
+      "score": 0.7980282183602104,
+      "mean_iou": 0.8449001300795601,
+      "pixels_changed": 190057,
+      "sheets_accepted": 5
+    },
+    {
+      "sweep": 1,
+      "loss": 62877.7265625,
+      "score": 0.8019263666978763,
+      "mean_iou": 0.8479360229633265,
+      "pixels_changed": 46816,
+      "sheets_accepted": 5
+    },
+    {
+      "sweep": 2,
+      "loss": 62799.078125,
+      "score": 0.8020893146572574,
+      "mean_iou": 0.8477746848931003,
+      "pixels_changed": 6646,
+      "sheets_accepted": 3
+    },
+    {
+      "sweep": 3,
+      "loss": 62777.953125,
+      "score": 0.8021289091201045,
+      "mean_iou": 0.847750918343341,
+      "pixels_changed": 1498,
+      "sheets_accepted": 2
+    },
+    {
+      "sweep": 4,
+      "loss": 62777.98828125,
+      "score": 0.80212891474603,
+      "mean_iou": 0.847750918343341,
+      "pixels_changed": 5,
+      "sheets_accepted": 1
+    }
+  ],
+  "solve_summary": {
+    "mean_iou": 0.847750918343341,
+    "min_iou": 0.8386189327993243,
+    "distinctness": 0.30687874639445034,
+    "views": 3
+  },
+  "shards_only_summary": {
+    "mean_iou": 0.8402023776929853,
+    "min_iou": 0.7968799791419219,
+    "distinctness": 0.33108961768565914,
+    "views": 3
+  },
+  "geometry": {
+    "magnification": 6.08511063404532,
+    "lamp_to_body_m": 0.4930066485916347,
+    "body_to_wall_m": 2.506993351408365,
+    "lamp_height_m": 0.8743932265281217,
+    "footprint_m": [
+      0.29866566489925345,
+      0.29866566489925345
+    ],
+    "swept_diameter_m": 0.3,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 30.425553170226596,
+    "penumbra_sigma_mm": {
+      "back": 3.5935735933454476,
+      "side": 3.9325574767690554,
+      "front": 3.9325574767690554
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "vector": {
+    "n_polygons": 3629,
+    "regions_per_panel": {
+      "F0_0": {
+        "ENG_L": 381,
+        "ENG_D": 289,
+        "ENG_K": 320
+      },
+      "F0_1": {
+        "ENG_L": 296,
+        "ENG_D": 175,
+        "ENG_K": 176
+      },
+      "F1_0": {
+        "ENG_L": 366,
+        "ENG_D": 246,
+        "ENG_K": 156
+      },
+      "F1_1": {
+        "ENG_L": 259,
+        "ENG_D": 159,
+        "ENG_K": 114
+      },
+      "F2_0": {
+        "ENG_L": 3,
+        "ENG_D": 5,
+        "ENG_K": 24
+      },
+      "F2_1": {
+        "ENG_L": 295,
+        "ENG_D": 218,
+        "ENG_K": 147
+      }
+    }
+  },
+  "gate_weave": {
+    "n_crossings": 12,
+    "n_clusters": 12,
+    "max_multiplicity": 2,
+    "n_triple_points": 0,
+    "worst_cluster": {
+      "xy_m": [
+        0.0279,
+        0.0075
+      ],
+      "panels": [
+        "F0_0",
+        "F1_0"
+      ]
+    },
+    "min_crossing_angle_deg": 60.0,
+    "max_slot_width_mm": 3.464,
+    "material_thickness_mm": 3.0,
+    "pass": true
+  },
+  "gate_fab_round_trip": {
+    "views": {
+      "back": {
+        "mse": 0.01662897959163945,
+        "rmse": 0.12895340085332938,
+        "psnr_db": 17.791343996870832,
+        "ssim": 0.7760197785098015,
+        "edge_fidelity": 0.5794485339923203,
+        "iou": 0.8514259292404988,
+        "pred_fg_frac": 0.35063055555555556,
+        "target_fg_frac": 0.3389638888888889
+      },
+      "side": {
+        "mse": 0.0206429326656164,
+        "rmse": 0.14367648612635403,
+        "psnr_db": 16.852286040400067,
+        "ssim": 0.7553065531010559,
+        "edge_fidelity": 0.5642601247447737,
+        "iou": 0.8507818913008988,
+        "pred_fg_frac": 0.3829388888888889,
+        "target_fg_frac": 0.36235555555555554
+      },
+      "front": {
+        "mse": 0.022151770847914167,
+        "rmse": 0.14883470982238708,
+        "psnr_db": 16.545915498591384,
+        "ssim": 0.7204482691627189,
+        "edge_fidelity": 0.5668727776676838,
+        "iou": 0.8357697791873776,
+        "pred_fg_frac": 0.4005,
+        "target_fg_frac": 0.3648222222222222
+      }
+    },
+    "summary": {
+      "mean_iou": 0.8459925332429251,
+      "min_iou": 0.8357697791873776,
+      "distinctness": 0.2897311416608689,
+      "views": 3
+    },
+    "cost_mean_iou": 0.0017583851004159268
+  },
+  "gate_ablation": {
+    "per_panel": [
+      {
+        "panel": "F0_0",
+        "drop_by_view": {
+          "back": 0.2025,
+          "side": 0.035,
+          "front": 0.0053
+        },
+        "best_view": "back",
+        "max_drop": 0.2025,
+        "mean_iou_drop": 0.0809
+      },
+      {
+        "panel": "F0_1",
+        "drop_by_view": {
+          "back": 0.1529,
+          "side": 0.0229,
+          "front": 0.0056
+        },
+        "best_view": "back",
+        "max_drop": 0.1529,
+        "mean_iou_drop": 0.0605
+      },
+      {
+        "panel": "F1_0",
+        "drop_by_view": {
+          "back": 0.0864,
+          "side": 0.276,
+          "front": 0.066
+        },
+        "best_view": "side",
+        "max_drop": 0.276,
+        "mean_iou_drop": 0.1428
+      },
+      {
+        "panel": "F1_1",
+        "drop_by_view": {
+          "back": 0.0362,
+          "side": 0.1228,
+          "front": -0.0018
+        },
+        "best_view": "side",
+        "max_drop": 0.1228,
+        "mean_iou_drop": 0.0524
+      },
+      {
+        "panel": "F2_0",
+        "drop_by_view": {
+          "back": 0.144,
+          "side": 0.0656,
+          "front": 0.2871
+        },
+        "best_view": "front",
+        "max_drop": 0.2871,
+        "mean_iou_drop": 0.1656
+      },
+      {
+        "panel": "F2_1",
+        "drop_by_view": {
+          "back": 0.062,
+          "side": 0.0748,
+          "front": 0.1667
+        },
+        "best_view": "front",
+        "max_drop": 0.1667,
+        "mean_iou_drop": 0.1011
+      }
+    ],
+    "idle_panels": [],
+    "n_idle": 0,
+    "pass": true
+  },
+  "runtime_s": 114.59247229999164
+}

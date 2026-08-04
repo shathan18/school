@@ -1,0 +1,204 @@
+{
+  "config": {
+    "name": "30x30, 6 sheets (2 per family)",
+    "body": 0.3,
+    "n_per_family": 2,
+    "pitch": 0.02,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "engrave_min_feature": 0.0002,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.09,
+    "fragment_max_area": 0.014,
+    "shard_budget": 260,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "damage_weight": 0.25,
+    "credit_weight": null,
+    "match_tol": 0.3,
+    "colour_blend": 0.0,
+    "colour_primary_tol": 0.1,
+    "engrave_levels": [
+      0.6,
+      0.3,
+      0.1
+    ],
+    "intensity_gain": 1.0,
+    "white_threshold": 0.9,
+    "precompensate": 0,
+    "precompensate_gain": 1.0,
+    "target_blur_px": 0.0,
+    "footprint_limit": 0.3,
+    "views": {
+      "back": "examples/pearlN_back.png",
+      "side": "examples/pearlN_side.png",
+      "front": "examples/pearlN_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.013377943029548,
+    "lamp_to_body_m": 0.4988876515698589,
+    "body_to_wall_m": 2.501112348430141,
+    "lamp_height_m": 0.8757438289023028,
+    "footprint_m": [
+      0.29430946114286766,
+      0.29430946114286766
+    ],
+    "swept_diameter_m": 0.30000000000000004,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 30.066889715147738,
+    "penumbra_sigma_mm": {
+      "back": 3.671408130181608,
+      "side": 3.805691953115667,
+      "front": 3.805691953115666
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.03016481059087915,
+      "rmse": 0.17368019631172446,
+      "psnr_db": 15.20499397335618,
+      "ssim": 0.6861666170807903,
+      "edge_fidelity": 0.46057113851561204,
+      "iou": 0.8098074868580242,
+      "pred_fg_frac": 0.37159166666666665,
+      "target_fg_frac": 0.3389638888888889
+    },
+    "side": {
+      "mse": 0.030267583660351274,
+      "rmse": 0.1739758134349464,
+      "psnr_db": 15.190222485136289,
+      "ssim": 0.6726421142220305,
+      "edge_fidelity": 0.488132652781967,
+      "iou": 0.845857024038396,
+      "pred_fg_frac": 0.3897388888888889,
+      "target_fg_frac": 0.36235555555555554
+    },
+    "front": {
+      "mse": 0.04402223178929898,
+      "rmse": 0.20981475589028284,
+      "psnr_db": 13.563279438542784,
+      "ssim": 0.6559567364594507,
+      "edge_fidelity": 0.5233763428431513,
+      "iou": 0.7859976619241866,
+      "pred_fg_frac": 0.4330027777777778,
+      "target_fg_frac": 0.3648222222222222
+    }
+  },
+  "summary": {
+    "mean_iou": 0.8138873909402022,
+    "min_iou": 0.7859976619241866,
+    "distinctness": 0.23489144761049796,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.010840657385571315,
+      "rmse": 0.10411847763759953,
+      "psnr_db": 19.649443810569036,
+      "ssim": 0.7862211928469305,
+      "edge_fidelity": 0.5745035200622234,
+      "iou": 0.8384082832986154,
+      "pred_fg_frac": 0.32784722222222223,
+      "target_fg_frac": 0.3389638888888889
+    },
+    "side": {
+      "mse": 0.01641615310604365,
+      "rmse": 0.12812553651026656,
+      "psnr_db": 17.847286060809587,
+      "ssim": 0.7780165786961407,
+      "edge_fidelity": 0.4829336881484293,
+      "iou": 0.8511369626596766,
+      "pred_fg_frac": 0.34973055555555554,
+      "target_fg_frac": 0.36235555555555554
+    },
+    "front": {
+      "mse": 0.02058348052886612,
+      "rmse": 0.1434694410976293,
+      "psnr_db": 16.864811870723763,
+      "ssim": 0.745236841156216,
+      "edge_fidelity": 0.5178224393055421,
+      "iou": 0.8025524604245919,
+      "pred_fg_frac": 0.328825,
+      "target_fg_frac": 0.3648222222222222
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8306992354609614,
+    "min_iou": 0.8025524604245919,
+    "distinctness": 0.3110238055258222,
+    "views": 3
+  },
+  "crosstalk_cost_iou": 0.016811844520759123,
+  "shards": {
+    "n_fragments": 767,
+    "stack_depths": {
+      "1": 767
+    },
+    "collisions_resolved": 12,
+    "budget": {
+      "back": {
+        "target": 260,
+        "achieved": 256,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 7.704568750202884
+      },
+      "side": {
+        "target": 260,
+        "achieved": 257,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 7.704568750202888
+      },
+      "front": {
+        "target": 260,
+        "achieved": 254,
+        "spacing_multiplier": 1.0,
+        "penumbra_min_feature_mm": 7.704568750202886
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 767,
+    "mean_views": 2.951760104302477,
+    "frac_multi": 1.0,
+    "frac_all": 0.9517601043024772
+  },
+  "precompensation": {
+    "iters": 0,
+    "best_pass": 0,
+    "trace": [
+      {
+        "pass": 0,
+        "mean_iou": 0.8138873909402022,
+        "min_iou": 0.7859976619241866
+      }
+    ]
+  },
+  "runtime_s": 10.38321959998575,
+  "device": "cuda"
+}

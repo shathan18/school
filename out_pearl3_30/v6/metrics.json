@@ -1,0 +1,204 @@
+{
+  "config": {
+    "name": "30x30, 6 sheets (2 per family)",
+    "body": 0.3,
+    "n_per_family": 2,
+    "pitch": 0.05,
+    "family_angles_deg": null,
+    "image": 1.8,
+    "image_z0": 0.3,
+    "lamp_to_wall": 3.0,
+    "body_z0": 0.78,
+    "source_radius": 0.0015,
+    "stops_deg": [
+      15.0,
+      135.0,
+      255.0
+    ],
+    "thickness": 0.003,
+    "min_feature": 0.005,
+    "engrave_min_feature": 0.0002,
+    "wall_res": 600,
+    "panel_res": 600,
+    "fragment_size": 0.05,
+    "fragment_max_area": 0.014,
+    "shard_budget": 400,
+    "detail_bias": 2.0,
+    "palette": "noir",
+    "max_stack": 3,
+    "penumbra_sigmas": 2.0,
+    "seed": 0,
+    "damage_weight": 0.25,
+    "credit_weight": null,
+    "match_tol": 0.3,
+    "colour_blend": 0.0,
+    "colour_primary_tol": 0.1,
+    "engrave_levels": [
+      0.85,
+      0.62,
+      0.35
+    ],
+    "intensity_gain": 1.0,
+    "white_threshold": 0.9,
+    "precompensate": 0,
+    "precompensate_gain": 1.0,
+    "target_blur_px": 0.0,
+    "footprint_limit": 0.3,
+    "views": {
+      "back": "examples/pearlN_back.png",
+      "side": "examples/pearlN_side.png",
+      "front": "examples/pearlN_front.png"
+    }
+  },
+  "geometry": {
+    "magnification": 6.08511063404532,
+    "lamp_to_body_m": 0.4930066485916347,
+    "body_to_wall_m": 2.506993351408365,
+    "lamp_height_m": 0.8743932265281217,
+    "footprint_m": [
+      0.29866566489925345,
+      0.29866566489925345
+    ],
+    "swept_diameter_m": 0.3,
+    "min_feature_panel_mm": 5.0,
+    "min_feature_wall_mm": 30.425553170226596,
+    "penumbra_sigma_mm": {
+      "back": 3.5935735933454476,
+      "side": 3.9325574767690554,
+      "front": 3.9325574767690554
+    },
+    "family_angles_deg": [
+      75.0,
+      135.0,
+      15.0
+    ],
+    "panels_per_view": {
+      "back": 2,
+      "side": 2,
+      "front": 2
+    }
+  },
+  "views": {
+    "back": {
+      "mse": 0.023877844630184893,
+      "rmse": 0.15452457613656442,
+      "psnr_db": 16.220048780227174,
+      "ssim": 0.7143927763874882,
+      "edge_fidelity": 0.5009955050955983,
+      "iou": 0.8487354779779065,
+      "pred_fg_frac": 0.38066666666666665,
+      "target_fg_frac": 0.3389638888888889
+    },
+    "side": {
+      "mse": 0.024323054860780628,
+      "rmse": 0.1559585036501076,
+      "psnr_db": 16.139818806385165,
+      "ssim": 0.7014944782512291,
+      "edge_fidelity": 0.4948892293754725,
+      "iou": 0.8601481864509413,
+      "pred_fg_frac": 0.3970861111111111,
+      "target_fg_frac": 0.36235555555555554
+    },
+    "front": {
+      "mse": 0.02955414231750695,
+      "rmse": 0.171913182500665,
+      "psnr_db": 15.293816396708312,
+      "ssim": 0.6860968673425187,
+      "edge_fidelity": 0.5365191084374616,
+      "iou": 0.827121347959076,
+      "pred_fg_frac": 0.4050861111111111,
+      "target_fg_frac": 0.3648222222222222
+    }
+  },
+  "summary": {
+    "mean_iou": 0.845335004129308,
+    "min_iou": 0.827121347959076,
+    "distinctness": 0.27846882742482804,
+    "views": 3
+  },
+  "views_shards_only": {
+    "back": {
+      "mse": 0.01686933482813655,
+      "rmse": 0.12988200348060755,
+      "psnr_db": 17.729020416648844,
+      "ssim": 0.7732101803963467,
+      "edge_fidelity": 0.5720686608822677,
+      "iou": 0.8703763890178599,
+      "pred_fg_frac": 0.3324388888888889,
+      "target_fg_frac": 0.3389638888888889
+    },
+    "side": {
+      "mse": 0.024815519009135714,
+      "rmse": 0.15752942267759287,
+      "psnr_db": 16.05276637232865,
+      "ssim": 0.7553817216658553,
+      "edge_fidelity": 0.4993553412051304,
+      "iou": 0.8533507649191743,
+      "pred_fg_frac": 0.35039166666666666,
+      "target_fg_frac": 0.36235555555555554
+    },
+    "front": {
+      "mse": 0.02934785386434722,
+      "rmse": 0.1713121532885137,
+      "psnr_db": 15.3242365213187,
+      "ssim": 0.7315591560012845,
+      "edge_fidelity": 0.47901103178418963,
+      "iou": 0.7968799791419219,
+      "pred_fg_frac": 0.3243611111111111,
+      "target_fg_frac": 0.3648222222222222
+    }
+  },
+  "summary_shards_only": {
+    "mean_iou": 0.8402023776929853,
+    "min_iou": 0.7968799791419219,
+    "distinctness": 0.33108961768565914,
+    "views": 3
+  },
+  "crosstalk_cost_iou": -0.005132626436322618,
+  "shards": {
+    "n_fragments": 1140,
+    "stack_depths": {
+      "1": 1140
+    },
+    "collisions_resolved": 12,
+    "budget": {
+      "back": {
+        "target": 400,
+        "achieved": 378,
+        "spacing_multiplier": 1.189207115002721,
+        "penumbra_min_feature_mm": 8.11524801739843
+      },
+      "side": {
+        "target": 400,
+        "achieved": 394,
+        "spacing_multiplier": 1.189207115002721,
+        "penumbra_min_feature_mm": 8.11524801739843
+      },
+      "front": {
+        "target": 400,
+        "achieved": 368,
+        "spacing_multiplier": 1.2968395546510096,
+        "penumbra_min_feature_mm": 8.11524801739843
+      }
+    }
+  },
+  "duty": {
+    "n_shards": 1140,
+    "mean_views": 2.930701754385965,
+    "frac_multi": 0.9982456140350877,
+    "frac_all": 0.9324561403508772
+  },
+  "precompensation": {
+    "iters": 0,
+    "best_pass": 0,
+    "trace": [
+      {
+        "pass": 0,
+        "mean_iou": 0.845335004129308,
+        "min_iou": 0.827121347959076
+      }
+    ]
+  },
+  "runtime_s": 21.646236400003545,
+  "device": "cuda"
+}
