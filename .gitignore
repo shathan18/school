@@ -15,3 +15,6 @@ Project.zip
 out_pearl3*/**/_scratch/
 out_pearl3*/**/*.npy
 examples/pearl3/_scratch/
+
+# Slide PNGs exported by _deckcheck.py purely to eyeball the deck; the .pptx is the artefact.
+_deckcheck/
