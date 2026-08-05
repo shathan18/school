@@ -42,6 +42,7 @@ BAD = RGBColor(0xD9, 0x6B, 0x5E)
 PANEL = RGBColor(0x1C, 0x20, 0x26)      # card fill, one step up from the background
 
 FONT = "Segoe UI"
+MONO = "Consolas"
 
 _missing: list[str] = []
 
@@ -64,7 +65,7 @@ def rect(slide, x, y, w, h, rgb=PANEL, shape=MSO_SHAPE.ROUNDED_RECTANGLE):
     return s
 
 
-def _runs(p, text, size, color, weight_color=None):
+def _runs(p, text, size, color, weight_color=None, font=None):
     """Split `**bold**` markup into runs so a key term can carry the accent colour."""
     for i, chunk in enumerate(re.split(r"\*\*(.+?)\*\*", text)):
         if not chunk:
@@ -72,7 +73,7 @@ def _runs(p, text, size, color, weight_color=None):
         r = p.add_run()
         r.text = chunk
         r.font.size = Pt(size)
-        r.font.name = FONT
+        r.font.name = font or FONT
         strong = i % 2 == 1
         r.font.bold = strong
         r.font.color.rgb = (weight_color or ACCENT) if strong else color
@@ -91,7 +92,8 @@ def text(slide, x, y, w, h, lines, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP):
         p.space_before = Pt(ln.get("before", 0))
         p.space_after = Pt(ln.get("after", 6))
         p.line_spacing = ln.get("spacing", 1.05)
-        _runs(p, ln["text"], ln.get("size", 14), ln.get("color", FG), ln.get("strong", ACCENT))
+        _runs(p, ln["text"], ln.get("size", 14), ln.get("color", FG), ln.get("strong", ACCENT),
+              ln.get("font"))
     return box
 
 
@@ -216,6 +218,18 @@ def template_banner(s):
          align=PP_ALIGN.CENTER)
 
 
+def divider(prs, title, sub):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    s.background.fill.solid()
+    s.background.fill.fore_color.rgb = BG
+    text(s, MARGIN, 2.95, BODY_W, 1.6,
+         [{"text": title, "size": 38, "color": FG, "after": 16},
+          {"text": sub, "size": 13.5, "color": MUTED}], align=PP_ALIGN.CENTER)
+    r = rect(s, W / 2 - 0.55, 4.72, 1.1, 0.028, ACCENT, MSO_SHAPE.RECTANGLE)
+    r.shadow.inherit = False
+    return s
+
+
 # ---------------------------------------------------------------- live numbers
 
 def load_numbers():
@@ -313,7 +327,7 @@ Then start the deck. Do not read the title slide aloud.
                    "against each other rather than in sequence.",
            "size": 11, "color": MUTED}])
     notes(s, """
-[0:30-1:15] Keep this to 45 seconds. One line each.
+[0:30-1:00] Thirty seconds. One line each.
 
 The point worth landing: this is a CS/Architecture collaboration, and the fabrication
 constraints were in the optimiser from the beginning rather than applied afterwards. That is
@@ -341,7 +355,7 @@ TODO BEFORE PRESENTING: fill in the three "Interests" lines and Shadha's surname
             caption="Left: the source at each of the three stops.  "
                     "Right: the shadow the six-sheet solution casts there.")
     notes(s, """
-[1:15-2:15]
+[1:00-1:40]
 
 "Vermeer's Girl with a Pearl Earring. We want three views of her — front, profile, back —
 out of one object on a turntable, with a fixed lamp.
@@ -352,101 +366,132 @@ computes the wall will look like, from the same geometry we then cut."
 Do not explain the algorithm yet. Just establish the goal.
 """)
 
-    # ---- 4. prior art ---------------------------------------------------
-    s = slide(prs, "What we took from the literature — and what we didn't", "Background — prior art")
-    entries = [
-        ("Mitra & Pauly — Shadow Art", "SIGGRAPH Asia 2009",
-         "The founding paper. Given target silhouettes and light directions, carve a single "
-         "volume whose shadows match, starting from the visual hull.",
-         "NOT APPLICABLE", BAD,
-         "A visual hull is a connected solid. We have six flat sheets, because the "
-         "manufacturing constraint is laser-cut stock. We did adopt their honesty: for many "
-         "target triples no exact solution exists."),
-        ("Baran et al. — Layered Attenuators", "Eurographics 2012",
-         "The closest relative. Stacked semi-transparent layers, attenuation multiplying "
-         "through the stack, solved for prescribed grayscale shadows.",
-         "ADOPTED", GOOD,
-         "Two ideas carry directly: multiplicative compositing is the physics, and because "
-         "transmittances multiply, densities add — so tone levels should be spaced evenly in "
-         "optical density. Measured here: +0.034 mean IoU."),
-        ("Bermano et al. — ShadowPix", "2012",
-         "Height-field reliefs producing several images under different grazing light "
-         "directions, via self-shadowing of surface microstructure.",
-         "NOT APPLICABLE", BAD,
-         "Reflection and self-shadowing, not transmission. Our tone comes from engraving "
-         "density in a transmissive sheet, so the stack composes multiplicatively instead."),
+    # ---- 4. how we got here ---------------------------------------------
+    # The semester actually ran ceiling mobile -> Rhino/GH -> own simulator -> flat panels,
+    # and the last step is what created the assignment problem the rest of the talk is about.
+    s = slide(prs, "How we got here", "Background — the route")
+    arc = [
+        ("Hang it from the ceiling",
+         "The first idea was a suspended cloud: fragments floating at their own depths, "
+         "free in all three dimensions. Maximum freedom for the optimiser.",
+         "Every fragment needs something to hang from, and the thread casts a shadow too. "
+         "It was freedom the fabrication could not honour."),
+        ("Rhino and Grasshopper",
+         "We built it parametrically in Grasshopper, which is the standard tool for this "
+         "kind of geometry in architecture.",
+         "A dataflow evaluator, not an optimiser. We needed hundreds of solves, gradients "
+         "and a GPU — and it could not show all three projections at once."),
+        ("So we built our own simulator",
+         "A differentiable renderer in Python, and an orbitable 3D scene in the browser — "
+         "sheets, lamp, rays and all three walls in one view, with no CAD licence.",
+         "The renderer became the physics model, the optimisation objective and the preview "
+         "at the same time. Sweeps went from unrunnable to **21.6 s** per complete build."),
+        ("Then the geometry changed completely",
+         "The suspended cloud became **six flat laser-cut sheets**, slotted into each other: "
+         "self-supporting, reproducible from files, nothing extra in the light path.",
+         "But depth stopped being continuous. A fragment now has to pick a **discrete host "
+         "sheet** — and that single change is what created the problem the rest of this "
+         "talk is about."),
     ]
-    cw = (BODY_W - 0.52) / 3
-    for i, (title, venue, what, tag, colour, why) in enumerate(entries):
-        x = MARGIN + i * (cw + 0.26)
-        rect(s, x, 1.9, cw, 3.8)
-        text(s, x + 0.26, 2.1, cw - 0.52, 1.5,
-             [{"text": title, "size": 14.5, "color": FG, "after": 3},
-              {"text": venue, "size": 10.5, "color": MUTED, "after": 12},
-              {"text": what, "size": 11.5, "color": FG, "spacing": 1.25}])
-        verdict(s, x + 0.26, 3.86, 1.75, tag, colour)
-        text(s, x + 0.26, 4.28, cw - 0.52, 1.3,
-             [{"text": why, "size": 11, "color": MUTED, "spacing": 1.25}])
-    warn = rect(s, MARGIN, 5.85, BODY_W, 1.35, RGBColor(0x2A, 0x21, 0x10))
-    warn.line.color.rgb = ACCENT
-    warn.line.width = Pt(1)
-    text(s, MARGIN + 0.32, 6.05, BODY_W - 0.64, 1.0,
-         [{"text": "...and then the adopted rule reversed on us.", "size": 13.5,
-           "color": ACCENT, "after": 5},
-          {"text": "Density-even tone spacing won clearly at eighteen sheets. When we "
-                   "re-optimised for **six**, it finished **sixth out of seven** — light "
-                   "tones won instead. With eighteen layers stacking multiplicatively each "
-                   "must be pale; with six, the dark alphabet overshoots. The paper is not "
-                   "wrong. We had measured it in a regime we then left.",
-           "size": 11.5, "color": FG, "spacing": 1.25}])
+    cw = (BODY_W - 3 * 0.22) / 4
+    for i, (head, what, learned) in enumerate(arc):
+        x = MARGIN + i * (cw + 0.22)
+        c = rect(s, x, 1.95, cw, 4.5)
+        if i == 3:
+            c.line.color.rgb = ACCENT
+            c.line.width = Pt(1.25)
+        text(s, x + 0.26, 2.18, cw - 0.52, 2.1,
+             [{"text": f"0{i + 1}", "size": 11, "color": ACCENT, "after": 9},
+              {"text": head, "size": 15, "color": FG, "spacing": 1.12, "after": 12},
+              {"text": what, "size": 11.5, "color": FG, "spacing": 1.3}])
+        text(s, x + 0.26, 4.62, cw - 0.52, 1.6,
+             [{"text": "What it cost us", "size": 9.5, "color": ACCENT, "after": 6},
+              {"text": learned, "size": 11, "color": MUTED, "spacing": 1.3}])
+        if i < 3:
+            text(s, x + cw + 0.01, 4.0, 0.2, 0.3,
+                 [{"text": "›", "size": 15, "color": MUTED}], align=PP_ALIGN.CENTER)
+    text(s, MARGIN, 6.62, BODY_W, 0.4,
+         [{"text": "Two of the three big decisions this semester were made by discovering "
+                   "what the previous one could not do.", "size": 12, "color": ACCENT}])
     notes(s, """
-[2:15-3:30] This is the slide that shows we read rather than skimmed.
+[1:40-2:40] Yahel opens this one — it is the architecture half of the story.
 
-Spend most of the time on Baran. "Closest relative. Two ideas carry: the physics is
-multiplicative, and because transmittances multiply, optical densities add — so your tone
-levels should be evenly spaced in density, not in transmittance. We measured that: +0.034 IoU.
+"We did not start here. We started wanting to hang fragments from the ceiling, and we built
+it in Rhino and Grasshopper because that is what you use.
 
-And then we cut the build from eighteen sheets to six, re-ran the sweep, and that rule came
-sixth out of seven. Not because the paper is wrong — because we had measured it while the
-layer count was pinned by a different constraint."
+Two things pushed us off that. Grasshopper is a dataflow evaluator — it recomputes a graph.
+It is not an optimiser, it has no GPU and no gradients, and we needed to run hundreds of
+solves. So we wrote our own renderer and our own 3D viewer in the browser, and stopped
+needing a CAD licence at all.
 
-This sets up the closing insight. Flag it now, pay it off on the insights slide.
+And once we could actually see the thing, the hanging design lost. It became six flat sheets
+that slot into each other — no thread, no hardware in the beam, and the whole object comes
+off a laser bed.
+
+That last move is the one that matters for the algorithm, because depth stopped being a
+continuous variable. A fragment now picks a discrete sheet. That is the problem we spent the
+rest of the semester on."
+
+Do not apologise for the dead ends. This is the "main challenges" item on the brief.
 """)
 
-    # ---- 5. what is new -------------------------------------------------
-    s = slide(prs, "What is new here", "Background — our contribution")
+    # ---- 5. prior art + contribution -------------------------------------
+    s = slide(prs, "Where this sits, and what we added", "Background — prior art")
+    entries = [
+        ("Mitra & Pauly — Shadow Art", "SIGGRAPH Asia 2009", "NOT APPLICABLE", BAD,
+         "Carve one connected volume from the visual hull. Ours is flat laser-cut stock, not "
+         "a solid — but we kept their honesty: for many target triples no exact solution "
+         "exists, so the goal is the best approximation, not a match."),
+        ("Baran et al. — Layered Attenuators", "Eurographics 2012", "ADOPTED", GOOD,
+         "The closest relative. Transmittances multiply, so optical densities add — tone "
+         "levels should be spaced evenly in density. Worth **+0.034 mean IoU** to us. It then "
+         "reversed when we cut to six sheets, which is the closing insight of this talk."),
+        ("Bermano et al. — ShadowPix", "2012", "NOT APPLICABLE", BAD,
+         "Height-field reliefs that self-shadow under grazing light. That is reflection; "
+         "ours is transmission, so our stack composes multiplicatively instead."),
+    ]
+    for i, (title_, venue, tag, colour, why) in enumerate(entries):
+        y = 1.95 + i * 1.56
+        rect(s, MARGIN, y, 6.15, 1.48)
+        text(s, MARGIN + 0.28, y + 0.2, 3.5, 0.5,
+             [{"text": title_, "size": 13.5, "color": FG, "after": 2},
+              {"text": venue, "size": 10, "color": MUTED}])
+        verdict(s, MARGIN + 4.15, y + 0.24, 1.72, tag, colour)
+        text(s, MARGIN + 0.28, y + 0.8, 5.6, 0.6,
+             [{"text": why, "size": 10.5, "color": MUTED, "spacing": 1.25}])
+    rect(s, 7.15, 1.95, 5.46, 4.6)
     items = [
         ("Rotation, not relighting",
-         "Prior multi-view shadow work moves the light or uses separate stacks. Here the "
-         "lamp is fixed and the **object turns**, so all three images share one set of "
+         "The lamp is fixed and the object turns, so all three images share one set of "
          "matter with no ability to mask any of it."),
         ("Engraving density as the tone alphabet",
-         "Four levels — clear plus three burn depths — cut into **one** clear acrylic sheet. "
-         "No dye, no varying thickness, no laminating different stock. Tone is a laser "
-         "parameter."),
+         "Four levels cut into one clear sheet. No dye, no lamination, no thickness "
+         "variation — tone is a laser parameter."),
         ("Cross-talk priced, not suppressed",
-         "The interference between views enters the objective as a signed quantity that can "
-         "go **negative**. A fragment is rewarded for genuinely serving another view. Our "
-         "measured cross-talk is constructive."),
+         "Interference enters the objective as a **signed** term that may go negative, so a "
+         "fragment is rewarded for genuinely serving another view."),
         ("Fabrication inside the loop",
-         "Kerf, minimum feature, penumbra and joint feasibility constrain the solver "
-         "directly, and three gates re-verify against the **exported polygons** rather than "
-         "the solver's own raster."),
+         "Kerf, minimum feature and joint feasibility constrain the solver directly, and the "
+         "gates re-verify against the exported polygons."),
     ]
-    cw = (BODY_W - 0.78) / 4
-    for i, (head, body) in enumerate(items):
-        x = MARGIN + i * (cw + 0.26)
-        rect(s, x, 2.05, cw, 3.5)
-        text(s, x + 0.26, 2.32, cw - 0.52, 0.7,
-             [{"text": f"0{i + 1}", "size": 12, "color": ACCENT, "after": 10},
-              {"text": head, "size": 15, "color": FG, "spacing": 1.15}])
-        text(s, x + 0.26, 3.55, cw - 0.52, 1.85,
-             [{"text": body, "size": 11.5, "color": MUTED, "spacing": 1.3}])
+    text(s, 7.45, 2.15, 4.9, 0.35, [{"text": "What is new here", "size": 14, "color": ACCENT}])
+    yy = 2.66
+    for head, body in items:
+        text(s, 7.45, yy, 4.9, 0.9,
+             [{"text": head, "size": 12.5, "color": FG, "after": 4},
+              {"text": body, "size": 10.5, "color": MUTED, "spacing": 1.26}])
+        yy += 0.97
     notes(s, """
-[3:30-4:15] Fast. Four claims, ten seconds each. This is the "why is this a project and not
-a reimplementation" slide.
+[2:40-3:20] Forty seconds. Do not read the cards.
 
-If asked to cut for time, this is the third slide to drop.
+Say only this: "Two of these are not applicable and one is — Baran. From Baran we take that
+the physics is multiplicative, and that because transmittances multiply, densities add, so
+your tone levels should be evenly spaced in density. That was worth about three IoU points.
+Hold that thought, because it reversed on us later."
+
+Then point at the right-hand column and give one sentence: "what is new is that the lamp
+never moves — the object turns — and that we price the interference between views instead of
+trying to suppress it."
 """)
 
     # ---- 6. why it is hard ----------------------------------------------
@@ -476,7 +521,7 @@ If asked to cut for time, this is the third slide to drop.
               {"text": head, "size": 17, "color": FG, "spacing": 1.1, "after": 16},
               {"text": body, "size": 12.5, "color": MUTED, "spacing": 1.35}])
     notes(s, """
-[4:15-5:15] Slow down here. If the audience gets these three, everything after is easy.
+[3:20-4:20] Slow down here. If the audience gets these three, everything after is easy.
 
 Obstacle 2 is the one to demonstrate with your hands — two flat palms, "half and half does
 not make black, it makes three-quarters."
@@ -505,7 +550,7 @@ It does."
                     ("−0.005", "measured cross-talk — negative, i.e. constructive")],
           height=1.35, top_size=24)
     notes(s, """
-[5:15-6:15] This is the conceptual centre of the talk.
+[4:20-5:05] This is the conceptual centre of the talk.
 
 "Every piece of engraving casts a shadow for every view. That is normally the error term.
 But if a piece lands where another portrait also wanted darkness, that stray shadow is free
@@ -559,125 +604,92 @@ That last number is the one to say slowly.
          [{"text": "The two highlighted stages are where the research contribution sits.",
            "size": 11.5, "color": ACCENT}])
     notes(s, """
-[6:15-7:00] Do not narrate all seven. Point at the chain, say "seven stages, targets in,
+[5:05-5:35] Do not narrate all seven. Point at the chain, say "seven stages, targets in,
 cut files out", then go straight to:
 
 "Two of these are where the actual contribution is — assignment and re-toning. I want to
-spend the next three minutes on those."
+spend the next two and a half minutes on those."
 """)
 
-    # ---- 9. optics ------------------------------------------------------
-    s = slide(prs, "The optics fix what is physically knowable", "The project — algorithmic approach")
-    text(s, MARGIN, 1.95, 5.8, 4.3,
-         [{"text": "Central projection → one 3×3 matrix", "size": 15, "color": ACCENT,
-           "after": 7},
-          {"text": "A point light, a flat sheet and a flat wall define a projective "
-                   "collineation, so the whole mapping is a **homography**. We build it from "
-                   "the four sheet corners by normalised DLT and SVD, and cache it per "
-                   "(sheet, view) pair.",
-           "size": 12.5, "color": MUTED, "spacing": 1.32, "after": 20},
-          {"text": "Magnification is the depth-to-resolution gradient", "size": 15,
-           "color": ACCENT, "after": 7},
-          {"text": "A 29.6 cm sheet becomes a **1.80 m** image — **6.09×**. Sheets nearer the "
-                   "lamp throw larger, coarser shadows; sheets nearer the wall carry finer "
-                   "detail. Depth is therefore also a detail budget.",
-           "size": 12.5, "color": MUTED, "spacing": 1.32, "after": 20},
-          {"text": "Penumbra is a hard resolution bound", "size": 15, "color": ACCENT,
-           "after": 7},
-          {"text": "A real lamp has width, so every shadow edge is blurred — **3.6 to "
-                   "3.9 mm** at the wall here. We compute that first and refuse to engrave "
-                   "anything finer. Detail below the blur is precision the light can never "
-                   "resolve; fabricating it is a lie told in acrylic.",
-           "size": 12.5, "color": MUTED, "spacing": 1.32}])
-    # The rig numbers, rather than a second copy of the projection sheet used on slide 3.
-    rect(s, 6.9, 1.9, 5.75, 4.55)
-    text(s, 7.2, 2.1, 5.15, 0.4,
-         [{"text": "The rig these numbers describe", "size": 13.5, "color": ACCENT}])
-    geo = [("lamp → body", "0.493 m"),
-           ("body → wall", "2.507 m"),
-           ("lamp height", "0.874 m"),
-           ("sheet", "295.8 × 295.8 mm, 3 mm cast acrylic"),
-           ("footprint", "298.7 × 298.7 mm"),
-           ("image on the wall", "1.80 m"),
-           ("magnification", "6.085×"),
-           ("penumbra at the wall", "3.59 / 3.93 / 3.93 mm"),
-           ("smallest honest feature", "30.4 mm at the wall"),
-           ("turntable stops", "15° / 135° / 255°")]
-    for i, (k, v) in enumerate(geo):
-        y = 2.62 + i * 0.375
-        text(s, 7.2, y, 2.5, 0.34,
-             [{"text": k, "size": 11.5, "color": MUTED}])
-        text(s, 9.7, y, 2.65, 0.34,
-             [{"text": v, "size": 11.5, "color": FG, "align": PP_ALIGN.RIGHT}])
-    notes(s, """
-[7:00-7:40] Fast, and the first slide to cut if you are running long.
-
-The line worth keeping if you compress: "we compute the blur from the lamp's physical size
-first, and then refuse to engrave anything finer than it. Detail below the blur is precision
-the light can never resolve."
-
-The panel on the right is the whole rig. If anyone wants to rebuild this, those ten numbers
-plus the cut files are sufficient — which is the point, and it is why they are in the
-submission document too.
-""")
-
-    # ---- 10. host assignment (core) -------------------------------------
-    s = slide(prs, "The core: choosing which sheet hosts each fragment", "The project — the contribution")
-    text(s, MARGIN, 1.9, 5.9, 2.4,
-         [{"text": "A fragment's position within its own portrait is already fixed by the "
-                   "optics. The one remaining free variable is **which sheet hosts it** — "
-                   "and that single choice decides where its unavoidable stray shadow lands "
-                   "on the other two views.",
-           "size": 13.5, "color": FG, "spacing": 1.32, "after": 14},
-          {"text": "It is the entire lever on cross-talk. In our first implementation it "
-                   "was a **random draw** — which is exactly why reconstruction quality swung "
-                   "**14–37% on the random seed alone**.",
-           "size": 13.5, "color": FG, "spacing": 1.32}])
-    rect(s, MARGIN, 4.5, 5.9, 2.2)
-    text(s, MARGIN + 0.3, 4.75, 5.3, 1.8,
-         [{"text": "Why it was random: cost", "size": 13, "color": ACCENT, "after": 8},
-          {"text": "Scoring a candidate host naively means re-rendering a wall — for every "
-                   "fragment, every candidate sheet, every other view. That is far too "
-                   "expensive to do, so the original code guessed.",
-           "size": 12, "color": MUTED, "spacing": 1.3}])
-    rect(s, 7.05, 1.9, 5.6, 2.4)
-    text(s, 7.35, 2.15, 5.0, 2.0,
-         [{"text": "The trick: compose the two homographies", "size": 13.5, "color": ACCENT,
-           "after": 9},
-          {"text": "We precompute one matrix  **G = H(sheet→other view) · H(own view→sheet)**  "
-                   "per sheet and view pair. It maps a point on the fragment's own wall "
-                   "**directly** to where that material lands on another view's wall.",
-           "size": 12, "color": MUTED, "spacing": 1.3, "after": 8},
-          {"text": "Damage is then evaluated by transforming at most **200 of the fragment's "
-                   "own pixels**. No wall is rendered at all.",
-           "size": 12, "color": FG, "spacing": 1.3}])
-    grid_table(s, 7.05, 4.5, 5.6,
+    # ---- 9. the algorithm (core) ----------------------------------------
+    # The optics and the full damage functional now live in the backup section; this slide
+    # has to survive being given ninety seconds and nothing else.
+    s = slide(prs, "The algorithm: which sheet hosts each fragment",
+              "The project — the contribution")
+    text(s, MARGIN, 1.9, 6.55, 0.5,
+         [{"text": "A fragment's position inside its own portrait is already fixed by the "
+                   "optics. The one free variable left is **which sheet carries it** — and "
+                   "that decides where its unavoidable stray shadow lands on the other two "
+                   "views.", "size": 12.5, "color": FG, "spacing": 1.3}])
+    rect(s, MARGIN, 2.85, 6.55, 3.28)
+    code = [
+        "shatter each view's target into shards",
+        "order shards by the darkness they demand, densest first",
+        "",
+        "for each shard f:",
+        "    for each sheet p that can physically reach f:",
+        "        gain   \u2190 darkness f delivers to its OWN view",
+        "        **damage \u2190 stray darkness it throws on the OTHER two**",
+        "        score  \u2190 gain \u2212 \u03bb \u00b7 damage",
+        "    host(f) \u2190 best-scoring sheet that still has room",
+        "",
+        "resolve slot collisions where sheets cross",
+        "freeze the geometry; coordinate-descend the four tones",
+    ]
+    text(s, MARGIN + 0.3, 3.05, 6.0, 2.95,
+         [{"text": ln or " ", "size": 10.5, "color": FG if ln.startswith(("for", "shatter",
+                                                                          "order", "resolve",
+                                                                          "freeze")) else MUTED,
+           "font": MONO, "spacing": 1.18, "after": 2} for ln in code])
+    text(s, MARGIN, 6.28, 6.55, 0.85,
+         [{"text": "Before this, the host was a **random draw**.", "size": 12,
+           "color": ACCENT, "after": 5},
+          {"text": "Reconstruction quality swung **14–37% on the seed alone** — the single "
+                   "largest source of variance in the project.",
+           "size": 11.5, "color": MUTED, "spacing": 1.28}])
+    rect(s, 7.42, 1.9, 5.19, 3.15)
+    text(s, 7.72, 2.15, 4.6, 2.7,
+         [{"text": "Damage is the expensive term — and we never render a wall to get it",
+           "size": 13, "color": ACCENT, "spacing": 1.15, "after": 10},
+          {"text": "Scoring a candidate naively means re-rendering another view's wall, for "
+                   "every fragment and every sheet. Instead we compose the two homographies "
+                   "once per (sheet, view) pair:",
+           "size": 11.5, "color": MUTED, "spacing": 1.28, "after": 9},
+          {"text": "G = H(sheet \u2192 other wall) \u00b7 H(own wall \u2192 sheet)",
+           "size": 11, "color": ACCENT, "font": MONO, "after": 9},
+          {"text": "That maps a point on the fragment's own wall **directly** to where its "
+                   "material lands on another view's wall. Evaluating a host is then at most "
+                   "**200 pixel transforms**.",
+           "size": 11.5, "color": FG, "spacing": 1.28}])
+    grid_table(s, 7.42, 5.25, 5.19,
                [["Cost of host selection", "complexity"],
                 ["Naive — re-render per candidate", "F · P · V · N"],
                 ["Ours — composed homography", "F · P · V · 200"],
                 ["Speed-up on the dominant term", "≈ 1800×"]],
-               [3.85, 1.75])
-    text(s, 7.05, 6.05, 5.6, 0.7,
-         [{"text": "That reduction is the whole difference between choosing hosts by "
-                   "**optimisation** and choosing them by coin flip.",
-           "size": 11.5, "color": ACCENT, "spacing": 1.3}])
+               [3.49, 1.70], row_h=0.32)
+    text(s, 7.42, 6.62, 5.19, 0.5,
+         [{"text": "The difference between choosing hosts by **optimisation** and choosing "
+                   "them by coin flip.", "size": 11.5, "color": ACCENT, "spacing": 1.25}])
     notes(s, """
-[7:40-9:00] THE most important slide. Give it a full minute and do not rush.
+[5:35-7:05] THE slide. Ninety seconds, and do not rush it. Shadha takes this.
 
-Structure:
-1. "The fragment's position in its own picture is already fixed. The only thing still free is
-   which sheet carries it — and that decides where its stray shadow falls on the other two."
-2. "In our first version that was a random draw. Quality swung 14 to 37 percent on the seed
-   alone. It was the largest single source of variance in the project."
-3. "It was random because scoring it properly means re-rendering a wall for every fragment,
-   every candidate sheet, every other view — far too expensive."
-4. "So instead of rendering, we compose the two homographies into one matrix that maps
-   directly from one wall to another. Then we only transform a couple of hundred of the
-   fragment's own pixels. About eighteen hundred times cheaper — and that is the difference
-   between optimising the choice and guessing it."
+Four beats:
+1. "The fragment's position in its own picture is already fixed by the optics. The only thing
+   still free is which sheet carries it — and that decides where its stray shadow falls on
+   the other two views."
+2. Walk the pseudocode with a finger. Gain, damage, argmax. Say "the whole contribution is
+   the one bold line."
+3. "In our first version the host was a random draw. Quality swung 14 to 37 percent on the
+   seed alone. It was random because scoring it properly means re-rendering a wall for every
+   fragment, every sheet, every other view — far too expensive."
+4. "So we never render. We compose the two homographies into one matrix that maps directly
+   from one wall to another, and transform a couple of hundred of the fragment's own pixels.
+   About eighteen hundred times cheaper — and that is the difference between optimising the
+   choice and guessing it."
 
-Expect the critique panel to come back here. Be ready for: "is the greedy optimal?" — no, it
-is single-pass and myopic, no revisiting; that is on the future-work slide.
+THERE IS A BACKUP SLIDE with the damage functional written out, its four limiting cases, and
+why greedy. Go to it if anyone asks how damage is actually defined, or whether the greedy is
+optimal. Do not pre-empt it here.
 """)
 
     # ---- 11. re-toning --------------------------------------------------
@@ -729,7 +741,7 @@ is single-pass and myopic, no revisiting; that is on the future-work slide.
                    f"**+{N['iou2'] - N['iou1']:.4f}**  ·  the faces went from crushed to readable",
            "size": 10.5, "color": MUTED}])
     notes(s, f"""
-[9:00-10:15] The second-strongest slide. It is the honest-failure slide, and panels reward it.
+[7:05-8:05] The second-strongest slide. It is the honest-failure slide, and panels reward it.
 
 "Our renders hit {N['iou1']:.3f} on the standard metric and they looked wrong. Both of those were
 true at the same time, and that is the interesting part. IoU scores the outline of a shape. A
@@ -750,100 +762,7 @@ same blindness that hid the bug, showing up again while we fixed it — which is
 never report IoU without SSIM and an edge term beside it.
 """)
 
-    # ---- 11b. design search --------------------------------------------
-    # The reversal is asserted on the prior-art slide; this is where it gets evidence.
-    s = slide(prs, "Choosing the design, and the two rules that reversed",
-              "The project — the contribution")
-    picture(s, ROOT / "examples" / "pearl3" / "2_levers.png", MARGIN, 1.85, 7.55, 5.0)
-    text(s, 8.5, 1.9, 4.1, 5.0,
-         [{"text": "We swept the design, not the solver.", "size": 14.5, "color": ACCENT,
-           "after": 9},
-          {"text": "Sheet count, pitch, engrave alphabet, damage weight and fragment size — "
-                   "**two seeds per point**, accepted on a composite of mean IoU, worst view "
-                   "and SSIM rather than on IoU alone.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3, "after": 18},
-          {"text": "Pitch wanted to open, not tighten.", "size": 13, "color": FG,
-           "after": 7},
-          {"text": "Tight stacking was right when sheets were many. At six, **50 mm** takes "
-                   "the worst view from 0.785 to 0.816 and drives cross-talk to zero. "
-                   "100 mm collapses it again.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3, "after": 18},
-          {"text": "The engrave alphabet wanted to go light.", "size": 13, "color": FG,
-           "after": 7},
-          {"text": "Eighteen pale layers multiply into darkness, so the tones must be dark. "
-                   "With two layers per view there is little left to multiply, and a dark "
-                   "alphabet overshoots. We ship **0.85 / 0.62 / 0.35**.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3, "after": 18},
-          {"text": "And one lever turned out not to be a lever: the damage weight gave "
-                   "**identical scores to four decimals** for every non-zero value. It is a "
-                   "switch, not a dial.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3}])
-    notes(s, """
-[10:15-11:00] This slide is the evidence for the promise you made on the prior-art slide.
-Call back to it explicitly: "earlier I said the rule we took from Baran reversed on us —
-here it is."
-
-Point at the bottom-left panel. The green bar is what we shipped. The rule from the
-literature — dark, evenly spaced tones — is the fourth bar down.
-
-Then the bottom-right panel, which is the summary of the whole semester in one chart: a
-third of the sheets and a quarter of the footprint of our earlier build, and still ahead of
-it. The last bar is measured from the cut files, not from the solver.
-
-The honest framing, if asked: neither rule was measured badly. Both were measured at
-eighteen sheets, where a constraint we later removed was doing the work. You cannot detect
-that from inside the original experiment.
-""")
-
-    # ---- 12. raster to cut ----------------------------------------------
-    s = slide(prs, "From a solved field to files a laser can run", "The project — fabrication")
-    steps = [
-        ("Threshold", "Each sheet's solved field is split into the four tone levels."),
-        ("Minimum feature", "Morphological opening then closing at the cuttable radius — "
-                            "this is where the penumbra bound becomes physical geometry."),
-        ("Contour", "Regions become polygons in sheet-local millimetres."),
-        ("Kerf offset", "Every ring is grown by half the beam width, so the finished part is "
-                        "nominal size after the laser eats the edge."),
-    ]
-    text(s, MARGIN, 1.95, 5.7, 0.4,
-         [{"text": "Vectorisation", "size": 15, "color": ACCENT}])
-    y = 2.45
-    for i, (head, body) in enumerate(steps):
-        text(s, MARGIN, y, 5.7, 0.8,
-             [{"text": f"{i + 1}.  {head}", "size": 13, "color": FG, "after": 4},
-              {"text": body, "size": 11.5, "color": MUTED, "spacing": 1.28}])
-        y += 0.86
-    rect(s, MARGIN, 5.95, 5.7, 0.95)
-    text(s, MARGIN + 0.28, 6.18, 5.2, 0.6,
-         [{"text": "Layer order: ENG_L → ENG_D → ENG_K → CUT_SLOT → CUT_OUTLINE",
-           "size": 12, "color": ACCENT, "after": 5},
-          {"text": "Engrave first, cut last. Cutting the outline first leaves a compliant "
-                   "part that lifts and defocuses.", "size": 11, "color": MUTED}])
-    picture(s, ROOT / "examples" / "pearl3" / "4_fabrication.png", 6.85, 1.9, 5.8, 3.4)
-    facts = [["6", "sheets, 295.8 mm square, 3 mm clear acrylic"],
-             ["3,629", "engraved regions"],
-             ["4", "tone levels — clear, 0.85, 0.62, 0.35 transmittance"],
-             ["12", "half-lap joints"],
-             [f"{N['slot']:.2f} mm", f"widest slot on 3.0 mm stock, at {N['angle']:.0f}° crossing"]]
-    yy = 5.45
-    for value, label in facts:
-        text(s, 6.85, yy, 1.5, 0.28, [{"text": value, "size": 12.5, "color": ACCENT}])
-        text(s, 8.35, yy, 4.3, 0.28, [{"text": label, "size": 11.5, "color": MUTED}])
-        yy += 0.29
-    notes(s, """
-[10:15-11:00]
-
-Two things to say out loud because they are the ones that surprise people:
-
-1. "Engrave before you cut. If you cut the outline first you are left with a floppy part that
-   lifts off the bed and defocuses the beam."
-2. "The widest slot is 3.46 millimetres for 3 millimetre material. That is not an error — a
-   slot at a 60 degree crossing has to be thickness over sine theta."
-
-Yahel should take this slide.
-""")
-
-    # ---- 13. fabrication photos -----------------------------------------
+    # ---- 11. fabrication -------------------------------------------------
     s = slide(prs, "Fabrication", "The project — fabrication")
     shots = [("fab_01_engraving", "Laser engraving the tone layers"),
              ("fab_02_sheets_flat", "The six sheets, cut and unassembled"),
@@ -851,26 +770,45 @@ Yahel should take this slide.
              ("fab_04_object", "The finished assembly")]
     cw = (BODY_W - 3 * 0.24) / 4
     for i, (stem, cap) in enumerate(shots):
-        photo(s, stem, MARGIN + i * (cw + 0.24), 2.0, cw, 3.6, caption=cap)
-    text(s, MARGIN, 5.85, BODY_W, 0.9,
-         [{"text": "Material: 3 mm clear cast acrylic. The four tones are engraving depths on "
-                   "one material — no dye, no lamination, no thickness variation.",
-           "size": 12.5, "color": FG, "after": 6},
-          {"text": "The three tone levels are specified as optical transmittance, not as "
-                   "laser power and speed, because those differ per machine and per batch. "
-                   "Calibrating them against a step wedge on scrap is the single most likely "
-                   "way to get a disappointing result from correct files.",
-           "size": 11.5, "color": MUTED, "spacing": 1.28}])
+        photo(s, stem, MARGIN + i * (cw + 0.24), 1.95, cw, 3.05, caption=cap)
+    rect(s, MARGIN, 5.12, 6.15, 1.78)
+    text(s, MARGIN + 0.28, 5.36, 5.6, 1.35,
+         [{"text": "ENG_L → ENG_D → ENG_K → CUT_SLOT → CUT_OUTLINE", "size": 11.5,
+           "color": ACCENT, "after": 7},
+          {"text": "Engrave first, cut last. Cutting the outline first leaves a compliant "
+                   "part that lifts off the bed and defocuses the beam.",
+           "size": 11, "color": MUTED, "spacing": 1.26, "after": 7},
+          {"text": f"Widest slot **{N['slot']:.2f} mm** on 3 mm stock — not an error: a slot "
+                   f"at a {N['angle']:.0f}° crossing must be thickness ÷ sin θ.",
+           "size": 11, "color": MUTED, "spacing": 1.26}])
+    rect(s, 7.42, 5.12, 5.19, 1.78)
+    text(s, 7.7, 5.36, 4.65, 1.35,
+         [{"text": "3 mm clear cast acrylic · 3,629 engraved regions · 12 joints",
+           "size": 11.5, "color": ACCENT, "after": 7},
+          {"text": "The four tones are engraving depths in **one** material — no dye, no "
+                   "lamination, no thickness variation.",
+           "size": 11, "color": MUTED, "spacing": 1.26, "after": 7},
+          {"text": "Specified as **transmittance**, not as power and speed, because those "
+                   "differ per machine. Calibrate on scrap first.",
+           "size": 11, "color": MUTED, "spacing": 1.26}])
     notes(s, """
-[11:00-11:45] Yahel's slide. Talk about the physical process, not the algorithm.
+[8:05-8:55] Yahel's slide. Talk about the physical process, not the algorithm.
 
-Worth mentioning: the tones are specified as transmittance, not as machine settings, and had
-to be calibrated on scrap first. That is a genuinely non-obvious fabrication insight.
+The two non-obvious things, and they are the ones fabrication people react to:
+
+1. "Engrave before you cut. If you cut the outline first you are left with a floppy part that
+   lifts off the bed and defocuses the beam."
+2. "The tones are specified as transmittance, not as machine settings, so they have to be
+   calibrated against a step wedge on scrap first. Correct files on an uncalibrated machine
+   still give you a disappointing object."
+
+The vectorisation pipeline — threshold, minimum feature, contour, kerf offset — is a BACKUP
+slide. Go there only if asked how the raster becomes polygons.
 
 TODO: drop four photos into examples/photos/ and re-run make_deck.py.
 """)
 
-    # ---- 14. object and shadows -----------------------------------------
+    # ---- 12. object and shadows -----------------------------------------
     s = slide(prs, "The artefact, and the shadows it actually casts", "The project — result")
     photo(s, "fab_04_object", MARGIN, 1.95, 4.2, 4.55, caption="The assembly — roughly 30 × 30 cm")
     trio = [("shadow_front", "Front"), ("shadow_side", "Profile"), ("shadow_back", "Back")]
@@ -881,7 +819,7 @@ TODO: drop four photos into examples/photos/ and re-run make_deck.py.
          [{"text": "Same object, same lamp. Only the rotation changes.",
            "size": 13, "color": ACCENT}])
     notes(s, """
-[11:45-12:15] Let this one sit. Say the caption line and stop talking for a beat.
+[8:55-9:30] Let this one sit. Say the caption line and stop talking for a beat.
 
 If the room can be darkened, do this live with the object and a lamp instead of the slide —
 it is far more convincing than any photograph. Check the room in advance.
@@ -889,7 +827,7 @@ it is far more convincing than any photograph. Check the room in advance.
 TODO: drop the three shadow photos into examples/photos/.
 """)
 
-    # ---- 15. results ----------------------------------------------------
+    # ---- 13. results ----------------------------------------------------
     s = slide(prs, "Results, and how we verified them", "The project — validation")
     cards(s, 1.9, [(f"{N['mean_iou']:.3f}", "mean IoU across the three views"),
                    (f"{N['min_iou']:.3f}", "worst single view — we optimise this too"),
@@ -924,7 +862,7 @@ TODO: drop the three shadow photos into examples/photos/.
                    "would make that trade again.",
            "size": 11.5, "color": MUTED, "spacing": 1.3}])
     notes(s, """
-[12:15-13:00]
+[9:30-10:25]
 
 Lead with the worst-view number, not the mean: "we optimise the worst of the three views
 explicitly, because for a three-view piece the easiest way to cheat is to sacrifice one view
@@ -937,7 +875,7 @@ The 6-vs-18 table pre-empts the obvious critique question ("why only six?"). Ans
 they ask.
 """)
 
-    # ---- 16. it generalises ---------------------------------------------
+    # ---- 14. it generalises ---------------------------------------------
     s = slide(prs, "The method is not specific to this painting", "Generality")
     gallery = [(ROOT / "out_final" / "faces2_60x60" / "preview_walls.png",
                 "Three facial expressions — distinctness 0.97"),
@@ -958,102 +896,73 @@ they ask.
                    "to carry.",
            "size": 11.5, "color": MUTED, "spacing": 1.3}])
     notes(s, """
-[13:00-13:20] Twenty seconds. This is the second slide to cut if you are over time.
+[10:25-10:45] Twenty seconds. This is the first slide to cut if you are over time.
 
 The honest caveat matters more than the gallery: "we know what it cannot do — the subject has
 to be centred on a plain background. Full-frame paintings have no silhouette to carry, and
 they fail."
 """)
 
-    # ---- 17. parametric UI (template) -----------------------------------
-    s = slide(prs, "Live demo — parametric interface", "Demo")
-    rect(s, MARGIN, 1.95, 6.1, 4.3)
-    text(s, MARGIN + 0.32, 2.2, 5.5, 3.8,
-         [{"text": "What to show", "size": 14, "color": ACCENT, "after": 12},
-          {"text": "· Sheet count and spacing", "size": 12.5, "color": FG, "after": 7},
-          {"text": "· Lamp distance and source radius → penumbra", "size": 12.5,
-           "color": FG, "after": 7},
-          {"text": "· Fragment size and shard budget", "size": 12.5, "color": FG, "after": 7},
-          {"text": "· The four engrave tone levels", "size": 12.5, "color": FG, "after": 7},
-          {"text": "· Stop angles and grid phase", "size": 12.5, "color": FG, "after": 14},
-          {"text": "Every one of these is already a field on the BuildConfig dataclass; a "
-                   "complete re-solve takes 21.6 seconds on the GPU.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3}])
-    picture(s, None, 7.05, 1.95, 5.6, 4.3, caption="Screen recording or live window",
-            label="demo_ui.png")
-    template_banner(s)
-    notes(s, """
-[13:20-13:50] TEMPLATE — replace before presenting.
-
-Either run it live or play a screen recording. If neither is ready, show the CLI driving a
-parameter sweep and the resulting journal, and be straight about the fact that there is no
-GUI yet — it is on the future-work slide.
-
-Fallback that always works: open the interactive 3D scene in a browser and orbit it.
-""")
-
-    # ---- 18. grasshopper (template) -------------------------------------
-    s = slide(prs, "CAD interoperability", "Demo")
-    rect(s, MARGIN, 1.95, 6.1, 4.3)
-    text(s, MARGIN + 0.32, 2.2, 5.5, 3.8,
-         [{"text": "What exists today", "size": 14, "color": ACCENT, "after": 12},
-          {"text": "· Per-vertex-coloured **OBJ** of the full assembly, opening cleanly in "
-                   "Rhino, Blender and MeshLab", "size": 12.5, "color": FG, "after": 7},
-          {"text": "· **PLY** export for the same geometry", "size": 12.5, "color": FG,
-           "after": 7},
-          {"text": "· Layered **DXF** and **SVG** per sheet, ready for the laser",
-           "size": 12.5, "color": FG, "after": 7},
-          {"text": "· An orbitable **3D scene** in the browser showing sheets, lamps, rays "
-                   "and the three projected walls", "size": 12.5, "color": FG, "after": 14},
-          {"text": "There is no Grasshopper component yet. The solver is a Python library "
-                   "with a fully parametric configuration object, which is what a component "
-                   "would wrap — see the future-work slide.",
-           "size": 11.5, "color": MUTED, "spacing": 1.3}])
-    picture(s, _find("scene_3d"), 7.05, 1.95, 5.6, 4.3,
+    # ---- 15. demo + video (template) -------------------------------------
+    # Three required deliverables (parametric UI, CAD interop, the short film) collapsed onto
+    # one slide, because at 15 minutes they are one minute between them.
+    s = slide(prs, "Live demo, and the video", "Demo")
+    cw = (BODY_W - 2 * 0.24) / 3
+    xs_ = [MARGIN + i * (cw + 0.24) for i in range(3)]
+    picture(s, _find("demo_ui"), xs_[0], 1.9, cw, 2.25,
+            caption="Parametric solve, live or recorded", label="demo_ui.png")
+    picture(s, _find("scene_3d"), xs_[1], 1.9, cw, 2.25,
             caption="The interactive 3D scene", label="scene_3d.png")
+    picture(s, _find("video_still"), xs_[2], 1.9, cw, 2.25,
+            caption="30–40 second summary video", label="video_still.png")
+    panels = [
+        ("Parametric interface",
+         ["· sheet count and spacing",
+          "· lamp distance and source radius → penumbra",
+          "· fragment size and shard budget",
+          "· the four engrave tone levels",
+          "· stop angles and grid phase"],
+         "Each is a field on the configuration object; a re-solve is 21.6 s."),
+        ("CAD interoperability",
+         ["· per-vertex-coloured **OBJ** and **PLY**",
+          "· opens cleanly in Rhino, Blender, MeshLab",
+          "· layered **DXF** / **SVG** per sheet, laser-ready",
+          "· orbitable browser scene: sheets, lamp, rays,",
+          "   and all three projected walls"],
+         "No Grasshopper component yet — the solver is a Python library that a component "
+         "would wrap."),
+        ("The film",
+         ["0:00  the six sheets, flat on the bench",
+          "0:06  assembly — slotting the weave",
+          "0:12  lamp on, the first portrait resolves",
+          "0:20  slow rotation, morphing to the profile",
+          "0:34  title card and names"],
+         "The continuous rotation is the shot that sells the piece."),
+    ]
+    for x, (head, bullets, foot) in zip(xs_, panels):
+        rect(s, x, 4.3, cw, 2.15)
+        lines = [{"text": head, "size": 12.5, "color": ACCENT, "after": 7}]
+        lines += [{"text": b, "size": 10, "color": FG, "spacing": 1.18, "after": 2}
+                  for b in bullets]
+        lines.append({"text": foot, "size": 9, "color": MUTED, "spacing": 1.2, "before": 5})
+        text(s, x + 0.24, 4.48, cw - 0.48, 1.85, lines)
     template_banner(s)
     notes(s, """
-[13:50-14:10] TEMPLATE — replace before presenting.
+[10:45-11:45] TEMPLATE — replace all three panels before presenting.
 
-Be direct: there is no Grasshopper component. What we have is clean interop — OBJ, PLY, DXF,
-SVG — plus a browser 3D scene. Show the 3D scene live; it reads well on a projector.
+One minute for the whole slide. Do the demo live if you can; if the room or the laptop is
+uncertain, play recordings. The fallback that always works is opening the interactive 3D
+scene in a browser and orbiting it — it reads well on a projector.
 
-Do not overclaim here. The panel will respect "not yet, and here is exactly what it would
-take" far more than a stretch.
+Be direct about Grasshopper: there is no component. What exists is clean interop — OBJ, PLY,
+DXF, SVG — plus our own browser viewer, which is exactly why we built it (slide 4). The panel
+will respect "not yet, and here is what it would take" far more than a stretch.
+
+The video plays from a SEPARATE FILE, not embedded, and it is also a required Aug 9
+submission item.
 """)
 
-    # ---- 19. video (template) -------------------------------------------
-    s = slide(prs, "Project video", "Demo")
-    picture(s, None, MARGIN, 1.95, 7.4, 4.5, caption="30–40 second summary video",
-            label="video_still.png")
-    rect(s, 8.35, 1.95, 4.3, 4.5)
-    text(s, 8.62, 2.2, 3.75, 4.0,
-         [{"text": "Suggested cut", "size": 14, "color": ACCENT, "after": 12},
-          {"text": "0:00  the six sheets, flat on the bench", "size": 12, "color": FG,
-           "after": 8},
-          {"text": "0:06  assembly — slotting the weave", "size": 12, "color": FG,
-           "after": 8},
-          {"text": "0:12  lamp on, first portrait resolves", "size": 12, "color": FG,
-           "after": 8},
-          {"text": "0:20  slow rotation, shadow morphs to the profile", "size": 12,
-           "color": FG, "after": 8},
-          {"text": "0:28  continues to the back view", "size": 12, "color": FG, "after": 8},
-          {"text": "0:34  title card and names", "size": 12, "color": FG, "after": 16},
-          {"text": "Shot on the real object under a small bright lamp in a dark room. The "
-                   "continuous rotation is the shot that sells the piece.",
-           "size": 11, "color": MUTED, "spacing": 1.3}])
-    template_banner(s)
-    notes(s, """
-[14:10-14:50] TEMPLATE — replace with the actual video, played from a separate file.
-
-The rotation shot is the one that matters. Everything else is context. Shoot it in a dark
-room with the smallest bright lamp you can find — a phone torch is often better than a lamp
-because the source is small, and source size is what blurs the shadow.
-
-Note: the video is also a required Aug 9 submission item, as a separate file.
-""")
-
-    # ---- 20. insights ---------------------------------------------------
+    # ---- 16. insights ---------------------------------------------------
     s = slide(prs, "What the semester actually taught us", "Insights")
     lessons = [
         ("A measured rule is only valid over the range it was measured on",
@@ -1084,7 +993,7 @@ Note: the video is also a required Aug 9 submission item, as a separate file.
              [{"text": head, "size": 14, "color": ACCENT, "spacing": 1.15, "after": 10},
               {"text": body, "size": 11.5, "color": MUTED, "spacing": 1.3}])
     notes(s, """
-[14:50-15:20] The closing argument. If you are over time, cut slides 9 and 16 to protect
+[11:45-12:45] The closing argument. If you are over time, cut slides 5 and 14 to protect
 this one — it is what the panel will remember.
 
 Lead with the first. It pays off the Baran reversal you flagged on the prior-art slide:
@@ -1096,60 +1005,330 @@ with thirty-two regions next to sheets with nine hundred and assumed it was dead
 turned out to be the single most important sheet in the piece."
 """)
 
-    # ---- 21. future -----------------------------------------------------
+    # ---- 17. future ------------------------------------------------------
     s = slide(prs, "Where this goes next", "Future directions")
     future = [
         ("Look ahead, not just forward",
-         "Host assignment is a single greedy pass in fragment order — no lookahead, no "
-         "revisiting. A fragment placed early cannot move once later fragments reveal a "
-         "better arrangement. Beam search, or a second reassignment pass conditioned on the "
-         "realised stray field, is the obvious next step."),
+         "Host assignment is a single greedy pass — no lookahead, no revisiting. A fragment "
+         "placed early cannot move once later ones reveal a better arrangement. Beam search, "
+         "or a second reassignment pass conditioned on the stray field the first one actually "
+         "produced, is the obvious next step."),
         ("Blue-noise tone quantisation",
-         "Fragment boundaries still correlate weakly along the vertical axis, producing faint "
-         "streaks. Error diffusion with a blue-noise mask in the re-toning stage is the "
-         "standard halftoning answer and is not yet implemented."),
-        ("Subtractive colour",
-         "The renderer already composites CMYK transmittances, and we have colour builds. "
-         "Extending the three-view turntable to colour means each fragment carries a channel "
-         "stack as well as a host, which enlarges the assignment problem considerably."),
+         "Fragment boundaries still correlate weakly along the vertical axis, producing "
+         "faint streaks in the result. Error diffusion with a blue-noise mask inside the "
+         "re-toning stage is the standard halftoning answer, and is not yet implemented."),
         ("Continuous rotation",
-         "Three stops is a design choice, not a limit. Supervising intermediate angles would "
-         "turn the piece from three portraits into a genuine animation — a face that turns "
-         "rather than three faces that swap."),
+         "Three stops is a design choice, not a limit. Supervising the intermediate angles "
+         "would turn the piece from three portraits into a genuine animation — a face that "
+         "turns, rather than three faces that swap."),
         ("A real parametric front end",
-         "The configuration object is already fully parametric and a solve takes 21.6 "
-         "seconds. A slider interface, and a Grasshopper component wrapping the same library, "
-         "would put the design loop in a designer's hands rather than a programmer's."),
-        ("Scale and material",
-         "Everything here is 3 mm acrylic at 30 cm. The optics scale, but penumbra and "
-         "minimum feature scale differently, so a larger or a thinner build is a genuine "
-         "re-optimisation rather than a resize."),
+         "The configuration is already fully parametric and a solve takes 21.6 seconds. "
+         "Sliders, and a Grasshopper component wrapping the same library, would put the "
+         "design loop in a designer's hands rather than a programmer's — which is where this "
+         "project started."),
     ]
-    cw = (BODY_W - 2 * 0.24) / 3
+    cw = (BODY_W - 3 * 0.24) / 4
     for i, (head, body) in enumerate(future):
-        x = MARGIN + (i % 3) * (cw + 0.24)
-        y = 1.92 + (i // 3) * 2.52
-        rect(s, x, y, cw, 2.38)
-        text(s, x + 0.26, y + 0.24, cw - 0.52, 1.9,
-             [{"text": head, "size": 13.5, "color": ACCENT, "spacing": 1.15, "after": 9},
-              {"text": body, "size": 11, "color": MUTED, "spacing": 1.28}])
-    text(s, MARGIN, 7.0, BODY_W, 0.4,
-         [{"text": "Code, cut files and the full decision record: "
-                   "**github.com/shathan18/school**", "size": 12.5, "color": FG,
+        x = MARGIN + i * (cw + 0.24)
+        rect(s, x, 1.95, cw, 3.7)
+        text(s, x + 0.26, 2.2, cw - 0.52, 3.2,
+             [{"text": f"0{i + 1}", "size": 11, "color": ACCENT, "after": 9},
+              {"text": head, "size": 14.5, "color": ACCENT, "spacing": 1.14, "after": 11},
+              {"text": body, "size": 11, "color": MUTED, "spacing": 1.3}])
+    rect(s, MARGIN, 5.85, BODY_W, 1.05)
+    text(s, MARGIN, 6.08, BODY_W, 0.7,
+         [{"text": "Code, cut files, sweep journals and the full decision record:  "
+                   "**github.com/shathan18/school**", "size": 13.5, "color": FG,
+           "align": PP_ALIGN.CENTER, "after": 6},
+          {"text": "Thank you — questions welcome.", "size": 11.5, "color": MUTED,
            "align": PP_ALIGN.CENTER}])
     notes(s, """
-[15:20-15:40] Close on the first item — admitting the greedy is myopic is a strength, not a
-weakness, and it is the question a panel is most likely to ask anyway. Answering it before
-they do is worth more than the thirty seconds it costs.
+[12:45-13:15] Thirty seconds, then stop. Ten minutes of critique follows.
 
-Then stop and take questions. Ten minutes of critique follows.
+Close on the first item. Admitting the greedy is myopic is a strength, not a weakness, and it
+is the question a panel is most likely to ask anyway — answering it before they do is worth
+far more than the thirty seconds it costs.
 
-Have ready, in case they ask:
-- "Why six sheets?" -> the 6-vs-18 table on the results slide.
-- "Is the greedy optimal?" -> no, single-pass and myopic; beam search is item one here.
-- "How do you know the cut files match the simulation?" -> gate B, the fabrication round trip.
-- "What happens if a sheet is mis-cut?" -> the piece fails rather than degrades; there is no
-  redundancy at six sheets, and that is a deliberate trade.
+The last item is the nicest closing line available: "we started wanting a designer's tool and
+ended up writing a solver. Putting the solver back behind sliders is the last step."
+
+THERE ARE BACKUP SLIDES after this one: the algorithm in full, the optics and rig numbers,
+the vectorisation pipeline, the design sweep, and a list of the questions we expect. Know the
+order so you can jump straight to one.
+""")
+
+    # ================================ backup ==============================
+    # Everything below is off the 15-minute path. It exists so that a question can be
+    # answered with evidence on screen instead of from memory.
+
+    divider(prs, "Backup", "Not presented — held for the critique")
+    notes(prs.slides[-1], """
+Do not walk through these. Jump to one when a question lands:
+
+  B1  the damage functional, its four limiting cases, and why greedy
+  B2  the optics and the full rig geometry
+  B3  raster to cut files — thresholding, minimum feature, kerf
+  B4  the design sweep, and the two rules that reversed
+  B5  the questions we expect, with the answers
+""")
+
+    # ---- B1. the algorithm in full ---------------------------------------
+    s = slide(prs, "The damage functional, in full", "Backup — algorithm")
+    text(s, MARGIN, 1.9, 6.55, 0.4,
+         [{"text": "What a fragment costs the views it was not drawn for", "size": 13.5,
+           "color": ACCENT}])
+    rect(s, MARGIN, 2.4, 6.55, 1.15)
+    text(s, MARGIN + 0.3, 2.6, 6.0, 0.85,
+         [{"text": "\u03b4(f,p) = mean over q of   \u2016T_f \u2212 T_w(q)\u2016\u00b2  \u2212  "
+                   "\u20161 \u2212 T_w(q)\u2016\u00b2", "size": 12, "color": FG,
+           "font": MONO, "after": 7},
+          {"text": "q = G(x),  for x in \u2264200 sampled pixels of fragment f",
+           "size": 10.5, "color": MUTED, "font": MONO}])
+    text(s, MARGIN, 3.68, 6.55, 0.75,
+         [{"text": "T_f is the fragment's transmittance; T_w(q) is what view **w** wants at "
+                   "the point its material lands on. The first term is the error **with** the "
+                   "fragment there, the second the error of leaving that spot blank — so δ is "
+                   "the change it causes, not its absolute darkness.",
+           "size": 11, "color": MUTED, "spacing": 1.28}])
+    cases = [("the other view wants…", "\u03b4", "consequence", True),
+             ("white background", "> 0", "pure harm — a visible stray shard", False),
+             ("darkness already", "< 0", "credit — the stray shadow does real work", False),
+             ("\u2248 this fragment's tone", "< 0", "maximal credit", False),
+             ("nothing — it lands off-wall", "0", "steering cross-talk away is learnable",
+              False)]
+    for i, (a, b, c, head) in enumerate(cases):
+        yy = 4.52 + i * 0.36
+        if head:
+            rect(s, MARGIN, yy, 6.55, 0.36, PANEL, MSO_SHAPE.RECTANGLE)
+        elif i % 2 == 0:
+            rect(s, MARGIN, yy, 6.55, 0.36, RGBColor(0x17, 0x1A, 0x1F), MSO_SHAPE.RECTANGLE)
+        col = MUTED if head else FG
+        text(s, MARGIN + 0.16, yy + 0.07, 2.4, 0.24,
+             [{"text": a, "size": 10.5 if head else 11.5, "color": col}])
+        text(s, MARGIN + 2.6, yy + 0.07, 0.7, 0.24,
+             [{"text": b, "size": 10.5 if head else 11.5,
+               "color": MUTED if head else ACCENT, "font": None if head else MONO}])
+        text(s, MARGIN + 3.45, yy + 0.07, 2.95, 0.24,
+             [{"text": c, "size": 10.5 if head else 11, "color": MUTED}])
+    text(s, MARGIN, 6.42, 6.55, 0.7,
+         [{"text": "Because δ may be **negative**, the optimiser can be paid for cross-talk "
+                   "rather than merely tolerating it. Measured on the shipped build: "
+                   "**−0.005** — constructive.",
+           "size": 11.5, "color": ACCENT, "spacing": 1.28}])
+    rect(s, 7.42, 1.9, 5.19, 2.45)
+    text(s, 7.7, 2.12, 4.65, 2.05,
+         [{"text": "Why greedy, and what that costs", "size": 13, "color": ACCENT,
+           "after": 9},
+          {"text": "Assignment couples every pair of fragments through the multiplicative "
+                   "composite, so the exact problem is **quadratic in the fragment count**. "
+                   "We take one pass, ordered by demanded darkness, with no revisiting. It is "
+                   "provably not optimal.",
+           "size": 11, "color": MUTED, "spacing": 1.28, "after": 8},
+          {"text": "The monotone second stage then recovers part of what the greedy left — "
+                   "and that pair measured better than a worse solution to the exact problem "
+                   "in the same wall-clock time.",
+           "size": 11, "color": FG, "spacing": 1.28}])
+    rect(s, 7.42, 4.5, 5.19, 1.55)
+    text(s, 7.7, 4.72, 4.65, 1.15,
+         [{"text": "Complexity", "size": 13, "color": ACCENT, "after": 8},
+          {"text": "O(F · P · V · S),  S \u2264 200", "size": 11, "color": FG, "font": MONO,
+           "after": 7},
+          {"text": "F ≈ 1,168 fragments · P = 6 sheets · V = 3 views. Complete build 21.6 s "
+                   "on an RTX 3060 Ti.",
+           "size": 11, "color": MUTED, "spacing": 1.26}])
+    text(s, 7.42, 6.2, 5.19, 0.8,
+         [{"text": "And λ is not a dial.", "size": 12, "color": ACCENT, "after": 5},
+          {"text": "Every non-zero damage weight gave **identical scores to four decimal "
+                   "places**. It is a switch: price cross-talk, or do not.",
+           "size": 11, "color": MUTED, "spacing": 1.26}])
+    notes(s, """
+BACKUP — go here for "how is damage actually defined?" or "is the greedy optimal?"
+
+The functional is the thing to be proud of, because its four limiting cases fall out of the
+algebra rather than being special-cased:
+
+  - target white there   -> leaving it blank is already correct, so any shadow is pure harm
+  - target dark there    -> blank is maximally WRONG, so a dark fragment IMPROVES it -> credit
+  - target matches tone  -> the fragment supplies exactly the colour wanted -> maximal credit
+  - lands off the wall   -> contributes nothing, so "aim the cross-talk into the void" is a
+                            strategy the assignment can discover on its own
+
+Earlier versions were harm-only and non-negative. That form structurally could not reward
+double duty, so it drove good cross-talk to zero along with the bad. Making delta signed is
+the single change that turned interference from a cost into a resource.
+""")
+
+    # ---- B2. optics and the rig ------------------------------------------
+    s = slide(prs, "The optics fix what is physically knowable", "Backup — optics")
+    text(s, MARGIN, 1.95, 5.8, 4.3,
+         [{"text": "Central projection → one 3×3 matrix", "size": 15, "color": ACCENT,
+           "after": 7},
+          {"text": "A point light, a flat sheet and a flat wall define a projective "
+                   "collineation, so the whole mapping is a **homography**. We build it from "
+                   "the four sheet corners by normalised DLT and SVD, and cache it per "
+                   "(sheet, view) pair.",
+           "size": 12.5, "color": MUTED, "spacing": 1.32, "after": 20},
+          {"text": "Magnification is the depth-to-resolution gradient", "size": 15,
+           "color": ACCENT, "after": 7},
+          {"text": "A 29.6 cm sheet becomes a **1.80 m** image — **6.09×**. Sheets nearer the "
+                   "lamp throw larger, coarser shadows; sheets nearer the wall carry finer "
+                   "detail. Depth is therefore also a detail budget.",
+           "size": 12.5, "color": MUTED, "spacing": 1.32, "after": 20},
+          {"text": "Penumbra is a hard resolution bound", "size": 15, "color": ACCENT,
+           "after": 7},
+          {"text": "A real lamp has width, so every shadow edge is blurred — **3.6 to "
+                   "3.9 mm** at the wall here. We compute that first and refuse to engrave "
+                   "anything finer. Detail below the blur is precision the light can never "
+                   "resolve; fabricating it is a lie told in acrylic.",
+           "size": 12.5, "color": MUTED, "spacing": 1.32}])
+    rect(s, 6.9, 1.9, 5.72, 4.55)
+    text(s, 7.2, 2.1, 5.15, 0.4,
+         [{"text": "The rig these numbers describe", "size": 13.5, "color": ACCENT}])
+    geo = [("lamp → body", "0.493 m"),
+           ("body → wall", "2.507 m"),
+           ("lamp height", "0.874 m"),
+           ("sheet", "295.8 × 295.8 mm, 3 mm cast acrylic"),
+           ("footprint", "298.7 × 298.7 mm"),
+           ("image on the wall", "1.80 m"),
+           ("magnification", "6.085×"),
+           ("penumbra at the wall", "3.59 / 3.93 / 3.93 mm"),
+           ("smallest honest feature", "30.4 mm at the wall"),
+           ("turntable stops", "15° / 135° / 255°")]
+    for i, (k, v) in enumerate(geo):
+        y = 2.62 + i * 0.375
+        text(s, 7.2, y, 2.5, 0.34, [{"text": k, "size": 11.5, "color": MUTED}])
+        text(s, 9.7, y, 2.62, 0.34,
+             [{"text": v, "size": 11.5, "color": FG, "align": PP_ALIGN.RIGHT}])
+    notes(s, """
+BACKUP — go here for anything about the rig, the blur, or "what resolution can you actually
+achieve?"
+
+The line worth having ready: "we compute the blur from the lamp's physical size first, and
+then refuse to engrave anything finer than it. Detail below the blur is precision the light
+can never resolve."
+
+Those ten numbers plus the cut files are sufficient to rebuild the piece, which is why they
+are also in the replication section of the submission document.
+""")
+
+    # ---- B3. raster to cut -----------------------------------------------
+    s = slide(prs, "From a solved field to files a laser can run", "Backup — fabrication")
+    steps = [
+        ("Threshold", "Each sheet's solved field is split into the four tone levels."),
+        ("Minimum feature", "Morphological opening then closing at the cuttable radius — "
+                            "this is where the penumbra bound becomes physical geometry."),
+        ("Contour", "Regions become polygons in sheet-local millimetres."),
+        ("Kerf offset", "Every ring is grown by half the beam width, so the finished part is "
+                        "nominal size after the laser eats the edge."),
+    ]
+    text(s, MARGIN, 1.95, 5.7, 0.4,
+         [{"text": "Vectorisation", "size": 15, "color": ACCENT}])
+    y = 2.45
+    for i, (head, body) in enumerate(steps):
+        text(s, MARGIN, y, 5.7, 0.8,
+             [{"text": f"{i + 1}.  {head}", "size": 13, "color": FG, "after": 4},
+              {"text": body, "size": 11.5, "color": MUTED, "spacing": 1.28}])
+        y += 0.86
+    rect(s, MARGIN, 5.95, 5.7, 0.95)
+    text(s, MARGIN + 0.28, 6.18, 5.2, 0.6,
+         [{"text": "Layer order: ENG_L → ENG_D → ENG_K → CUT_SLOT → CUT_OUTLINE",
+           "size": 12, "color": ACCENT, "after": 5},
+          {"text": "Engrave first, cut last. Cutting the outline first leaves a compliant "
+                   "part that lifts and defocuses.", "size": 11, "color": MUTED}])
+    picture(s, ROOT / "examples" / "pearl3" / "4_fabrication.png", 6.85, 1.9, 5.77, 3.4)
+    facts = [["6", "sheets, 295.8 mm square, 3 mm clear acrylic"],
+             ["3,629", "engraved regions"],
+             ["4", "tone levels — clear, 0.85, 0.62, 0.35 transmittance"],
+             ["12", "half-lap joints"],
+             [f"{N['slot']:.2f} mm", f"widest slot on 3.0 mm stock, at {N['angle']:.0f}° crossing"]]
+    yy = 5.45
+    for value, label in facts:
+        text(s, 6.85, yy, 1.5, 0.28, [{"text": value, "size": 12.5, "color": ACCENT}])
+        text(s, 8.35, yy, 4.27, 0.28, [{"text": label, "size": 11.5, "color": MUTED}])
+        yy += 0.29
+    notes(s, """
+BACKUP — go here for "how does the solved image become polygons?" or any kerf / tolerance
+question.
+
+The minimum-feature step is the interesting one: it is where the penumbra bound computed on
+the optics slide stops being a number and becomes physical geometry. We open then close at
+the cuttable radius, so nothing survives that the light could not have resolved anyway.
+""")
+
+    # ---- B4. the design sweep --------------------------------------------
+    s = slide(prs, "The design sweep, and the two rules that reversed", "Backup — evidence")
+    picture(s, ROOT / "examples" / "pearl3" / "2_levers.png", MARGIN, 1.85, 7.55, 5.0)
+    text(s, 8.5, 1.9, 4.11, 5.0,
+         [{"text": "We swept the design, not the solver.", "size": 14.5, "color": ACCENT,
+           "after": 9},
+          {"text": "Sheet count, pitch, engrave alphabet, damage weight and fragment size — "
+                   "**two seeds per point**, accepted on a composite of mean IoU, worst view "
+                   "and SSIM rather than on IoU alone.",
+           "size": 11.5, "color": MUTED, "spacing": 1.3, "after": 18},
+          {"text": "Pitch wanted to open, not tighten.", "size": 13, "color": FG, "after": 7},
+          {"text": "Tight stacking was right when sheets were many. At six, **50 mm** takes "
+                   "the worst view from 0.785 to 0.816 and drives cross-talk to zero. "
+                   "100 mm collapses it again.",
+           "size": 11.5, "color": MUTED, "spacing": 1.3, "after": 18},
+          {"text": "The engrave alphabet wanted to go light.", "size": 13, "color": FG,
+           "after": 7},
+          {"text": "Eighteen pale layers multiply into darkness, so the tones must be dark. "
+                   "With two layers per view there is little left to multiply, and a dark "
+                   "alphabet overshoots. We ship **0.85 / 0.62 / 0.35** — the rule from the "
+                   "literature finished **sixth of seven**.",
+           "size": 11.5, "color": MUTED, "spacing": 1.3}])
+    notes(s, """
+BACKUP — this is the evidence for the reversal claimed on the prior-art slide and paid off on
+the insights slide. Go here if anyone challenges either.
+
+Point at the bottom-left panel: the green bar is what we shipped; the dark, density-even
+alphabet from Baran is the fourth bar down.
+
+The bottom-right panel is the whole semester in one chart — a third of the sheets and a
+quarter of the footprint of our earlier build, and still ahead of it. The last bar is measured
+from the exported cut files, not from the solver.
+
+The honest framing: neither rule was measured badly. Both were measured at eighteen sheets,
+where a constraint we later removed was doing the work. You cannot detect that from inside
+the original experiment.
+""")
+
+    # ---- B5. expected questions ------------------------------------------
+    s = slide(prs, "Questions we expect", "Backup — Q&A")
+    qa = [
+        ("Why only six sheets?",
+         "Eighteen scores 0.882 against our 0.846 — about 4%. It also costs 24 more cut "
+         "files and **96 more assembly joints**, and every joint is an independent chance to "
+         "misalign the whole piece."),
+        ("Is the greedy optimal?",
+         "No. One pass, no revisiting; the exact problem is quadratic in the fragment count. "
+         "Beam search or a second reassignment pass is the first item of future work."),
+        ("How do you know the files match the simulation?",
+         "Gate B re-renders from the **exported polygons**, not the solver's own raster. The "
+         "round trip costs +0.0018 mean IoU, and that number is measured every build."),
+        ("What if a sheet is mis-cut?",
+         "The piece fails rather than degrades. At six sheets there is no redundancy — "
+         "ablation drops range 0.052 to 0.166 — and that is a deliberate trade."),
+        ("Why not three separate stacks?",
+         "Then it is three objects in a box, not one object. That every piece of matter is "
+         "visible to all three views at once **is** the problem; removing it removes the "
+         "project."),
+        ("Does it work for any three images?",
+         "No. Subjects must be centred on a plain background; full-frame paintings have no "
+         "silhouette to carry and fail. The distinctness of the three targets predicts it."),
+    ]
+    cw = (BODY_W - 2 * 0.24) / 3
+    for i, (q, a) in enumerate(qa):
+        x = MARGIN + (i % 3) * (cw + 0.24)
+        y = 1.95 + (i // 3) * 2.45
+        rect(s, x, y, cw, 2.3)
+        text(s, x + 0.26, y + 0.24, cw - 0.52, 1.85,
+             [{"text": q, "size": 13, "color": ACCENT, "spacing": 1.14, "after": 10},
+              {"text": a, "size": 11, "color": MUTED, "spacing": 1.3}])
+    notes(s, """
+BACKUP — keep this slide up during the critique if the panel is asking rapid-fire questions.
+
+Whoever is not answering should be finding the right backup slide.
 """)
 
     prs.save(OUT)
